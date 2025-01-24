@@ -1,0 +1,125 @@
+.file-info span {
+    display: block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-info {
+    /* justify-content:center; */
+    /* width:100%; */
+    /* padding:10px; */
+}
+
+.file-info a {
+    display: block;
+    max-width: 100%;
+    /* white-space: nowrap; */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    margin-bottom: 3px;
+    word-wrap: break-word; /* ให้ชื่อไฟล์ขึ้นบรรทัดใหม่ */
+    overflow-wrap: break-word; /* ให้ชื่อไฟล์ขึ้นบรรทัดใหม่ (สำหรับเบราว์เซอร์ที่รองรับ) */
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+
+.file-info span {
+    font-size: 15px;
+    font-weight: 100;
+    text-direction: none;
+    
+}
+ .file-link {
+  
+ }
+
+ .textmessage {
+    font-weight: 400;
+    /* margin-bottom:px; */
+}
+
+
+ /* .long-name {
+    display: block; 
+ }  */
+
+/* 
+ .message {
+    color: black;
+    background: ;
+    padding: 0.75rem;
+    border-radius: 25px;
+    max-width: 50%;
+  }
+  
+  .message.self {
+    color: white;
+    background:  ;
+  }
+   */
+
+   .size{
+    color: #F0F0F0;
+    /* font-size: 12px; */
+   }
+
+   .file-icon {
+     color: black;
+}
+
+/* .file-upload svg {
+    color: #232323;
+} */
+
+/* .file-preview2{
+    color: black;
+    background: #F0F0F0;
+    border-radius: 25px;
+    /* max-width: 50%; */
+    /* padding: 10px;
+} */ */
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #ccc;
+  }
+
+
+  .file-preview3 {
+    display: flex;
+    align-items: center;
+    margin: 0 70% 0 2rem;
+    margin-bottom: 20px;
+    padding: 1rem;
+    background: #F0F0F0;
+    font-size:12px;
+    border-radius:20px;
+}
+
+.file-preview3 svg {
+    margin-right: 10px;
+    color: #232323;
+}
+
+.file-preview3 span {
+    margin-right: auto;
+}
+
+.file-preview3 button {
+    border-radius: 5px;
+    font-size: 10px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.file-preview3 button:hover{
+    background: #ccc;
+}

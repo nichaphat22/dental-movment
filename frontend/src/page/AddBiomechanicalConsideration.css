@@ -1,0 +1,40 @@
+/* AddBiomechanicalConsideration.css */
+.container {
+    display: flex;
+    height: 100vh;
+    margin-top: 80px;
+  }
+  
+  .sidebar-mobile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 16rem; /* 64 Tailwind */
+    background-color: #f3f4f6; /* gray-100 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%);
+    z-index: 40;
+  }
+  
+  .sidebar-mobile.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-desktop {
+    display: none;
+    width: 20%; /* 1/5 */
+  }
+  
+  @media (min-width: 768px) {
+    .sidebar-desktop {
+      display: block;
+    }
+  }
+  
+  .main-content {
+    flex: 1;
+    width: 80%; /* 4/5 */
+  }
+  

@@ -1,0 +1,418 @@
+.container-ar {
+  /* display: flex; */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh; /* Full viewport height */
+  text-align: center;
+}
+.title-h1 {
+  margin: 20px 0 50px 20px;
+}
+
+.bt{
+  display:flex;
+  justify-content:center;
+}
+.button-edit {
+  text-align: center;
+    font-size:0.85rem;
+    color: #000;
+    background-color: #dbdbdb;
+    margin-right: 2px;
+    border-radius: 5px;
+    border-style: none;
+    padding: 5px;
+    margin: 5px;
+    width: 30%;
+  }
+  .button-edit:hover {
+      color: #000;
+      background-color: #b8b8b8;
+    }
+    .button-edit:active {
+      color: #000 !important;
+      background-color: #b8b8b8 !important;
+    }
+      
+    
+  .remove {
+    background-color: red; 
+    color: white; 
+    border-radius: 5px;
+    border-style: none;
+    padding: 3px 10px;
+    justify-content: center;
+    
+  }
+  
+  .button-remove {
+    font-size:0.85rem;
+    background-color: #ff2828 !important; 
+    color: white; 
+    margin: 5px;
+    border-radius: 5px;
+    border-style: none;
+    padding: 5px;
+    width: 30%;
+  }
+
+  .button-remove:hover {
+    background-color: #df0000 !important; 
+    color: white; 
+  }
+  .button-add {
+    /* padding: 5px 20px; */
+    background-color: rgb(79, 7, 131);
+    color: white; 
+    /* font-size: 70px; */
+    border-radius: 10px;
+    border-style: none;
+    justify-content: center;
+    border: 1px solid rgb(79, 7, 131);
+    box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.1);
+    width: 80px;
+    height: 80px;
+  }
+.Frame-View{
+  /* background-color:#000000;
+  display: table-cell; */
+/* width: 68vw;
+min-height: 45vw;
+padding: 10px;
+margin-top: 15px; */
+flex-direction: column;
+justify-content: center;
+align-items: center; 
+/* border-top: 5px solid #8A2BE2;
+border-radius: 20px; */
+}
+/* Viewer{
+  justify-content: center;
+} */
+/* .Frame-View {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+
+input{
+  border: 2px ;
+  border-style: solid;
+  border-color: rgb(145, 54, 205);
+  border-radius: 8px;
+  padding: 5px;
+  color: rgb(145, 54, 205);
+}
+.save-button{
+  color: rgb(255, 255, 255);
+  background-color: rgb(9, 162, 22);
+  border-color: rgb(9, 162, 22);
+  padding: 7px 15px;
+  margin-top: 20px;
+  border-radius: 8px;
+  
+}
+.save-button:hover{
+  color: black;
+  border-color: black;
+}
+input[type="file"]::file-selector-button {
+  background-color: rgb(145, 54, 205);
+  color: white;
+  border-radius: 8px;
+  padding: 5px;
+}
+input[type="file"]{
+border: none;
+}
+
+.button-ar{
+  padding: 5px;
+  color: white;
+  /* font-weight:bold; */
+  background-color: #4E007B ;
+  border-color: #4E007B  ;
+  border: 2px solid;
+  border-radius: 10px;
+}
+
+.button-ar:hover{
+  background-color: #3A005B    ;
+}
+
+
+
+
+/* .viewmodel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(30%, 1fr));
+  /* gap: 20px; 
+} */ */
+/* 
+.Frame{
+  white: 90%;
+} */
+
+
+.grid-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.model-container span {
+  display: inline-block;
+  max-width: 170px; 
+  /* white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; */
+}
+
+
+/* white: 90%; */
+.modelrow {
+  box-sizing:unset;
+  display: inline-block;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: #ffffff; 
+  border-radius: 10px; 
+  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.075);
+  height: auto;
+  margin: 5px 15px 20px 15px;
+  justify-content: center;
+  
+}
+/* 
+.Frame{
+  
+} */
+.viewmodel:hover {
+    transform:scale(1.01);
+    /* z-index: 2; */
+    box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1);
+  
+}
+.modelrow canvas{
+  border-radius: 15px;
+}
+
+.modelrow:hover {
+  transform:scale(1.01);
+  /* z-index: 2; */
+  box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+
+span {
+  /* text-align: center; */
+  font-weight: bold;
+  /* margin-left: 15px !important; */
+  /* margin-bottom: 30px !important; */
+}
+.model-container {
+  /* display: flex; */
+  /* justify-content: space-between; */
+  align-items: center; 
+  margin: 15px 0;
+  
+  /* margin-bottom: 20px; */
+  /* margin-right: 30px; */
+}
+
+.bookmark {
+  background-color: rgb(255, 255, 255);
+  /* border: 1px solid rgb(212, 212, 212);
+  border-radius: 100%; */
+  border: none;
+  /* width: 35px;
+  height: 35px; */
+  display: flex;
+justify-content: end;
+padding:0;
+  
+  /* margin-right: 20px; */
+}
+
+
+.btn-edt{
+  padding: 5px;
+  margin: 3px;
+  background-color: red;
+}
+
+
+.img-model{
+  border-radius: 10px;
+  /* border: 1px solid #000; */
+  box-shadow: none; 
+  max-height:250px;
+}
+/* img {
+
+} */
+.img-model:hover {
+  transform: scale(1); /* ขยายขนาดรูปภาพ */
+  box-shadow: none; /* เพิ่มเงา */
+}
+.img-model{
+
+}
+
+.bt-pen {
+  display: flex;
+  background-color: #6a0f9e;
+  color: #fff;
+  border-radius: 50%;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  bottom: 20px; /* ระยะห่างจากขอบล่าง */
+  justify-content: center; /* จัดแนวให้กึ่งกลาง */
+}
+/* 
+.canvas-container{
+  width:100% !important;
+  height:600px !important;
+} */
+
+.shape-menu {
+  position: absolute; 
+  background: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: block; /* Make sure it is displayed */
+  z-index: 4; /* Ensure it appears above other elements */
+}
+
+.shape-menu button {
+  display: block;
+  margin: 5px 0;
+  cursor: pointer;
+}
+
+.container-ar {
+  position: relative; /* Make sure this is set for absolute positioning */
+  width: 100%;
+  height: 100vh; /* Full viewport height */
+}
+
+.modelName{
+  /* margin-bottom: 50px; */
+}
+/* canvas{
+
+} */
+ .draw{
+  
+  /* display:flex; */
+  /* z-Index: 14; */
+  width: auto;
+  height: 155px;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px  rgba(0, 0, 0, 0.1);
+  background: 'fff'
+  /* justify-content:center; */
+  /* top:30; */
+  /* margin-top:10px; */
+  /* margin-bottom:500px; */
+ }
+ .draw2{
+  display:flex;
+  width: auto;
+  justify-content:center;
+  align:center;
+  margin-top:20px;
+  margin-bottom:50px; 
+ }
+/* 
+ .bt-fapen:focus{
+background:#555
+ } */
+
+/* .input-range{
+  font-size:30px;
+} */
+
+div.canvas-container{
+  /* z-index: 7 !important;  */
+   position:static !important;
+   /* display:block; */
+   /* pointer-events: auto !important; */
+   /* top: 55% !important;
+   left: 50% !important; */
+   
+   /* left: 50% !important;  */
+   /* top:175 !important; */
+   /* pointer-events: auto !important; */
+}
+   /* canvas.upper-canvas{
+    display:block !important;
+    /* position: absolute!important; */
+    /* top: 30%!important; 
+    left: 50%!important; วาง canvas ที่ครึ่งบนของหน้าจอ */
+/* วาง canvas ที่ครึ่งซ้ายของหน้าจอ */
+    /* transform: translate(-50%, -50%)!important;เลื่อนกลับให้ตรงกลาง */
+ /* } */
+
+ /* canvas.lower-canvas{ */
+  /* top:75 !important; */
+ /* }   */ 
+ canvas.upper-canvas,
+canvas.lower-canvas {
+  position:static !important;
+  /* z-index: 5 !important;  */
+  position: absolute !important;
+  top: 55% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+
+canvas[data-engine="three.js r166"]  {
+  display:block;
+  z-index: 4;
+  position: absolute;
+  top: 55%; /* วาง canvas ที่ครึ่งบนของหน้าจอ */
+  left: 50%; /* วาง canvas ที่ครึ่งซ้ายของหน้าจอ */
+  transform: translate(-50%, -50%); /* เลื่อนกลับให้ตรงกลาง */
+}
+
+
+
+
+ .containerRef{
+width: 50rem;
+height: 30pem;
+}
+.canvas-drawing{
+  width: 50rem;
+  height: 30pem;
+}
+
+/* สำหรับแท็บเล็ต (กลาง) */
+/* @media (max-width: 900px) {
+  .containerRef{
+    width: 290px;
+    height: 350px;
+    }
+    .canvas-drawing{
+      width: 290px;
+      height: 350px;
+    }
+} */
+
+/* สำหรับมือถือ (ขนาดเล็ก) */
+/* @media (max-width: 480px) {
+  .containerRef{
+    width: 190px;
+    height: 150px;
+    }
+    .canvas-drawing{
+      width: 190px;
+    height: 150px;
+    }
+} */ 

@@ -1,0 +1,175 @@
+.Container-Draw {
+  display: flex;
+  /* position: relative; */
+  /* z-index: 1; Set z-index to ensure it's above other elements */
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* background: #fff;
+  border-radius: 10px;
+  border: 1px solid black;
+}section { */
+  
+
+.tools-board {
+  position: relative;
+  z-index: 2; /* Ensure tools-board is above the canvas */
+  width: 210px;
+  padding: 15px 22px 0;
+}
+
+.tools-board .row {
+  margin-bottom: 10px;
+}
+
+.row .options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row .options .option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.option:hover svg,
+.option.active svg {
+  filter: invert(17%) sepia(98%) saturate(3000%) hue-rotate(90deg) brightness(100%) contrast(100%);
+}
+
+.option:hover span,
+.option.active span,
+.option:hover label,
+.option.active label {
+  color: #6a0f9e;
+}
+
+.option span,
+.option label {
+  color: #5a6168;
+  cursor: pointer;
+  padding-left: 10px;
+}
+
+.option #color-picker {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.option #fill-color {
+  cursor: pointer;
+  height: 14px;
+  width: 14px;
+}
+
+.option label {
+  cursor: pointer;
+}
+
+#fill-color:checked + label {
+  color: blue;
+}
+
+.colors .option {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  margin-top: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.colors .option::before {
+  content: " ";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: inherit;
+  background: inherit;
+}
+
+.drawing-board {
+  flex: 1;
+  border: 1px solid black;
+}
+
+.colors .option:first-child.selected::before {
+  border-color: #ccc;
+}
+
+.clear-canvas {
+  color: #5a6168;
+  border: 1px solid #5a6168;
+  background: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  margin-right: 10px;
+}
+
+.save-img {
+  background: #6a0f9e;
+  border: 1px solid #6a0f9e;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+
+.drawing-board canvas {
+  /* position: fixed; */
+  width: 100%;
+  height: 50%;
+  /* z-index: 1; Ensure canvas is below the tools/ */
+}
+/* .lecture-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Adjust this property for different spacing */
+/* } */
+
+/* .thumbnail-container { */
+  /* flex: 1 1 120px; Adjust width as needed */
+  /* margin: 10px 10px 10px 15px; */
+  /* box-sizing: border-box; */
+/* } */ 
+
+
+/* Add this CSS to your stylesheet */
+.lecture-modal {
+  position: fixed;
+  top: -50px;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  background-color: rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  position: relative;
+  /* background-color: white; */
+  /* padding: 20px; */
+  border-radius: 10px;
+  max-width: 40%;
+  max-height: 70%;
+  /* overflow: auto; */
+  box-shadow: 0 0 50px 5px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 35px;
+  cursor: pointer;
+  color: #ccc;
+}
