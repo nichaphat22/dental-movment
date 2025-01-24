@@ -63,7 +63,7 @@ import LectureHistory from "./page/LectureHistoryImg"
 import Form from "./page/Form"
 import PageNotFound from './page/PageNotFound';
 import GoogleLoginButton from "./components/GoogleLoginButton";
-const clientId = "450666820866-aejvvap5ear5m0p5dvtjs216lochp7ik.apps.googleusercontent.com";
+
 
 function App () {
   const { user } = useContext(AuthContext); // Fetch user data from context
@@ -73,7 +73,7 @@ function App () {
 
 
   return (
-  <GoogleOAuthProvider clientId={clientId} >
+  <GoogleOAuthProvider>
     <ChatContextProvider user={user}>
     {location.pathname !== "/AR-RPD" && <NavBar />}
 

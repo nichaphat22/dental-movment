@@ -1,0 +1,21 @@
+# Dependency
+node_modules/
+
+# Build Output
+dist/
+build/
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+.env.local
+
+# Editor
+.vscode/
+.idea/
+
+
+
+src/config/firebase.js
