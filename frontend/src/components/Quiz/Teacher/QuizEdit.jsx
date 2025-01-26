@@ -6,12 +6,14 @@ import { HiOutlineX } from "react-icons/hi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import Swal from "sweetalert2";
 import { FiImage } from "react-icons/fi"; 
+import defaultImage from "../../../../public/imgQuiz.svg";
 
 const QuizEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [image, setImage] = useState(); 
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -74,6 +76,47 @@ const QuizEdit = () => {
       }
     }
   };
+  const handleQuestionImageUpload = (index, e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[index].image = reader.result; // บันทึก Base64 ของรูปภาพในคำถาม
+        setQuestions(updatedQuestions);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      updatedQuestions[index].image = ""; // ตั้งค่า image ให้เป็นค่าว่าง
+      setQuestions(updatedQuestions);
+
+      toast.error("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+        transition: Flip,
+      });
+    }
+  };
+
+     // เพิ่มการจัดการไฟล์รูปภาพ
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImage(reader.result); // บันทึก Base64 ของภาพ
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast.error("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+        transition: Flip,
+      });
+    }
+  };
 
   const handleSave = async () => {
     // ตรวจสอบข้อมูลก่อนที่จะบันทึก
@@ -123,7 +166,7 @@ const QuizEdit = () => {
         }
       }
 
-      // เพิ่มหรืออัปเดตคำถามที่ยังไม่ถูกลบ
+      // เพิ่มหรืออัปเดตคำถาม
       const activeQuestions = quiz.questions.filter((q) => !q.deleted);
       for (const question of activeQuestions) {
         if (question._id) {
@@ -180,6 +223,11 @@ const QuizEdit = () => {
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
+   //ลบรูปภาพ title
+   const handleRemoveImageTitle = () => {
+    setImage(null);
+  }
+
   if (isLoading) {
     return <div>Loading quiz details, please wait...</div>;
   }
@@ -192,60 +240,156 @@ const QuizEdit = () => {
     <div className="relative p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
       <h1 className="text-4xl font-bold text-purple-500 mb-12 text-center">แก้ไขแบบทดสอบ</h1>
 
+      <div>
+        {/* <label>รูปภาพ: </label> */}
+        <div className="relative text-center flex justify-center mt-2 mb-4">
+          {image ? (
+          <>
+            <img
+            src={image || defaultImage}
+            alt="Quiz"
+            className="w-48 h-48 object-cover border shadow-none hover:transform-none"
+          />
+            <label 
+            htmlFor="file-upload"
+            className="absolute inset-0 flex items-center justify-center cursor-pointer"
+            title="เพิ่มรูปภาพ">
+                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
+            </label>
+            <div>
+              <button
+                onClick={handleRemoveImageTitle}
+                type="button"
+                className="absolute inline-flex size-5  text-red-600 rounded-full"
+                title="ลบรูปภาพ"
+                >
+                <HiOutlineX className="w-3 h-3" />
+              </button>
+            </div>
+          </>
+          ) : (
+            <>
+            <img 
+              src={defaultImage} 
+              alt="ภาพแบบทดสอบ"
+              className="w-48 h-48 object-cover border shadow-none" 
+            />
+            <label 
+            htmlFor="file-upload"
+            className="absolute inset-0 flex items-center justify-center cursor-pointer"
+            title="เพิ่มรูปภาพ">
+                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
+            </label>
+
+            </>
+      
+          )}
+          </div>
+            {/* hidded input */}
+            <input
+              id="file-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+        />       
+      </div>
+
       {/* Edit Quiz Title */}
-      <label className="flex text-2xl mb-4">
+      <label className="flex sm:text-lg lg:text-2xl mb-4">
         <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">ชื่อแบบทดสอบ:</span>
         <input
           type="text"
           value={quiz.title}
           onChange={(e) => handleFieldChange("title", e.target.value)}
-          className="border-gray-200 pl-4 py-2 w-full"
+          className="border-gray-200 pl-4 py-2 pr-2 w-full"
         />
       </label>
 
       {/* Edit Quiz Description */}
-      <label className="flex justify-center text-xl mb-4">
+      <label className="flex justify-center sm:text-lg lg:text-2xl mb-4">
         <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">คำอธิบาย:</span>
         <textarea
           value={quiz.description}
           onChange={(e) => handleFieldChange("description", e.target.value)}
-          className="border-gray-200 border p-2 w-full rounded"
+          className="border-gray-200 border p-2 pr-2 w-full rounded"
         ></textarea>
       </label>
 
-      <hr className="pb-4" />
+      
+
+      <hr className="pb-2" />
 
       {/* Questions */}
       {quiz.questions
         .filter((question) => !question.deleted)
         .map((question, qIndex) => (
-          <div className="relative mt-8 mb-6 p-4 border rounded-md bg-gray-50 shadow-sm" key={qIndex}>
-            <HiOutlineX onClick={() => handleDeleteQuestion(qIndex)} className="absolute top-2 right-2 text-xl cursor-pointer text-red-600" />
+          <div className="relative mt-8 mb-6 p-4 border rounded-md bg-gray-50 shadow-sm lg:text-xl" key={qIndex}>
+            <HiOutlineX onClick={() => handleDeleteQuestion(qIndex)}  title="ลบคำถาม" className="absolute top-2 right-2 text-xl cursor-pointer text-red-600 w-4 h-4" />
             {/* Question Input */}
-            <label className="flex mb-4">
+            <label className="flex mb-4 mt-2">
               <span className="pr-4 py-2">{qIndex + 1}.</span>
               <input
                 type="text"
                 value={question.question}
                 onChange={(e) => handleQuestionChange(qIndex, "question", e.target.value)}
-                className="border border-none border-b-pink-200 w-full py-2 pl-4"
+                className="border border-none border-b-pink-200 w-full py-2 pr-2 pl-4"
               />
             </label>
             {/* เพิ่มแก้ไขลบรูปภาพ */}
             <label>รูปภาพคำถาม</label>
-            <div className="text-center flex justify-center mt-2 mb-4">
+            <div className="relative text-center flex justify-center mt-2 mb-4">
               {question.image ? (
+                <>
                 <img
                   src={question.image} // แสดงรูปภาพที่อัปโหลด
                   alt={`Question ${qIndex  + 1}`}
-                  className="max-w-full h-auto rounded-lg border shadow-md"
+                  className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
                   />
+                  <label 
+                    htmlFor={`file-imgQ-${qIndex}`}
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    title="เพิ่มรูปภาพ"
+                  >
+                    <FiImage className="w-16 h-16 text-gray-800 opacity-70 hover:text-gray-500"/>
+                  </label>
+                  <div>
+                    <button
+                      onClick={() => {
+                        const updatedQuestions = [...quiz.questions];
+                        updatedQuestions[qIndex].image = null; // ตั้งค่าเป็น null เพื่อเคลียร์รูปภาพ
+                        handleQuestionChange(qIndex, "image", null);
+                      }}
+                      className="absolute inline-flex size-5  text-red-600 rounded-full"
+                      title="ลบรูปภาพ"
+                    >
+                      <HiOutlineX className="w-3 h-3" />
+                    </button>
+                  </div>
+                  </>
               ) : (
-                 <div className="w-40 h-40 flex items-center justify-center border border-dashed text-gray-500">
+                <>
+                <div className="w-40 h-40 flex items-center justify-center border border-dashed text-gray-500">
                       <FiImage className="w-10 h-10" /> {/* ไอคอนรูปภาพ */}
                 </div>
+                <label 
+                  htmlFor={`file-imgQ-${qIndex}`}
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                  title="เพิ่มรูปภาพ"
+                  >
+                    <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
+                </label>
+                </>
+                 
               )}
             </div>
+            <input
+                id={`file-imgQ-${qIndex}`}
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleQuestionImageUpload(index, e)}
+                className="hidden"
+            />
 
             {/* Choices */}
             {question.choices.map((choice, oIndex) => (
@@ -260,7 +404,7 @@ const QuizEdit = () => {
                       updatedChoices[oIndex] = e.target.value;
                       handleQuestionChange(qIndex, "choices", updatedChoices);
                     }}
-                    className="border border-none py-2 pl-4"
+                    className="w-full  border border-none py-2 pl-4 pr-2"
                   />
                 </label>
               </div>
@@ -272,7 +416,7 @@ const QuizEdit = () => {
               <select
                 value={question.correctAnswer}
                 onChange={(e) => handleQuestionChange(qIndex, "correctAnswer", e.target.value)}
-                className="ml-2 border p-2 rounded"
+                className="ml-2 border p-2 rounded mb-4"
               >
                 {question.choices.map((_, idx) => (
                   <option key={idx} value={idx}>
@@ -286,12 +430,13 @@ const QuizEdit = () => {
             {/* Answer Explanation */}
             <label>
               <span>คำอธิบายคำตอบ:</span>
-              <textarea
+            </label>
+            <br />
+            <textarea
                 value={question.answerExplanation}
                 onChange={(e) => handleQuestionChange(qIndex, "answerExplanation", e.target.value)}
-                className="border-gray-200 border p-2 w-full rounded"
-              ></textarea>
-            </label>
+                className="resize h-32 border-gray-200 border p-2 w-full rounded lg:text-sm"
+            ></textarea>
 
             {/* Delete Question Button */}
             {/* <button

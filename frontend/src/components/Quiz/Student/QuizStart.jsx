@@ -69,7 +69,7 @@ const QuizStart = () => {
   }
 
   return (
-    <div className="flex justify-center items-center h-screen mt-24">
+    <div className="flex justify-center items-center">
       <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl w-full">
         {!showResults ? (
           <div>
@@ -79,11 +79,11 @@ const QuizStart = () => {
 
             {/* ตรวจสอบว่าในคำถามมีรูปภาพหรือไม่ */}
             {quiz.questions[currentQuestionIndex].image && (
-              <div className="text-center mb-4">
+              <div className="flex justify-center text-center mb-4">
                 <img
                   src={quiz.questions[currentQuestionIndex].image}
                   alt={`Question ${currentQuestionIndex + 1}`}
-                  className="max-w-full h-auto rounded-lg border shadow-md"
+                  className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
                 />
               </div>
             )}
@@ -150,11 +150,11 @@ const QuizStart = () => {
                   <h4 className="font-bold text-gray-800">{`${index + 1}: ${question.question}`}</h4>
                   {/* แสดงรูปภาพถ้ามีในหน้า Review */}
                   {question.image && (
-                    <div className="text-center mb-4">
+                    <div className="flex justify-center text-center my-4">
                       <img
                         src={question.image}
                         alt={`Question ${index + 1}`}
-                        className="max-w-full h-auto rounded-lg border shadow-md"
+                        className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
                       />
                     </div>
                   )}

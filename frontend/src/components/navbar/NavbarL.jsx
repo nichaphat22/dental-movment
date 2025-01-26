@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HiOutlineMenu, HiOutlineX } from 'react-icons/hi';
-
+import '../../tailwind.css';
 const SideNavBar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 

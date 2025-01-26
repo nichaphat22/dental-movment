@@ -4,6 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { HiOutlineMenu, HiOutlineX, HiSearch, HiOutlineBell } from 'react-icons/hi';
 import GoogleLogin from "../GoogleLoginButton";
 import MenuProfile from '../Profile/MenuProfile';
+import '../../tailwind.css';
 
 
 const NavBar = () => {

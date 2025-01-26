@@ -1,15 +1,34 @@
 import React, { useEffect, useState } from "react";
 import quizService from "../../../utils/quizService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import defaultImage from "../../../../public/imgQuiz.svg";
 import { CiEdit, CiTrash } from "react-icons/ci";
 import Swal from "sweetalert2";
-import { toast,Flip } from "react-toastify";
+import { toast,Flip, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 const QuizList = () => {
   const [quizzes, setQuizzes] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state && location.state.success) {
+      toast.success(location.state.message || 'Quiz created successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Flip,
+      });
+    }
+  }, [location.state]); // เพิ่ม dependency array เพื่อให้ run เมื่อ state เปลี่ยนแปลงเท่านั้น
+  
    
 
   useEffect(() => {
@@ -76,6 +95,7 @@ const QuizList = () => {
 
   return (
     <div className="relative grid grid-cols-1 gap-6 mt-4 m-10 lg:m-48">
+      <ToastContainer  />             
       {quizzes.length > 0 ? (
         quizzes.map((quiz) => (
           <div

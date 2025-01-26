@@ -53,7 +53,7 @@ const QuizList = () => {
                 <img
                   src={defaultImage}
                   alt="Quiz"
-                  className="w-40 h-40 object-cover rounded-md shadow-none"
+                  className="object-cover rounded-md shadow-none w-32 h-32 lg:w-40 lg:h-40 "
                 />
               )}
 

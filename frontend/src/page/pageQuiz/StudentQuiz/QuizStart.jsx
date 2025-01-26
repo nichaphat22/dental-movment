@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 function QuizStart() {
   return (
-    <div className="mb-2" >
+    <div style={{marginTop: "100px"}}>
 
 
 

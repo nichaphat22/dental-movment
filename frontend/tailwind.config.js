@@ -2,13 +2,16 @@
 export default {
     content: [
       // "./index.html",
+      //  "./src/**/*.{js,ts,jsx,tsx}", // ครอบคลุมทุกไฟล์ใน src
+
       "./src/components/Quiz/**/*.{js,ts,jsx,tsx}",
       "./src/components/navbar/**/*.{js,ts,jsx,tsx}",
       "./src/page/pageQuiz/**/*.{js,ts,jsx,tsx}",
-      // เพิ่มไลบรารีของ Material Tailwind
-      "./node_modules/@material-tailwind/react/**/*.{js,jsx,ts,tsx}",
+      
+      // เพิ่ม Material Tailwind ไลบรารี
+    "./node_modules/@material-tailwind/react/**/*.{js,jsx,ts,tsx}",
     "./node_modules/@material-tailwind/react/components/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@material-tailwind/react/theme/**/*.{js,ts,jsx,tsx}"
+    "./node_modules/@material-tailwind/react/theme/**/*.{js,ts,jsx,tsx}",
     ],
     theme: {
       extend: {

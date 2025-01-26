@@ -1,5 +1,8 @@
+
+
 .container-ar {
   /* display: flex; */
+  all: unset;
   flex-direction: column;
   align-items: center;
   justify-content: center;

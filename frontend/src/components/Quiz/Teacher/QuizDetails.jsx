@@ -105,12 +105,12 @@ const QuizDetails = () => {
                 <p className="text-lg font-medium text-gray-800 mb-2">
                     {index + 1}. {question.question || "ไม่มีคำถาม"}
                 </p>
-                <div className='text-center mb-4'>
+                <div className='relative flex items-center justify-center text-center mb-4'>
                   {question.image && (
                     <img 
                     src={question.image} 
                     alt={`Question ${index + 1}`}
-                    className="max-w-full h-auto rounded-lg border shadow-md"
+                    className="max-w-80 h-auto rounded-lg border shadow-none"
                       />
                   )}
                   
