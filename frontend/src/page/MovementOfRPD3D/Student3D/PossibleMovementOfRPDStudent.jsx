@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import NavBarLeft from "../components/navbar/NavBarLeft";
-import Frame from "../components/Frame";
-import MovementOfRPD from "../components/lesson/MovementOfRPD/MovementOfRPD";
-import ChatBox from "../components/Noti";
-import './sidebar-mobile.css'; 
+import NavBarLeft from "../../../components/navbar/NavBarLeft";
+import Frame from "../../../components/Frame";
+import Student_View_RPD_sample_case from "../../../components/lesson/RPDSampleCase/Student_View_RPD_sample_case";
+// import Student_Bio from "../components/lesson/Biomechanical_consideration/View_Biomechanical_consideration_Student"
+import ChatBox from "../../../components/Noti";
+import '../../sidebar-mobile.css'; 
 
-const AddMovementOfRPD = () => {
+const HomeStudent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
     <div style={{ marginTop: "100px" }}>
@@ -26,7 +27,9 @@ const AddMovementOfRPD = () => {
       {/* Main Content Area */}
       <div className="main-content">
         <Frame>
-          <MovementOfRPD />
+          <Student_View_RPD_sample_case />
+          {/* <Student_Bio/> */}
+
         </Frame>
 
         {/* ChatBox */}
@@ -34,6 +37,6 @@ const AddMovementOfRPD = () => {
       </div>
     </div>
   );
-}
+};
 
-export default AddMovementOfRPD;
+export default HomeStudent;

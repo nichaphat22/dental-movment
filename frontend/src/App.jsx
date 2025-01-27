@@ -26,16 +26,25 @@ import AddBiomechanicalConsideration from "./page/AddBiomechanicalConsideration"
 import ViewBiomechanicalConsideration from "./page/ViewBiomechanicalConsideration"
 import EditBiomechanicalConsideration from "./page/EditBiomechanicalConsideration"
 import BiomechanicalConsiderationStudent from "./page/BiomechanicalConsiderationStudent"
-// import AddMovementOfRPD from "./page/AddMovementOfRPD"
-// import MovementOfRPD from "./page/MovementOfRPD"
-import AddMovementOfRPD from "./page/AddMovementOfRPD"
-import MovementOfRPD from "./page/MovementOfRPD"
-//Quiz
+// import DrawModel from "./components/lesson/RPDSampleCase/DrawModel"
+import LectureHistory from "./page/LectureHistoryImg"
 
+
+//----------------------------------- route P---------------------------------------//
+//Animation 3D
+import AddMovementOfRPD from "./page/MovementOfRPD3D/Teacher3D/AddMovementOfRPD"
+import MovementOfRPD from "./page/MovementOfRPD3D/Teacher3D/MovementOfRPD"
+import PossibleMovementOfRPDTeacher from './page/MovementOfRPD3D/Teacher3D/PossibleMovementOfRPDTeacher';
+import Edit_MovementOfRPD from "./page/MovementOfRPD3D/Teacher3D/EditMovementOfRPD"
+import PossibleMovementOfRPDStudent from './page/MovementOfRPD3D/Student3D/PossibleMovementOfRPDStudent';
+import MovementOfRPDStudent from "./page/MovementOfRPD3D/Student3D/MovementOfRPDStudent"
+import ViewMovementOfRPD from "./page/MovementOfRPD3D/ViewMovementOfRPD"
+
+
+//Quiz
 import ListQuiz from './page/pageQuiz/StudentQuiz/ListQuiz';
 import QuizStart from './page/pageQuiz/StudentQuiz/QuizStart';
 import QuizDetail from './components/Quiz/Student/QuizDetail';
-
 import QuizList from './page/pageQuiz/TeacherQuiz/QuizList';
 import CreateQuizT from './page/pageQuiz/TeacherQuiz/CreateQuizT';
 import DetailQ from './page/pageQuiz/TeacherQuiz/DetailQ';
@@ -43,26 +52,17 @@ import EditQuiz from './page/pageQuiz/TeacherQuiz/EditQuiz';
 
 
 
-
-import PossibleMovementOfRPDTeacher from './page/PossibleMovementOfRPDTeacher';
-import PossibleMovementOfRPDStudent from './page/PossibleMovementOfRPDStudent';
-
-
 // import HomeS from "./page/home/homeStudent/homeS";
 import Success from "./page/loginSuccess/success";
 // import Dashboard from './page/home/homeStudent/Dashboard';
 import DashboardStudent from './page/home/homeStudent/DashboardStudent';
 import DashboardTeacher from './page/home/homeTeacher/DashboardTeacher';
-
-import MovementOfRPDStudent from "./page/MovementOfRPDStudent"
-import ViewMovementOfRPD from "./page/ViewMovementOfRPD"
-import Edit_MovementOfRPD from "./page/EditMovementOfRPD"
 // import Edit_MovementOfRPD from "./components/lesson/MovementOfRPD/Edit_MovementOfRPD"
-// import DrawModel from "./components/lesson/RPDSampleCase/DrawModel"
-import LectureHistory from "./page/LectureHistoryImg"
 import Form from "./page/Form"
 import PageNotFound from './page/PageNotFound';
 import GoogleLoginButton from "./components/GoogleLoginButton";
+
+//----------------------------------------End------------------------------------------//
 
 
 function App () {
@@ -83,8 +83,7 @@ function App () {
         <Routes>
           <Route path="/" element={<Home/>}/>
           <Route path="/googleLogin" element={<GoogleLoginButton/>}/>
-          
-         
+        
           <Route path="/register" element={user ? <Chat /> :<Register />} />
           <Route path="/login" element={user ? <Chat /> : <Login />} />
           <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>

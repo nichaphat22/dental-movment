@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import NavBarLeft from "../components/navbar/NavBarLeft";
-import Frame from "../components/Frame";
-import View_MovementOfRPD from "../components/lesson/MovementOfRPD/View_MovementOfRPD";
-import View_Animation3d from "../components/lesson/MovementOfRPD/View_Animation3D"
-import ChatBox from "../components/Noti";
-import './sidebar-mobile.css'; 
+import NavBarLeft from "../../../components/navbar/NavBarLeft";
+import Frame from "../../../components/Frame";
+import View_MovementOfRPD from "../../../components/lesson/MovementOfRPD/View_MovementOfRPD";
+import ChatBox from "../../../components/Noti";
+import '../../sidebar-mobile.css'; 
 
-const ViewMovementOfRPD = () => {
+const MovementOfRPD = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
     <div style={{ marginTop: "100px" }} >
@@ -27,7 +26,7 @@ const ViewMovementOfRPD = () => {
       {/* Main Content Area */}
       <div className="main-content">
         <Frame>
-          <View_Animation3d />
+          <View_MovementOfRPD />
         </Frame>
 
         {/* ChatBox */}
@@ -37,4 +36,4 @@ const ViewMovementOfRPD = () => {
   );
 }
 
-export default ViewMovementOfRPD;
+export default MovementOfRPD;

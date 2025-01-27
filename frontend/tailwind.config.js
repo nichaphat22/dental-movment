@@ -5,6 +5,7 @@ export default {
       //  "./src/**/*.{js,ts,jsx,tsx}", // ครอบคลุมทุกไฟล์ใน src
 
       "./src/components/Quiz/**/*.{js,ts,jsx,tsx}",
+      "./src/components/lesson/MovementOfRPD/**/*.{js,ts,jsx,tsx}",
       "./src/components/navbar/**/*.{js,ts,jsx,tsx}",
       "./src/page/pageQuiz/**/*.{js,ts,jsx,tsx}",
       

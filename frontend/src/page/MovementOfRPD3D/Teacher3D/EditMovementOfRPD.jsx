@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import NavBarLeft from "../components/navbar/NavBarLeft";
-import Frame from "../components/Frame";
-import Edit_MovementOfRPD from "../components/lesson/MovementOfRPD/Edit_MovementOfRPD";
-import ChatBox from "../components/Noti";
-import './sidebar-mobile.css'; 
+import NavBarLeft from "../../../components/navbar/NavBarLeft";
+import Frame from "../../../components/Frame";
+import Edit_MovementOfRPD from "../../../components/lesson/MovementOfRPD/Edit_MovementOfRPD";
+import ChatBox from "../../../components/Noti";
+import '../../sidebar-mobile.css'; 
 const EditMovementOfRPD = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
