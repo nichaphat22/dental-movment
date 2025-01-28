@@ -73,6 +73,7 @@ function View_Biomechanical_consideration() {
           <Col sm={6} md={4} lg={3} className="mb-4" key={animation._id}>
             <div className="animationid" style={{ textAlign: 'center' }}>
               <img
+              title="คลิกเพื่อเล่นวิดีโอ"
                 onClick={() => handleImageClick(animation._id)}
                 src={`data:${animation.Ani_image.contentType};base64,${animation.Ani_image.data}`}
                 alt={animation.Ani_name}
@@ -82,8 +83,8 @@ function View_Biomechanical_consideration() {
               />
               <h3 className="Ani_name">{animation.Ani_name}</h3>
              <div className="bt">
-             <Button className="button-edit" onClick={() => goToEditPage(animation._id)}>แก้ไข</Button>
-             <Button className="button-remove" onClick={() => removeAnimation(animation._id)}>ลบ</Button>
+             <Button className="button-edit-ani" onClick={() => goToEditPage(animation._id)}>แก้ไข</Button>
+             <Button className="button-remove-ani" onClick={() => removeAnimation(animation._id)}>ลบ</Button>
              </div>
              
             </div>

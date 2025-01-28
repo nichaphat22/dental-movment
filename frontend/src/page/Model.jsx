@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import ViewModel from "../components/lesson/RPDSampleCase/ViewModel"
-import ChatBox from "../components/Noti";
+// import ChatBox from "../components/Noti";
 import './sidebar-mobile.css'; 
 
 const Model = () => {
@@ -30,7 +30,7 @@ const Model = () => {
           </Frame>
   
           {/* ChatBox */}
-          <ChatBox />
+          {/* <ChatBox /> */}
         </div>
       </div>
     );

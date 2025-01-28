@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
@@ -42,6 +43,7 @@
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
     "react-input-emoji": "^5.9.0",
+    "react-lazy-load-image-component": "^1.6.3",
     "react-redux": "^9.1.2",
     "react-router-dom": "^6.24.0",
     "react-three-fiber": "^6.0.13",
@@ -63,5 +65,37 @@
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
     "vite": "^5.3.1"
+=======
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.7.8",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.3",
+    "cookie-session": "^2.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "google-auth-library": "^9.14.1",
+    "googleapis": "^144.0.0",
+    "iconv-lite": "^0.6.3",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "mongoose": "^8.8.3",
+    "multer": "^1.4.5-lts.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "validator": "^13.12.0",
+    "xlsx": "^0.18.5"
+>>>>>>> 2ce5451f263073e7845c5ee11337980aa1fea29e
   }
 }

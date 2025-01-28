@@ -8,7 +8,7 @@ import Chat from "./page/Chat"
 import Login from "./page/Login"
 import Register from "./page/Register"
 import Home from './page/Home';
-import "bootstrap/dist/css/bootstrap.min.css"
+
 import { Container } from "react-bootstrap"
 import NavBar from "./components/navbar/NavBar"
 import HomeTeacher from "./page/HomeTeacher"
@@ -88,7 +88,7 @@ function App () {
           <Route path="/login" element={user ? <Chat /> : <Login />} />
           <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>
           <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
-          <Route path="/chat" element={user ? <Chat /> : <Login />} />
+          <Route path="/chat/:id" element={user ? <Chat /> : <Login />} />
           <Route path="/AR-RPD" element={user ? <ARModel /> : <Login />} />
 
           {user && user.role === 'teacher' && (

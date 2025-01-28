@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import Edit_RPD from "../components/lesson/RPDSampleCase/Edit_RPD";
-import ChatBox from "../components/Noti";
+// import ChatBox from "../components/Noti";
 import './sidebar-mobile.css'; 
 const EditRPDSampleCase = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,7 +29,7 @@ const EditRPDSampleCase = () => {
           </Frame>
   
           {/* ChatBox */}
-          <ChatBox />
+          {/* <ChatBox /> */}
         </div>
       </div>
     );

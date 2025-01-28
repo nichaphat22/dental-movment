@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import Edit_Biomechanical_consideration from "../components/lesson/Biomechanical_consideration/Edit_Biomechanical_consideration";
-import ChatBox from "../components/Noti";
+// import ChatBox from "../components/Noti";
 import './sidebar-mobile.css'; 
 const EditBiomechanicalConsideration = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -29,7 +29,7 @@ const EditBiomechanicalConsideration = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

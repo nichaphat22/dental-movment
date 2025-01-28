@@ -47,21 +47,47 @@ body {
 .user-card {
   color: white;
   position: relative;
-  border-bottom: 1px solid rgb(100, 100, 100);
-  width: 380px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 0 1px 1px  rgba(0, 0, 0, 0.1); */
+  width: 30vw;
+}
+
+.user-card-noti{
+  color: white;
+  position: relative;
+  /* border-bottom: 2px solid rgba(0, 0, 0, 0.1); */
+  width: 20vw;
+ 
+}
+.user-card-noti:hover,.user-card:hover{
+  background: #f4f4f4;
 }
 
 .user-card .text-content {
-  width: 170px;
+  width: 10rem;
+  font-size: 1rem;
+  margin-left:0.5rem;
 }
-
+.user-card-noti .text-content {
+  margin-left:0.3rem;
+}
+.user-card-noti .name{
+  font-weight: 500;
+  font-size: 0.85rem;
+}
 .user-card .name {
   font-weight: 500;
+  font-size: 1rem;
 }
 
-.user-card .text,
-.user-card .date {
-  font-size: 14px;
+
+.user-card-noti .text,.user-card .text{
+  font-size: 1rem;
+  color: rgb(180, 180, 180);
+}
+
+.user-card-noti .date,.user-card .date {
+  font-size: 0.75rem;
   color: rgb(180, 180, 180);
 }
 
@@ -79,7 +105,7 @@ body {
 
 /* Chat Box */
 .chat-box {
-  max-height: calc(100vh - 7rem);
+  max-height: 100vh;
   overflow-y: auto;
   background: #f3f3f3;
   border-radius: 10px;
@@ -87,7 +113,7 @@ body {
 }
 
 .messages-box {
-  height: 85vh;
+  height: 80vh;
 }
 
 /* Chat Header */
@@ -109,22 +135,36 @@ body {
 }
 
 .message {
+  
   color: black;
   background:#fff;
   padding: 0.75rem;
   border-radius: 25px;
-  max-width: 35%;
+  max-width: 45%;
+  /* width: 100%; */
   border-radius: 5px 20px 20px 20px;
   border-bottom: 2px solid #DADADA;
-  boxShadow: 0 10px 5px rgba(0, 0, 0, 0.75),
-}
+  boxShadow: 0 10px 5px rgba(0, 0, 0, 0.75);
+  /* box-sizing: border-box; /* เพื่อให้รวม border และ padding ในการคำนวณขนาด */
+  /* white-space: normal; เพื่อให้ข้อความพับบรรทัดเมื่อยาวเกิน */}
 
 .message.self {
   color: white;
   background: #7600A9 ;
   border-radius: 20px 5px 20px 20px;
+
 }
 
+.textmessage {
+  font-weight: 400;
+  /* display:flex; */
+  word-wrap: break-word; /* เพิ่มบรรทัดนี้ */
+  /* margin-bottom:px; */
+}
+/* 
+.me-2 img{
+  margin-right:1rem;
+} */
 .message-footer {
   font-size: 12px;
   align-self: flex-end;
@@ -158,36 +198,38 @@ body {
   position: relative;
 }
 
-.notifications-icon {
+/* .notifications-icon {
   color: white;
   cursor: pointer;
   position: relative;
   margin-right: 1rem;
-}
+} */
 
 .notifications-box {
-  max-height: 50vh;
-  width: 300px;
+  height: 20vw;
+  width: 20vw;
   position: absolute;
-  top: 2rem;
+  top: 3rem;
   right: 0;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
-    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-  background: #181d31;
+  border-radius: 10px;
+  box-shadow: 0 0 5px 1px  rgba(0, 0, 0, 0.2);
+  background:rgb(255, 255, 255);
   color: white;
-  z-index: 5;
+  z-index: 10;
+  overflow: hidden; 
+  /* overflow-x: scroll; ใช้การเลื่อนในแนวนอน */
 }
 
 .notifications-header {
-  padding: 1rem;
+  padding: 0.5rem;
   padding-bottom: 0;
-  display: flex;
+  /* display: flex; */
   justify-content: space-between;
 }
 
 .notifications-box h3 {
   font-weight: 700;
-  font-size: 20px;
+  font-size: 1.2rem;
 }
 
 .mark-as-read {
@@ -196,7 +238,7 @@ body {
   opacity: 0.8;
 }
 
-.notification {
+/* .notification {
   font-size: 14px;
   margin: 1rem 0;
   padding-bottom: 0.2rem;
@@ -205,7 +247,7 @@ body {
   flex-direction: column;
   cursor: pointer;
   padding: 0.5rem 1rem;
-}
+} */
 
 .notification.not-read {
   background: #263159;
@@ -213,13 +255,14 @@ body {
 
 .notification-time {
   margin-top: 0.2rem;
-  font-size: 12px;
+  font-size: 0.5rem;
   color: #e0e0e0;
 }
 
-.notification-count {
+.this-notifications {
   display: flex;
   background: #EF0000;
+  color:#fff;
   height: 25px;
   width: 25px;
   font-size: 14px;

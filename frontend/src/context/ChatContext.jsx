@@ -194,7 +194,7 @@ useEffect(() => {
     }, [currentChat]);
 
     const sendTextMessage = useCallback(
-        async (textMessage, sender, currentChatId, fileMessage,setTextMessage,setFileMessage) => {
+        async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
             if (!textMessage && !fileMessage) {
                 console.log("You must type something...");
                 return;
@@ -206,17 +206,31 @@ useEffect(() => {
                     senderId: sender._id,
                     text: textMessage,
                     file: fileMessage,
-                },[fileMessage]);
+                });
+    
                 console.log(response); // Log the response for debugging
+    
                 if (response.error) {
                     return setSendTextMessageError(response);
                 }
     
                 setNewMessage(response); // Assuming setNewMessage updates your message state
-                setMessages((prev) => [...prev, response]); // Assuming setMessages updates your messages state
+                setMessages((prev) => [...prev, response]); // Update the messages state
                 setTextMessage(""); // Reset text message after sending
                 setFileMessage(null); // Reset file message after sending
-               
+    
+                // Create notification after sending the message
+                const notificationResponse = await postRequest(`${baseUrl}/notiChat`, {
+                    userId: currentChatId, // Assuming the userId is the current chat's userId
+                    type: 'message',
+                    relatedMessageId: response._id, // Use the ID of the sent message
+                    content: `New message from ${sender.fname}: ${textMessage || fileMessage?.name}`, // Customize this as needed
+                });
+    
+                if (notificationResponse.error) {
+                    console.error("Error creating notification:", notificationResponse);
+                }
+    
             } catch (error) {
                 console.error("Error sending message:", error);
                 setSendTextMessageError(error);
@@ -224,6 +238,7 @@ useEffect(() => {
         },
         []
     );
+    
     
 
 
@@ -245,57 +260,6 @@ useEffect(() => {
                 }
                 setUserChats((prev) => [...prev, response]);
             },[]);
-
-            const markAllNotificationsAsRead = useCallback((notifications) => {
-                const mNotifications = notifications.map((n)=>{
-                    return { ...n, isRead: true}
-                });
-                setNotifications(mNotifications);
-            },[]);
-        
-            const markNotificationsAsRead = useCallback(
-                (n, userChats, user, notifications)=> {
-                    // find chat to open
-        
-                    const desiredChat = userChats.find((chat)=>{
-                        const chatMembers = [user._id, n.senderId];
-                        const isDesiredChat = chat?.members.every((member)=>{
-                            return chatMembers.includes(member);
-                        })
-                        return isDesiredChat
-                    })
-                    // mark notification as read
-                    const mNotifications = notifications.map(el =>{
-                        if(n.senderId === el.senderId){
-                            return {...n, isRead:true}
-                        } else {
-                            return el
-                        }
-                    })
-                    updateCurrentChat(desiredChat);
-                    setNotifications(mNotifications);
-                },[]);
-        
-            const markThisUserNotificationsAsRead = useCallback(
-                (thisUserNotifications, notifications) => {
-                    // mark notification as read
-                     const mNotifications = notifications.map(el =>{
-                        let notification;
-        
-                        thisUserNotifications.forEach((n) => {
-                            if(n.senderId === el.senderId){
-                                notification = {...n, isRead:true}
-                            } else {
-                                notification = el
-                            }
-                        })
-                        return notification;
-                    })
-                    setNotifications(mNotifications);
-                },[])
-        
-        
-
     return (
         <ChatContext.Provider
             value={{
@@ -313,9 +277,9 @@ useEffect(() => {
                 onlineUsers,
                 notifications,
                 allUsers,
-                markAllNotificationsAsRead,
-                markNotificationsAsRead,
-                markThisUserNotificationsAsRead,
+                // markAllNotificationsAsRead,
+                // markNotificationsAsRead,
+                // markThisUserNotificationsAsRead,
             }}
         >
             {children}

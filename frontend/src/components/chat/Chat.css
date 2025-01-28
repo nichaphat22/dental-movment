@@ -38,11 +38,6 @@
   
  }
 
- .textmessage {
-    font-weight: 400;
-    /* margin-bottom:px; */
-}
-
 
  /* .long-name {
     display: block; 
@@ -122,4 +117,8 @@
 }
 .file-preview3 button:hover{
     background: #ccc;
+}
+
+.modal-content {
+    max-width: 100% !important;
 }

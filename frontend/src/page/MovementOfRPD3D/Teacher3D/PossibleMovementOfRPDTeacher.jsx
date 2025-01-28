@@ -3,7 +3,7 @@ import NavBarLeft from "../../../components/navbar/NavBarLeft";
 import Frame from "../../../components/Frame";
 import  View_RPD_sample_case from "../../../components/lesson/RPDSampleCase/View_RPD_sample_case";
 // import View_Biomechanical_consideration from "../components/lesson/Biomechanical_consideration/View_Biomechanical_consideration";
-import ChatBox from "../../../components/Noti";
+// import ChatBox from "../../../components/Noti";
 import '../../sidebar-mobile.css';  
 
 const HomeTeacher = () => {
@@ -32,7 +32,7 @@ const HomeTeacher = () => {
                 {/* <View_Biomechanical_consideration/> */}
                 </Frame>
             {/* ChatBox */}
-                <ChatBox />
+                {/* <ChatBox /> */}
             </div>
             
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import NavBarLeft from "../../../components/navbar/NavBarLeft";
 import Frame from "../../../components/Frame";
 import View_MovementOfRPD from "../../../components/lesson/MovementOfRPD/View_MovementOfRPD";
-import ChatBox from "../../../components/Noti";
+// import ChatBox from "../../../components/Noti";
 import '../../sidebar-mobile.css'; 
 
 const MovementOfRPD = () => {
@@ -30,7 +30,7 @@ const MovementOfRPD = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

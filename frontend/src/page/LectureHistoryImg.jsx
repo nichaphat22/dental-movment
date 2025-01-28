@@ -1,7 +1,7 @@
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import LectureHistory from "../components/lesson/RPDSampleCase/LectureHistory"
-import ChatBox from "../components/Noti";
+// import ChatBox from "../components/Noti";
 // import '../tailwind.css'
 const LectureHistoryImg = () => {
     return ( 
@@ -9,7 +9,7 @@ const LectureHistoryImg = () => {
            <Frame >
            <LectureHistory/>
            </Frame>
-           <ChatBox/>
+           {/* <ChatBox/> */}
         </div>
 
      );

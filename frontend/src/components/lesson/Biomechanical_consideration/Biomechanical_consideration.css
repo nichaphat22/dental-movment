@@ -18,17 +18,22 @@ h1 {
 }
 h3 {
     text-align: start;
-    margin-top: 10px;
+    /* margin-top: 10px; */
+    margin:10px 5px 5px 10px;
+    color:#000;
+    white-space: nowrap;        /* บังคับให้ข้อความอยู่ในบรรทัดเดียว */
+  overflow: hidden;           /* ซ่อนข้อความที่เกินขอบ */
+  text-overflow: ellipsis; 
 }
 .description {
     margin: 0 0;
 }
-img {
+LazyLoadImage {
     border-radius: 5px;
     /* border: 1px solid #6e6e6e; */
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25); 
 }
-img:hover {
+LazyLoadImage:hover {
     transform: scale(1.1); /* ขยายขนาดรูปภาพ */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* เพิ่มเงา */
     transition: transform 0.2s ease, box-shadow 0.2s ease; /* เพิ่มความลื่นไหลในการแสดงผล */
@@ -37,13 +42,13 @@ img:hover {
 textarea{
     color: rgba(108,117,125,1)
 }
-.Ani_name {
+h3 .Ani_name {
     /* color:#000; */
     font-size: 1rem;
     /* margin-top: 8px; */
-    color:#000;
-    margin:8px 5px 5px 5px 
-    /* text-align:center; */
+   
+    
+    /* text-align:start;/ */
 }
 .lebel-bio{
     font-size: 1.05rem;
@@ -167,18 +172,22 @@ video {
   
 }
 
-.viewAnimation img{
+.animationid img{
+    border-radius: 10px 10px 0 0; 
     cursor: pointer;
-   
+    width:20vw;
+   height:10vw;
 }
 
-.viewAnimation img:hover {
-    transform:scale(1.05);
+.animationid img:hover {
+    /* transform:scale(1.02); */
     /* z-index: 2; */
-    box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.05); */
 }
 .animationid {
-    
+    height:16vw;
+    border-radius: 10px; 
+    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.075);
 }
 
 .upload-status {
@@ -196,3 +205,53 @@ video {
    .row{
  margin: 20px;
    }
+
+   .button-edit-ani {
+    text-align: center;
+      font-size:0.85rem !important;
+      color: #000;
+      background-color: #dbdbdb !important;
+      /* margin-right: 2px; */
+      border-radius: 0.3rem !important;
+      border-style: none !important;
+      padding: 0.3rem !important;
+      margin: 0.3rem !important;
+      width: 10vw !important;
+    }
+    .button-edit-ani:hover {
+        color: #000;
+        background-color:rgb(209, 209, 209) !important;
+        /* box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1); */
+      }
+      .button-edit:active {
+        color: #000 !important;
+        background-color: #b8b8b8 !important;
+      }
+        
+      
+    .remove-ani {
+      background-color: red; 
+      color: white; 
+      border-radius: 0.3rem;
+      border-style: none;
+      padding: 0.1rem 0.5rem;
+      justify-content: center;
+      
+    }
+    
+    .button-remove-ani {
+      font-size:0.85rem !important;
+      background-color: #ff2828 !important; 
+      color: white; 
+      margin: 0.3rem !important;
+      border-radius: 0.3rem;
+      border-style: none;
+      padding: 0.3rem;
+      width: 10vw;
+    }
+  
+    .button-remove-ani:hover {
+      background-color: #df0000 !important; 
+      color: white; 
+      /* border:1px solid rgb */
+    }

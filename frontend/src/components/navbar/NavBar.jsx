@@ -1,10 +1,11 @@
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { HiOutlineMenu, HiOutlineX, HiSearch, HiOutlineBell } from 'react-icons/hi';
+import { HiOutlineMenu, HiOutlineX, HiOutlineBell } from 'react-icons/hi';
 import GoogleLogin from "../GoogleLoginButton";
 import MenuProfile from '../Profile/MenuProfile';
 import '../../tailwind.css';
+import Notifications from '../chat/Notifications';
 
 
 const NavBar = () => {
@@ -68,21 +69,23 @@ const NavBar = () => {
         {user ? (
           //Search Button
           <div className="relative flex items-center">
-            <div className="absolute pointer-events-auto ml-2 text-gray-400">
+              <Notifications/>
+            {/* <div className="absolute pointer-events-auto ml-2 text-gray-400">
               <HiSearch/>
-            </div>     
-            <input
+            </div>      */}
+            {/* <input
               type='text'
               placeholder='Search...'
               className='border rounded-lg px-6 py-2 mr-6'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} 
-            />
+            /> */}
 
             {/* แจ้งเตือน */}
             {/* <button onClick={handleSearch} className="ml-2 mr-2 text-purple-600">
               <HiSearch className="text-xl" />
             </button> */}
+              {/* <Notifications/> */}
             <button>
               <HiOutlineBell className='text-purple-500 w-6 h-6 mr-4'/>
             </button>
@@ -132,24 +135,16 @@ const NavBar = () => {
           {user && (
             <div className="hidden md:flex ml-auto justify-end  items-center space-x-4">
               <div className="relative flex items-center">
-                <div className="absolute pointer-events-auto  ml-2 text-gray-400">
-                  <HiSearch/>
-                </div>      
-            <input
-              type='text'
-              placeholder='Search...'
-              className='border rounded-lg md:px-6 py-2 mr-6 '
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
+               
               </div>
+              <Notifications/>
               <button>
                 <HiOutlineBell className='text-purple-500 w-6 h-6 mr-4'/>
               </button>
 
               {/* <button onClick={logoutUser} className="text-gray-800 hover:text-purple-600">Logout</button> */}
               <button onClick={() => setOpenProfile(!openProfile)}>
-                <img src={user?.img} alt="" width="38" height="38" className="rounded-full" />
+                <img src={user?.img} alt=""  className="rounded-full" style={{borderRadius:'50%', width:'40px', height:'40px'}}/>
                 {
                   openProfile && (
                     <MenuProfile/>

@@ -5,6 +5,7 @@ import { database, storage } from "../../../config/firebase";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
 import { HiPlusSm } from "react-icons/hi";
+import { IoIosSearch } from "react-icons/io";
 
 const ViewRPDSampleCase = () => {
   const [models, setModels] = useState([]);
@@ -128,6 +129,13 @@ const ViewRPDSampleCase = () => {
     navigate(`/Add-RPD`);
   };
 
+  const handleSearch = () => {
+    navigate(`/?search=${searchTerm}`);
+    setSearchTerm(""); // ล้างค่าหลังการค้นหา
+  };
+  
+
+
   return (
     <div className="Content">
       {/* <h1 className="title-h1">RPD sample case</h1>
@@ -140,11 +148,21 @@ const ViewRPDSampleCase = () => {
         <HiPlusSm className="w-5 h-5 mr-2" />
         เพิ่มสื่อการสอน
       </button>
+      
+      
       </div>
+      <div className="input-group">
+  <div className="form-outline" data-mdb-input-init>
+    <input type="search"  placeholder="ค้นหาโมเดล..."  className="form-control" value={searchTerm}   onChange={(e) => setSearchTerm(e.target.value)} />
+  </div>
+  <button type="button" onClick={handleSearch} className="btn btn-primary" data-mdb-ripple-init>
+  <IoIosSearch />
+  </button>
+</div>
 
       <div className="grid-container" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
-          <div className="modelrow" key={model.name} style={{ maxWidth: '220px' }}>
+          <div className="modelrow" key={model.name} style={{ maxWidth: '210px' }}>
             <div className="modelbtw">
               <div className="modelname">
                 <img
@@ -152,10 +170,10 @@ const ViewRPDSampleCase = () => {
                   src={model.imageUrl}
                   alt={model.name}
                   onClick={() => handleModelClick(model)}
-                  style={{ cursor: 'pointer', width: '100%', height: 'auto' }}
+                  style={{ cursor: 'pointer', width: '100%', height: '180px' }}
                 />
-                <div className="model-container" style={{ columnCount: '2', justifyContent: 'space-between' }}>
-                  <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500',maxWidth:'180px' }}>
+                <div className="model-container-view" style={{ columnCount: '2', justifyContent: 'space-between' }}>
+                  <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500',maxWidth:'80%' }}>
                     {model.name}
                   </span>
                   <button className="bookmark" onClick={() => handleBookmarkClick(model.name)}>
@@ -163,8 +181,8 @@ const ViewRPDSampleCase = () => {
                     className="img-model"
                       src={clickedBookmark[model.name] ? '/bookmark.png' : '/bookmark1.png'}
                       alt="bookmark"
-                      width="30"
-                      height="30"
+                      width="28"
+                      height="28"
                     />
                   </button>
                 </div>
