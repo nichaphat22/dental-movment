@@ -30,11 +30,25 @@
     .sidebar-mobile {
         display: none;
     }
+    .main-content {
+        margin: 10px;
+        margin-left: 20%;
+        width: 80%;
+    }
 }
 
-.main-content {
-    flex: 1;
-    width: 80%; /* เทียบกับ w-4/5 */
-    margin-left: 20%;
+@media (max-width: 1024px) { /* สำหรับ iPad และหน้าจอขนาดเล็ก */
+    .main-content {
+        margin: 0; /* ไม่มี margin เพื่อให้ดูชิดกับขอบหน้าจอ */
+        padding: 1rem; /* เพิ่ม padding เพื่อสร้างช่องว่างด้านใน */
+        width: 100%;
+    }
 }
 
+@media (max-width: 768px) { /* สำหรับโทรศัพท์มือถือ */
+    .main-content {
+        margin: 0; /* ไม่มี margin */
+        padding: 1rem; /* เพิ่ม padding ให้พอดี */
+        width: 100%; /* เต็มหน้าจอ */
+    }
+}

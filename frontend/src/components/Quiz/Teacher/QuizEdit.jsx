@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import quizService from "../../../utils/quizService";
-import { CiMenuKebab ,CiEdit} from "react-icons/ci";
+import { CiMenuKebab, CiEdit } from "react-icons/ci";
 import { HiOutlineX } from "react-icons/hi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import Swal from "sweetalert2";
-import { FiImage } from "react-icons/fi"; 
+import { FiImage } from "react-icons/fi";
 import defaultImage from "../../../../public/imgQuiz.svg";
 
 const QuizEdit = () => {
@@ -13,7 +13,7 @@ const QuizEdit = () => {
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [image, setImage] = useState(); 
+  const [image, setImage] = useState();
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -59,9 +59,9 @@ const QuizEdit = () => {
     }
 
     // ลบคำถามจาก UI ทันที
-    const updatedQuestions = [...quiz.questions];  // คัดลอกคำถามทั้งหมด
-    const deletedQuestion = updatedQuestions.splice(index, 1);  // ลบคำถามที่ index ที่เลือก
-    setQuiz({ ...quiz, questions: updatedQuestions });  // อัปเดต state ให้แสดงคำถามใหม่
+    const updatedQuestions = [...quiz.questions]; // คัดลอกคำถามทั้งหมด
+    const deletedQuestion = updatedQuestions.splice(index, 1); // ลบคำถามที่ index ที่เลือก
+    setQuiz({ ...quiz, questions: updatedQuestions }); // อัปเดต state ให้แสดงคำถามใหม่
 
     // ถ้าคำถามที่ถูกลบมี id (หมายถึงมันถูกบันทึกในฐานข้อมูล)
     const questionToDelete = deletedQuestion[0];
@@ -72,7 +72,11 @@ const QuizEdit = () => {
         Swal.fire("Deleted!", "The question has been removed.", "success");
       } catch (error) {
         console.error("Error deleting question:", error);
-        Swal.fire("Error!", "There was an error deleting the question.", "error");
+        Swal.fire(
+          "Error!",
+          "There was an error deleting the question.",
+          "error"
+        );
       }
     }
   };
@@ -99,7 +103,7 @@ const QuizEdit = () => {
     }
   };
 
-     // เพิ่มการจัดการไฟล์รูปภาพ
+  // เพิ่มการจัดการไฟล์รูปภาพ
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -136,7 +140,10 @@ const QuizEdit = () => {
         return;
       }
 
-      if (!question.choices.length || question.choices.some((opt) => !opt.trim())) {
+      if (
+        !question.choices.length ||
+        question.choices.some((opt) => !opt.trim())
+      ) {
         alert("Each question must have at least one choice with valid text.");
         return;
       }
@@ -159,7 +166,9 @@ const QuizEdit = () => {
       });
 
       // ลบคำถามที่มีสถานะ deleted
-      const deletedQuestions = quiz.questions.filter((question) => question.deleted);
+      const deletedQuestions = quiz.questions.filter(
+        (question) => question.deleted
+      );
       for (const question of deletedQuestions) {
         if (question._id) {
           await quizService.deleteQuestion(id, question._id);
@@ -180,7 +189,7 @@ const QuizEdit = () => {
 
       const result = await Swal.fire({
         title: "Do you want to save the changes?",
-        icon: 'warning',
+        icon: "warning",
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: "Save",
@@ -223,10 +232,10 @@ const QuizEdit = () => {
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
-   //ลบรูปภาพ title
-   const handleRemoveImageTitle = () => {
+  //ลบรูปภาพ title
+  const handleRemoveImageTitle = () => {
     setImage(null);
-  }
+  };
 
   if (isLoading) {
     return <div>Loading quiz details, please wait...</div>;
@@ -238,66 +247,70 @@ const QuizEdit = () => {
 
   return (
     <div className="relative p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold text-purple-500 mb-12 text-center">แก้ไขแบบทดสอบ</h1>
+      <h1 className="text-4xl font-bold text-purple-500 mb-12 text-center">
+        แก้ไขแบบทดสอบ
+      </h1>
 
       <div>
         {/* <label>รูปภาพ: </label> */}
         <div className="relative text-center flex justify-center mt-2 mb-4">
           {image ? (
-          <>
-            <img
-            src={image || defaultImage}
-            alt="Quiz"
-            className="w-48 h-48 object-cover border shadow-none hover:transform-none"
-          />
-            <label 
-            htmlFor="file-upload"
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            title="เพิ่มรูปภาพ">
-                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
-            </label>
-            <div>
-              <button
-                onClick={handleRemoveImageTitle}
-                type="button"
-                className="absolute inline-flex size-5  text-red-600 rounded-full"
-                title="ลบรูปภาพ"
+            <>
+              <img
+                src={image || defaultImage}
+                alt="Quiz"
+                className="w-48 h-48 object-cover border shadow-none hover:transform-none"
+              />
+              <label
+                htmlFor="file-upload"
+                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                title="เพิ่มรูปภาพ"
+              >
+                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500" />
+              </label>
+              <div>
+                <button
+                  onClick={handleRemoveImageTitle}
+                  type="button"
+                  className="absolute inline-flex size-5  text-red-600 rounded-full"
+                  title="ลบรูปภาพ"
                 >
-                <HiOutlineX className="w-3 h-3" />
-              </button>
-            </div>
-          </>
+                  <HiOutlineX className="w-3 h-3" />
+                </button>
+              </div>
+            </>
           ) : (
             <>
-            <img 
-              src={defaultImage} 
-              alt="ภาพแบบทดสอบ"
-              className="w-48 h-48 object-cover border shadow-none" 
-            />
-            <label 
-            htmlFor="file-upload"
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            title="เพิ่มรูปภาพ">
-                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
-            </label>
-
+              <img
+                src={defaultImage}
+                alt="ภาพแบบทดสอบ"
+                className="w-48 h-48 object-cover border shadow-none"
+              />
+              <label
+                htmlFor="file-upload"
+                className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                title="เพิ่มรูปภาพ"
+              >
+                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500" />
+              </label>
             </>
-      
           )}
-          </div>
-            {/* hidded input */}
-            <input
-              id="file-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-        />       
+        </div>
+        {/* hidded input */}
+        <input
+          id="file-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
       </div>
 
       {/* Edit Quiz Title */}
       <label className="flex sm:text-lg lg:text-2xl mb-4">
-        <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">ชื่อแบบทดสอบ:</span>
+        <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">
+          ชื่อแบบทดสอบ:
+        </span>
         <input
           type="text"
           value={quiz.title}
@@ -308,7 +321,9 @@ const QuizEdit = () => {
 
       {/* Edit Quiz Description */}
       <label className="flex justify-center sm:text-lg lg:text-2xl mb-4">
-        <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">คำอธิบาย:</span>
+        <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">
+          คำอธิบาย:
+        </span>
         <textarea
           value={quiz.description}
           onChange={(e) => handleFieldChange("description", e.target.value)}
@@ -316,23 +331,30 @@ const QuizEdit = () => {
         ></textarea>
       </label>
 
-      
-
       <hr className="pb-2" />
 
       {/* Questions */}
       {quiz.questions
         .filter((question) => !question.deleted)
         .map((question, qIndex) => (
-          <div className="relative mt-8 mb-6 p-4 border rounded-md bg-gray-50 shadow-sm lg:text-xl" key={qIndex}>
-            <HiOutlineX onClick={() => handleDeleteQuestion(qIndex)}  title="ลบคำถาม" className="absolute top-2 right-2 text-xl cursor-pointer text-red-600 w-4 h-4" />
+          <div
+            className="relative mt-8 mb-6 p-4 border rounded-md bg-gray-50 shadow-sm lg:text-xl"
+            key={qIndex}
+          >
+            <HiOutlineX
+              onClick={() => handleDeleteQuestion(qIndex)}
+              title="ลบคำถาม"
+              className="absolute top-2 right-2 text-xl cursor-pointer text-red-600 w-4 h-4"
+            />
             {/* Question Input */}
             <label className="flex mb-4 mt-2">
               <span className="pr-4 py-2">{qIndex + 1}.</span>
               <input
                 type="text"
                 value={question.question}
-                onChange={(e) => handleQuestionChange(qIndex, "question", e.target.value)}
+                onChange={(e) =>
+                  handleQuestionChange(qIndex, "question", e.target.value)
+                }
                 className="border border-none border-b-pink-200 w-full py-2 pr-2 pl-4"
               />
             </label>
@@ -341,17 +363,17 @@ const QuizEdit = () => {
             <div className="relative text-center flex justify-center mt-2 mb-4">
               {question.image ? (
                 <>
-                <img
-                  src={question.image} // แสดงรูปภาพที่อัปโหลด
-                  alt={`Question ${qIndex  + 1}`}
-                  className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
+                  <img
+                    src={question.image} // แสดงรูปภาพที่อัปโหลด
+                    alt={`Question ${qIndex + 1}`}
+                    className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
                   />
-                  <label 
+                  <label
                     htmlFor={`file-imgQ-${qIndex}`}
                     className="absolute inset-0 flex items-center justify-center cursor-pointer"
                     title="เพิ่มรูปภาพ"
                   >
-                    <FiImage className="w-16 h-16 text-gray-800 opacity-70 hover:text-gray-500"/>
+                    <FiImage className="w-16 h-16 text-gray-800 opacity-70 hover:text-gray-500" />
                   </label>
                   <div>
                     <button
@@ -366,29 +388,28 @@ const QuizEdit = () => {
                       <HiOutlineX className="w-3 h-3" />
                     </button>
                   </div>
-                  </>
+                </>
               ) : (
                 <>
-                <div className="w-40 h-40 flex items-center justify-center border border-dashed text-gray-500">
-                      <FiImage className="w-10 h-10" /> {/* ไอคอนรูปภาพ */}
-                </div>
-                <label 
-                  htmlFor={`file-imgQ-${qIndex}`}
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                  title="เพิ่มรูปภาพ"
+                  <div className="w-40 h-40 flex items-center justify-center border border-dashed text-gray-500">
+                    <FiImage className="w-10 h-10" /> {/* ไอคอนรูปภาพ */}
+                  </div>
+                  <label
+                    htmlFor={`file-imgQ-${qIndex}`}
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    title="เพิ่มรูปภาพ"
                   >
-                    <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
-                </label>
+                    <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500" />
+                  </label>
                 </>
-                 
               )}
             </div>
             <input
-                id={`file-imgQ-${qIndex}`}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleQuestionImageUpload(index, e)}
-                className="hidden"
+              id={`file-imgQ-${qIndex}`}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleQuestionImageUpload(index, e)}
+              className="hidden"
             />
 
             {/* Choices */}
@@ -415,7 +436,9 @@ const QuizEdit = () => {
               <span>เลือกคำตอบที่ถูกต้อง:</span>
               <select
                 value={question.correctAnswer}
-                onChange={(e) => handleQuestionChange(qIndex, "correctAnswer", e.target.value)}
+                onChange={(e) =>
+                  handleQuestionChange(qIndex, "correctAnswer", e.target.value)
+                }
                 className="ml-2 border p-2 rounded mb-4"
               >
                 {question.choices.map((_, idx) => (
@@ -433,9 +456,15 @@ const QuizEdit = () => {
             </label>
             <br />
             <textarea
-                value={question.answerExplanation}
-                onChange={(e) => handleQuestionChange(qIndex, "answerExplanation", e.target.value)}
-                className="resize h-32 border-gray-200 border p-2 w-full rounded lg:text-sm"
+              value={question.answerExplanation}
+              onChange={(e) =>
+                handleQuestionChange(
+                  qIndex,
+                  "answerExplanation",
+                  e.target.value
+                )
+              }
+              className="resize h-32 border-gray-200 border p-2 w-full rounded lg:text-sm"
             ></textarea>
 
             {/* Delete Question Button */}

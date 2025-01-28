@@ -33,20 +33,27 @@ function View_MovementOfRPD() {
         const animation3dList = await listAll(animation3dRef);
         const animation3dData = await Promise.all(
           animation3dList.prefixes.map(async (folderRef) => {
-            const animation3dUrl = await getDownloadURL(ref(storage, `${folderRef.fullPath}/animation3d.mp4`));
-            const aniImageUrl = await getDownloadURL(ref(storage, `${folderRef.fullPath}/image.jpg`));
-            return { id: folderRef.name, name: folderRef.name, description: folderRef.description ,url: animation3dUrl, aniImageUrl: aniImageUrl };
+            try {
+              console.log(`Fetching animation3d.mp4 for folder: ${folderRef.name}`);
+              const animation3dUrl = await getDownloadURL(ref(storage, `${folderRef.fullPath}/animation3d.mp4`));
+              console.log(`Successfully fetched animation3d.mp4 for folder: ${folderRef.name}`);
+              
+              const aniImageUrl = await getDownloadURL(ref(storage, `${folderRef.fullPath}/image.jpg`));
+              console.log(`Successfully fetched image.jpg for folder: ${folderRef.name}`);
+            
+              return { id: folderRef.name, name: folderRef.name, url: animation3dUrl, aniImageUrl };
+            } catch (error) {
+              console.warn(`Error fetching files for ${folderRef.name}:`, error.message);
+              return null;
+            }
+                     
           })
         );
-
-        setAnimation3d(animation3dData);
-
+        setAnimation3d(animation3dData.filter((item) => item !== null));
       } catch (error) {
         console.error("Error fetching animation3d:", error);
       }
     };
-
-
     fetchAnimation3d(); // Fetch animations on component load
   }, [location.state, location.search]); 
 
