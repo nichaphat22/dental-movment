@@ -2,15 +2,10 @@ const mongoose = require("mongoose");
 
 const notificationChatSchema = new mongoose.Schema(
     {
-        userId: {
+        senderId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User', // User ที่ได้รับการแจ้งเตือน
             required: true,
-        },
-        type: {
-            type: String,
-            enum: ['message', 'system'], // ประเภทของแจ้งเตือน
-            default: 'message',
         },
         relatedMessageId: {
             type: mongoose.Schema.Types.ObjectId,

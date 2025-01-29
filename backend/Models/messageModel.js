@@ -12,14 +12,19 @@ const messageSchema = new mongoose.Schema(
             ref: 'User', // Assuming there's a User model
             required: true
         },
+        recipientId: { // Add recipientId field
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User', // Assuming there's a User model
+            required: true
+        },
         text: {
             type: String,
         },
         file: {
-               name: { type: String },
-        data: { type: String },
-        type: { type: String },
-        size: { type: Number },
+            name: { type: String },
+            data: { type: String },
+            type: { type: String },
+            size: { type: Number },
         },
     },
     {
@@ -27,6 +32,6 @@ const messageSchema = new mongoose.Schema(
     }
 );
 
-const messageModel = mongoose.model("Message", messageSchema)
+const messageModel = mongoose.model("Message", messageSchema);
 
 module.exports = messageModel;

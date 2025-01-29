@@ -1,120 +1,108 @@
 const notificationChatModel = require('../Models/notificationChatModel'); // เรียกใช้โมเดล
+// const messageModel = require('../Models/messageModel'); // โมเดลของข้อความ
 
-const createNotification = async (req, res) => {
+// const createNotification = async (req, res) => {
+//     const { chatId, senderId, recipientId, messageId } = req.body;
+
+//     if (!chatId || !senderId || !recipientId || !messageId) {
+//         return res.status(400).json({ message: "chatId, senderId, recipientId, and messageId are required." });
+//     }
+
+//     try {
+//         // Create notification for recipient
+//         const notification = new notificationChatModel({
+//             userId: recipientId,
+//             relatedMessageId: messageId, // Use the messageId passed in the request body
+//             content: `${senderId} sent you a new message`,
+//             isRead: false,
+//         });
+
+//         await notification.save();
+
+//         res.status(200).json({
+//             message: "Notification created successfully",
+//             notification,
+//         });
+//     } catch (error) {
+//         console.error("Error creating notification:", error);
+//         res.status(500).json({
+//             message: "Error creating notification",
+//             error,
+//         });
+//     }
+// };
+
+
+
+// ฟังก์ชันรีเฟรชการแจ้งเตือนให้เป็น 0
+const resetNotifications = async (req, res) => {
+    const { userId } = req.params;  // รับ userId จาก params หรือ body
+
     try {
-        const { userId, type, relatedMessageId, content } = req.body;
-
-        // Create the new notification
-        const newNotification = await notificationChatModel.create({
-            userId,
-            type,
-            relatedMessageId,
-            content,
-            isRead: false,
-        });
-
-        res.status(201).json({
-            success: true,
-            message: "Notification created successfully",
-            data: newNotification,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error creating notification",
-            error: error.message,
-        });
-    }
-};
-
-// ดึงการแจ้งเตือนของผู้ใช้สำหรับแชทที่เลือก
-const getUserNotifications = async (req, res) => {
-    try {
-        const { userId, chatId } = req.params;
-
-        // ดึงข้อมูลการแจ้งเตือนที่ยังไม่อ่านของผู้ใช้สำหรับแชทที่เลือก
-        const notifications = await notificationChatModel
-            .find({ userId, chatId, isRead: false }) // เฉพาะการแจ้งเตือนที่ยังไม่ได้อ่าน
-            .sort({ createdAt: -1 }); // เรียงลำดับจากใหม่ไปเก่า
-
-        res.status(200).json({
-            success: true,
-            message: "User notifications fetched successfully",
-            data: notifications,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error fetching notifications",
-            error: error.message,
-        });
-    }
-};
-
-// อัปเดตสถานะการอ่านการแจ้งเตือน
-const markAsRead = async (req, res) => {
-    try {
-        const { notificationId } = req.params;
-
-        // อัปเดตสถานะ isRead เป็น true
-        const updatedNotification = await notificationChatModel.findByIdAndUpdate(
-            notificationId,
-            { isRead: true },
-            { new: true } // ส่งคืนข้อมูลที่อัปเดต
+        // รีเฟรชการแจ้งเตือนทั้งหมดที่ยังไม่ได้อ่านให้เป็น read
+        await notificationChatModel.updateMany(
+            { userId, isRead: false },
+            { $set: { isRead: true } }
         );
 
-        if (!updatedNotification) {
-            return res.status(404).json({
-                success: false,
-                message: "Notification not found",
-            });
-        }
-
         res.status(200).json({
-            success: true,
-            message: "Notification marked as read",
-            data: updatedNotification,
+            message: "Notifications reset successfully",
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({
-            success: false,
-            message: "Error updating notification",
-            error: error.message,
+            message: "Error resetting notifications",
+            error,
         });
     }
 };
 
-// ลบการแจ้งเตือน
-const deleteNotification = async (req, res) => {
+// ฟังก์ชันดึงการแจ้งเตือนทั้งหมดของผู้ใช้
+const getNotifications = async (req, res) => {
+    const { userId } = req.params;
+
     try {
-        const { notificationId } = req.params;
-
-        // ลบการแจ้งเตือน
-        const deletedNotification = await notificationChatModel.findByIdAndDelete(notificationId);
-
-        if (!deletedNotification) {
-            return res.status(404).json({
-                success: false,
-                message: "Notification not found",
-            });
-        }
+        const notifications = await notificationChatModel.find({ userId })
+            .sort({ createdAt: -1 })
+            .exec();
 
         res.status(200).json({
-            success: true,
-            message: "Notification deleted successfully",
+            message: "Notifications fetched successfully",
+            notifications,
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({
-            success: false,
-            message: "Error deleting notification",
-            error: error.message,
+            message: "Error fetching notifications",
+            error,
         });
     }
 };
 
-module.exports = {
-    createNotification,
-    getUserNotifications,
-    markAsRead,
-    deleteNotification,
+// ฟังก์ชันดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
+const getUnreadNotifications = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const unreadNotifications = await notificationChatModel.find({
+            userId,
+            isRead: false,
+        })
+            .sort({ createdAt: -1 })
+            .exec();
+
+        res.status(200).json({
+            message: "Unread notifications fetched successfully",
+            unreadNotifications,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error fetching unread notifications",
+            error,
+        });
+    }
+};
+
+module.exports = {resetNotifications, getNotifications, getUnreadNotifications
 };

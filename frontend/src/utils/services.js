@@ -47,3 +47,32 @@ export const getRequest = async (url) => {
     return data;
 };
 
+export const putRequest = async (url, body) => {
+    try {
+        const response = await fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify(body),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            let message = "An error occurred";
+
+            if (data?.message) {
+                message = data.message;
+            }
+
+            return { error: true, message };
+        }
+
+        return data;
+    } catch (error) {
+        console.error("PUT request error:", error);
+        return { error: true, message: error.message || "Unknown error" };
+    }
+};

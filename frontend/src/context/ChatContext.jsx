@@ -19,68 +19,89 @@ export const ChatContextProvider = ({ children, user }) => {
     const [onlineUsers, setOnlineUsers] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
+    const [unreadNotifications, setUnreadNotifications] = useState([]);
+
 
     console.log("notifications", notifications)
 
     //socket
-     // Initialize socket connection
+     // เชื่อมต่อ Socket
      useEffect(() => {
         const newSocket = io("http://localhost:8800");
         setSocket(newSocket);
-
+    
+        newSocket.on('connect', () => {
+            console.log("Socket connected:", newSocket.id); // ตรวจสอบว่า socket เชื่อมต่อแล้ว
+        });
+    
         return () => {
             newSocket.disconnect();
         };
     }, [user]);
+    
 
-    // Fetch online users and handle socket events
     useEffect(() => {
-        if (socket === null) return;
+        if (socket && newMessage && currentChat && user?._id) {
+            // ตรวจสอบค่าของ currentChat และ user._id
+            const recipientId = currentChat.members?.find((id) => id !== user._id);
+            if (!recipientId) {
+                console.error("Recipient not found for chat:", currentChat);
+                return;  // หาก recipientId เป็น undefined ให้หยุดการส่งข้อความ
+            }
+    
+            console.log("Sending message to recipient:", recipientId);
+            socket.emit("sendMessage", { ...newMessage, recipientId });
+        } else {
+            console.log("Missing values:", { socket, newMessage, currentChat, user });
+        }
+    }, [socket, newMessage, currentChat, user]);
+    
+    // ส่ง userId เมื่อเชื่อมต่อ
+    useEffect(() => {
+        if (socket === null || !user?._id) return;
 
-        socket.emit("addNewUser", user?._id);
-        socket.on("getOnlineUsers", (res) => {
-            setOnlineUsers(res);
-        });
-
-        return () => {
-            socket.off("getOnlineUsers");
-        };
+        console.log("Adding user to socket:", user._id);
+        socket.emit("addNewUser", user._id);
     }, [socket, user]);
 
-    // send message
+  
+    // รับข้อความ
     useEffect(() => {
         if (socket === null) return;
-        const recipientId = currentChat?.members?.find((id) => id !== user?._id)
-        socket.emit("sendMessage", { ...newMessage, recipientId })
-    }, [newMessage]);
-
-  // receive message
-  useEffect(() => {
-    if (socket === null) return;
-
-    socket.on("getMessage", (res) => {
-        if (currentChat?._id !== res.chatId) return;
-        setMessages((prev) => [...prev, res]);
     
-    })
+        socket.on("getMessage", (message) => {
+            console.log("New message received:", message);
+            //    // อัปเดตข้อความใหม่และการแจ้งเตือน
+            //    setMessages((prevMessages) => [
+            //     ...prevMessages, 
+            //     response.message // ข้อความที่ส่งกลับจาก API
+            // ]);
 
-    socket.on("getNotification", (res) => {
-        const isChatOpen = currentChat?.members.some(id => id === res.senderId)
-        if (isChatOpen) {
-            setNotifications(prev => [{ ...res, isRead: true }, ...prev]);
-        } else {
-            setNotifications(prev => [res, ...prev]);
-        }
+            setMessages((prevMessages) => {
+                return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
+            });
+        });
     
-    });
-
-
-    return () => {
-        socket.off("getMessage");
-        socket.off("getNotification");
-    };
-}, [socket, currentChat]);
-
+    
+        socket.on("getNotification", (notification) => {
+            console.log("Notification received:", notification);
+            
+            if (notification.senderId === user._id) return;
+          
+            setNotifications((prevNotifications) => {
+              const updatedNotifications = [...prevNotifications, notification];
+              console.log("Updated notifications:", updatedNotifications);
+              return updatedNotifications;
+            });
+          });
+          
+    
+        return () => {
+            socket.off("getMessage");
+            socket.off("getNotification");
+        };
+    }, [socket]);
+    
     
 
  // Fetch all users from API
@@ -164,87 +185,100 @@ useEffect(() => {
     };
 
     getUserChats();
-}, [user, notifications]);
+}, [user]);
     
 
-    useEffect(() => {
-        const getMessages = async () => {
-            setIsMessagesLoading(true);
-            setMessagesError(null);
+useEffect(() => {
+    const getMessages = async () => {
+        setIsMessagesLoading(true);
+        setMessagesError(null);
 
-            try {
-                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
+        try {
+            const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
 
-                if (response.error) {
-                    setMessagesError(response);
-                    return;
-                }
+            console.log("Messages response:", response);  // ตรวจสอบข้อมูลที่ได้
 
-                setMessages(response);
-            } catch (error) {
-                setMessagesError(error);
-            } finally {
-                setIsMessagesLoading(false);
-            }
-        };
-
-        if (currentChat) {
-            getMessages();
-        }
-    }, [currentChat]);
-
-    const sendTextMessage = useCallback(
-        async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
-            if (!textMessage && !fileMessage) {
-                console.log("You must type something...");
+            if (response.error) {
+                setMessagesError(response);
                 return;
             }
-    
-            try {
-                const response = await postRequest(`${baseUrl}/messages`, {
-                    chatId: currentChatId,
-                    senderId: sender._id,
-                    text: textMessage,
-                    file: fileMessage,
-                });
-    
-                console.log(response); // Log the response for debugging
-    
-                if (response.error) {
-                    return setSendTextMessageError(response);
-                }
-    
-                setNewMessage(response); // Assuming setNewMessage updates your message state
-                setMessages((prev) => [...prev, response]); // Update the messages state
-                setTextMessage(""); // Reset text message after sending
-                setFileMessage(null); // Reset file message after sending
-    
-                // Create notification after sending the message
-                const notificationResponse = await postRequest(`${baseUrl}/notiChat`, {
-                    userId: currentChatId, // Assuming the userId is the current chat's userId
-                    type: 'message',
-                    relatedMessageId: response._id, // Use the ID of the sent message
-                    content: `New message from ${sender.fname}: ${textMessage || fileMessage?.name}`, // Customize this as needed
-                });
-    
-                if (notificationResponse.error) {
-                    console.error("Error creating notification:", notificationResponse);
-                }
-    
-            } catch (error) {
-                console.error("Error sending message:", error);
-                setSendTextMessageError(error);
+            
+
+            setMessages(response);
+        } catch (error) {
+            console.error("Error fetching messages:", error);
+            setMessagesError(error);
+        } finally {
+            setIsMessagesLoading(false);
+        }
+    };
+
+    if (currentChat) {
+        getMessages();
+    }
+}, [currentChat]);
+
+const sendTextMessage = useCallback(
+    async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
+        if (!textMessage && !fileMessage) return console.log("You must type something...");
+
+        const recipientId = currentChat?.members?.find((id) => id !== sender?._id);
+        if (!recipientId) return console.log("No recipient found!");
+
+        try {
+            const response = await postRequest(`${baseUrl}/messages`, {
+                chatId: currentChatId,
+                senderId: sender._id,
+                recipientId,
+                text: textMessage,
+                file: fileMessage,
+            });
+
+            if (response.error) {
+                console.error("Send message error:", response);
+                return;
             }
-        },
-        []
-    );
-    
-    
+
+            // อัปเดตข้อความใหม่และการแจ้งเตือน
+            setMessages((prevMessages) => [
+                ...prevMessages, 
+                response.message // ข้อความที่ส่งกลับจาก API
+            ]);
+
+            // ส่งข้อความผ่าน Socket
+            if (socket && socket.connected) {
+                socket.emit("sendMessage", { ...response.message, recipientId });
+
+            }
+
+            // อัปเดตการแจ้งเตือน
+            if (response.notification) {
+                setNotifications((prevNotifications) => [
+                    ...prevNotifications, 
+                    response.notification // การแจ้งเตือนที่ส่งกลับจาก API
+                ]);
+            }
+
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    },
+    [currentChat, socket]
+);
 
 
+
+    
     const updateCurrentChat = useCallback((chat) => {
         setCurrentChat(chat);
     }, []);
+
+    
+    
+    useEffect(() => {
+        console.log("Updated messages:", messages);
+    }, [messages]);
+    
 
     
 ///////////////////////

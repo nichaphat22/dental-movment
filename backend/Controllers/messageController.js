@@ -1,24 +1,45 @@
 const messageModel = require("../Models/messageModel")
+const notificationChatModel = require('../Models/notificationChatModel'); // เรียกใช้โมเดล
 
-// createMessage
+
 const createMessage = async (req, res) => {
-    const { chatId, senderId, text, file } = req.body;
+    const { chatId, senderId, recipientId, text, file } = req.body;
 
-    const message = new messageModel({
-        chatId,
-        senderId,
-        text,
-        file,
-    });
+    if (!recipientId) {
+        return res.status(400).json({ message: "Recipient ID is required." });
+    }
 
     try {
-        const response = await message.save();
-        res.status(200).json(response);
+        // Create the message
+        const message = new messageModel({
+            chatId,
+            senderId,
+            recipientId, // Use recipientId directly
+            text,
+            file,
+        });
+
+        // Save the message to the database
+        await message.save();
+
+        // Create a notification for the recipient user
+        const notification = new notificationChatModel({
+            senderId: senderId, // Use recipientId for notification
+            relatedMessageId: message._id,
+            content: `${senderId} sent you a new message`,
+            isRead: false,
+        });
+
+        await notification.save();
+
+        res.status(201).json({ message: "Message created and notification sent.", message, notification });
     } catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    };
+        console.error(error);
+        res.status(500).json({ message: "An error occurred while creating the message and notification.", error });
+    }
 };
+
+
 
 // getMessages
 const getMessages = async (req, res) => {

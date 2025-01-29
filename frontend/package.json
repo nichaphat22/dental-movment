@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
@@ -8,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "nodemon index.js"
   },
   "browserslist": [
     ">0.2%",
@@ -27,16 +27,31 @@
     "@react-pdf/renderer": "3.4.4",
     "@react-three/fiber": "^8.13.4",
     "@reduxjs/toolkit": "^2.2.7",
-    "axios": "^1.7.7",
+    "axios": "^1.7.8",
+    "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.3",
+    "body-parser": "^1.20.3",
+    "cookie-session": "^2.1.0",
     "core-js": "^3.37.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
     "fabric": "^4.5.1",
     "fabric-history": "^2.0.0",
     "firebase": "^10.12.2",
     "framer-motion": "^11.9.0",
+    "google-auth-library": "^9.14.1",
+    "googleapis": "^144.0.0",
     "html2canvas": "^1.4.1",
+    "iconv-lite": "^0.6.3",
+    "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "mongoose": "^8.8.3",
     "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "pdfjs-dist": "3.4.120",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.3",
@@ -51,7 +66,9 @@
     "socket.io-client": "^4.7.5",
     "sweetalert2": "^11.14.1",
     "swiper": "^11.1.14",
-    "three": "^0.154.0"
+    "three": "^0.154.0",
+    "validator": "^13.12.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -65,37 +82,5 @@
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
     "vite": "^5.3.1"
-=======
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "server.js",
-  "scripts": {
-    "start": "nodemon index.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "axios": "^1.7.8",
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.3",
-    "cookie-session": "^2.1.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "express-session": "^1.18.1",
-    "google-auth-library": "^9.14.1",
-    "googleapis": "^144.0.0",
-    "iconv-lite": "^0.6.3",
-    "jsonwebtoken": "^9.0.2",
-    "jwt-decode": "^4.0.0",
-    "mongoose": "^8.8.3",
-    "multer": "^1.4.5-lts.1",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "validator": "^13.12.0",
-    "xlsx": "^0.18.5"
->>>>>>> 2ce5451f263073e7845c5ee11337980aa1fea29e
   }
 }

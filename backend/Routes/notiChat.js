@@ -1,22 +1,18 @@
 const express = require("express");
-const { 
-    createNotification,
-    getUserNotifications,
-    markAsRead,
-    deleteNotification,
+const { resetNotifications, getNotifications, getUnreadNotifications
 } = require("../Controllers/notiChatController"); // เรียกใช้ฟังก์ชันจาก Controller
 const router = express.Router();
 
 // สร้างการแจ้งเตือนใหม่
-router.post("/", createNotification);
+// router.post('/create-notification', createNotification);
 
-// ดึงการแจ้งเตือนทั้งหมดสำหรับแชทที่กำหนด (ตาม `chatId`)
-router.get("/:chatId", getUserNotifications);
+// รีเซ็ทการแจ้งเตือนให้เป็นอ่านแล้ว
+router.post('/reset-notifications/:userId', resetNotifications);
 
-// อัปเดตสถานะการแจ้งเตือนเป็น "อ่านแล้ว" (โดยใช้ `notificationId`)
-router.put("/:notificationId/read", markAsRead);
+// ดึงการแจ้งเตือนทั้งหมดของผู้ใช้
+router.get('/notifications/:userId', getNotifications);
 
-// ลบการแจ้งเตือน (โดยใช้ `notificationId`)
-router.delete("/:notificationId", deleteNotification);
+// ดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
+router.get('/notifications/unread/:userId', getUnreadNotifications);
 
 module.exports = router;

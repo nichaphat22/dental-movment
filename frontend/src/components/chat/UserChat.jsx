@@ -36,18 +36,18 @@ const UserChat = ({ chat, user }) => {
   }, [initialLatestMessage]);
 
   // ใช้ useEffect เพื่ออัปเดตการแจ้งเตือนของผู้ใช้
-  useEffect(() => {
-    // ดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
-    const unreadNotifications = unreadNotificationsFunc(notifications);
-    // กรองการแจ้งเตือนของผู้รับ
-    const userNotifications = unreadNotifications?.filter(n => n.senderId == recipientUser?._id);
-    setThisUserNotifications(userNotifications);
-  }, [notifications, recipientUser]);
+  // useEffect(() => {
+  //   // ดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
+  //   const unreadNotifications = unreadNotificationsFunc(notifications);
+  //   // กรองการแจ้งเตือนของผู้รับ
+  //   const userNotifications = unreadNotifications?.filter(n => n.senderId == recipientUser?._id);
+  //   setThisUserNotifications(userNotifications);
+  // }, [notifications, recipientUser]);
 
   // ใช้ useEffect เพื่อตรวจสอบสถานะออนไลน์ของผู้รับ
-  useEffect(() => {
-    setIsOnline(onlineUsers?.some(user => user?.userId === recipientUser?._id));
-  }, [onlineUsers, recipientUser]);
+  // useEffect(() => {
+  //   setIsOnline(onlineUsers?.some(user => user?.userId === recipientUser?._id));
+  // }, [onlineUsers, recipientUser]);
 
   // ฟังก์ชันสำหรับตัดข้อความให้สั้นลง
   const truncateText = text => {
@@ -66,10 +66,10 @@ const UserChat = ({ chat, user }) => {
   //   }
   // };
   const handleClick = (id) => {
-    if (thisUserNotifications?.length !== 0) {
-      NotificationsAsRead(notifications, recipientUser?._id); // ส่ง notifications และ recipientUserId
-      setThisUserNotifications([]);
-    }
+    // if (thisUserNotifications?.length !== 0) {
+      // NotificationsAsRead(notifications, recipientUser?._id); // ส่ง notifications และ recipientUserId
+      // setThisUserNotifications([]);
+    
 console.log("Navigating to:", `/chat/${id}`);
 navigate(`/chat/${id}`);
 };
@@ -81,6 +81,7 @@ navigate(`/chat/${id}`);
       className="user-card align-items-center p-2 justify-content-between"
       role="button"
       onClick={() => handleClick(recipientUser?._id)} 
+      // recipientUser?._id
     >
       <div className="d-flex">
         <div className="me-2" style={{margin: 'auto'}} >
