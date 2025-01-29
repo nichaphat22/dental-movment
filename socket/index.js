@@ -1,6 +1,4 @@
 const { Server } = require("socket.io");
-const { v4: uuidv4 } = require('uuid'); // ใช้ uuid เพื่อสร้าง _id
-
 const io = new Server(8800, {
   cors: {
     origin: "http://localhost:5173",
@@ -21,27 +19,26 @@ io.on("connection", (socket) => {
 
   // รับข้อความจากผู้ส่ง และส่งไปยังผู้รับ
   socket.on("sendMessage", (message) => {
-    const recipientSocketId = socketMap.get( recipientId ); // หาผู้รับด้วย userId
+    const recipientSocketId = socketMap.get(message.recipientId); // หาผู้รับด้วย recipientId
 
-    // message: response.message, recipientId 
     if (recipientSocketId) {
-      console.log("Sending message to recipient socket:", recipientSocketId);
+        console.log("Sending message to recipient socket:", recipientSocketId);
 
-      // ส่งข้อความให้ผู้รับ
-      io.to(recipientSocketId).emit("getMessage", message);
-      // console.log('newMessage', newMessage)/
+        // ส่งข้อความให้ผู้รับ
+        io.to(recipientSocketId).emit("getMessage", message);
 
-      io.to(recipientSocketId).emit("getNotification", {
-        senderId: message.senderId,  // คนส่ง
-        recipientId: message.recipientId,  // คนรับ
-        isRead: false,
-        date: new Date(),
-      });
-      
+        // ส่งการแจ้งเตือนให้ผู้รับ
+        io.to(recipientSocketId).emit("getNotification", {
+            senderId: message.senderId, // คนส่ง
+            recipientId: message.recipientId, // คนรับ
+            isRead: false, // สถานะการอ่าน
+            date: new Date(),
+        });
     } else {
-      console.log("Recipient not connected:", message.recipientId);
+        console.log("Recipient not connected:", message.recipientId);
     }
-  });
+});
+
 
   // เมื่อผู้ใช้ disconnect
   socket.on("disconnect", () => {

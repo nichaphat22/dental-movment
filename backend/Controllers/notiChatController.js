@@ -35,13 +35,18 @@ const notificationChatModel = require('../Models/notificationChatModel'); // เ
 
 
 // ฟังก์ชันรีเฟรชการแจ้งเตือนให้เป็น 0
+// ฟังก์ชันรีเซ็ตการแจ้งเตือนให้เป็น 0
 const resetNotifications = async (req, res) => {
-    const { userId } = req.params;  // รับ userId จาก params หรือ body
+    const { senderId } = req.params;  // รับ userId จาก params
+
+    if (!senderId) {
+        return res.status(400).json({ message: "senderId is required" });
+    }
 
     try {
         // รีเฟรชการแจ้งเตือนทั้งหมดที่ยังไม่ได้อ่านให้เป็น read
         await notificationChatModel.updateMany(
-            { userId, isRead: false },
+            { senderId, isRead: false },
             { $set: { isRead: true } }
         );
 
@@ -57,12 +62,13 @@ const resetNotifications = async (req, res) => {
     }
 };
 
+
 // ฟังก์ชันดึงการแจ้งเตือนทั้งหมดของผู้ใช้
 const getNotifications = async (req, res) => {
-    const { userId } = req.params;
+    const { senderId } = req.params;
 
     try {
-        const notifications = await notificationChatModel.find({ userId })
+        const notifications = await notificationChatModel.find({ senderId })
             .sort({ createdAt: -1 })
             .exec();
 
@@ -81,11 +87,11 @@ const getNotifications = async (req, res) => {
 
 // ฟังก์ชันดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
 const getUnreadNotifications = async (req, res) => {
-    const { userId } = req.params;
+    const { senderId } = req.params;
 
     try {
         const unreadNotifications = await notificationChatModel.find({
-            userId,
+            senderId,
             isRead: false,
         })
             .sort({ createdAt: -1 })

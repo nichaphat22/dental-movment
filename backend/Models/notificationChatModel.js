@@ -7,6 +7,11 @@ const notificationChatSchema = new mongoose.Schema(
             ref: 'User', // User ที่ได้รับการแจ้งเตือน
             required: true,
         },
+        recipientId:{
+  type: mongoose.Schema.Types.ObjectId,
+            ref: 'User', // Assuming there's a User model
+            required: true
+        },
         relatedMessageId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Message', // อ้างอิงข้อความที่เกี่ยวข้อง

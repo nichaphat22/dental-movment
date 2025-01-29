@@ -65,42 +65,40 @@ export const ChatContextProvider = ({ children, user }) => {
     }, [socket, user]);
 
   
-    // รับข้อความ
     useEffect(() => {
         if (socket === null) return;
     
         socket.on("getMessage", (message) => {
             console.log("New message received:", message);
-            //    // อัปเดตข้อความใหม่และการแจ้งเตือน
-            //    setMessages((prevMessages) => [
-            //     ...prevMessages, 
-            //     response.message // ข้อความที่ส่งกลับจาก API
-            // ]);
-
+    
             setMessages((prevMessages) => {
                 return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
             });
         });
     
-    
         socket.on("getNotification", (notification) => {
             console.log("Notification received:", notification);
-            
+    
             if (notification.senderId === user._id) return;
-          
+    
+            // เก็บการแจ้งเตือนที่ยังไม่ได้อ่านใน localStorage
             setNotifications((prevNotifications) => {
-              const updatedNotifications = [...prevNotifications, notification];
-              console.log("Updated notifications:", updatedNotifications);
-              return updatedNotifications;
+                const updatedNotifications = [...prevNotifications, notification];
+                console.log("Updated notifications:", updatedNotifications);
+    
+                // เก็บข้อมูลการแจ้งเตือนที่ยังไม่ได้อ่านใน localStorage
+                localStorage.setItem("unreadNotifications", JSON.stringify(updatedNotifications));
+    
+                return updatedNotifications;
             });
-          });
-          
+        });
     
         return () => {
             socket.off("getMessage");
             socket.off("getNotification");
         };
-    }, [socket]);
+    }, [socket, user]);
+    
     
     
 
@@ -266,8 +264,6 @@ const sendTextMessage = useCallback(
     [currentChat, socket]
 );
 
-
-
     
     const updateCurrentChat = useCallback((chat) => {
         setCurrentChat(chat);
@@ -311,6 +307,7 @@ const sendTextMessage = useCallback(
                 onlineUsers,
                 notifications,
                 allUsers,
+                setNotifications
                 // markAllNotificationsAsRead,
                 // markNotificationsAsRead,
                 // markThisUserNotificationsAsRead,

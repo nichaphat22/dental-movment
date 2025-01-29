@@ -25,6 +25,7 @@ const createMessage = async (req, res) => {
         // Create a notification for the recipient user
         const notification = new notificationChatModel({
             senderId: senderId, // Use recipientId for notification
+            recipientId:recipientId,
             relatedMessageId: message._id,
             content: `${senderId} sent you a new message`,
             isRead: false,

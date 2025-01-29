@@ -20,6 +20,8 @@ const Notifications = () => {
     userChats,
     notifications,  // Assuming this will hold all notifications
     updateCurrentChat,
+    setNotifications
+     
   } = useContext(ChatContext);
 
   // Reset CurrentChat เมื่อปิด Notifications
@@ -29,20 +31,46 @@ const Notifications = () => {
     };
   }, [updateCurrentChat]);
 
+
   useEffect(() => {
-    // กรองการแจ้งเตือนที่ยังไม่ได้อ่านและ recipientId ตรงกับ user._id
-    const unreadNotifications = notifications?.filter(
-      (notification) => notification.senderId != user._id && !notification.isRead
-    ) || [];
-  
-    setUnreadCount(unreadNotifications.length);  // อัปเดตจำนวนที่ยังไม่ได้อ่าน
-  }, [notifications, user._id]);  // คำนวณใหม่เมื่อ notifications หรือ user._id เปลี่ยนแปลง
-  
+    // ดึงการแจ้งเตือนที่ยังไม่ได้อ่านจาก localStorage
+    const unreadNotifications = JSON.parse(localStorage.getItem("unreadNotifications")) || [];
+
+    if (unreadNotifications.length > 0) {
+        setNotifications(unreadNotifications);
+    }
+}, []);
+
+useEffect(() => {
+  if (!notifications) return;
+
+  // ตรวจสอบการแจ้งเตือนที่ยังไม่ได้อ่านจาก notifications
+  const unreadNotifications = notifications.filter(
+    (notification) => notification.senderId !== user._id && !notification.isRead
+  );
+
+  // อัปเดตจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน
+  setUnreadCount(unreadNotifications.length);
+
+  // บันทึกการแจ้งเตือนที่ยังไม่ได้อ่านและจำนวนการแจ้งเตือนลงใน localStorage
+  localStorage.setItem('unreadNotifications', JSON.stringify(unreadNotifications));
+  localStorage.setItem('unreadCount', unreadNotifications.length);
+}, [notifications, user._id]); // คำนวณใหม่ทุกครั้งที่ notifications หรือ user._id เปลี่ยนแปลง
 
   const handleNotificationsClick = () => {
     setIsOpen(!isOpen);
-  };
+    
+    // รีเซ็ต notifications เป็น 0
+    setNotifications([]);  // รีเซ็ตการแจ้งเตือนให้เป็นอาเรย์ว่าง
+    
+    // รีเซ็ตจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน
+    setUnreadCount(0);
+    
+    // รีเซ็ตการแจ้งเตือนใน localStorage
+    localStorage.setItem('unreadCount', '0');  // บันทึก 0 ใน localStorage เพื่อเก็บค่าใหม่
+};
 
+ 
   return (
     <div className="notifications">
       <div
