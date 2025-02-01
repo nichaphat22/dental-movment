@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const notificationChatSchema = new mongoose.Schema(
     {
-        senderId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User', // User ที่ได้รับการแจ้งเตือน
-            required: true,
-        },
+        // senderId: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: 'User', // User ที่ได้รับการแจ้งเตือน
+        //     required: true,
+        // },
         recipientId:{
   type: mongoose.Schema.Types.ObjectId,
             ref: 'User', // Assuming there's a User model

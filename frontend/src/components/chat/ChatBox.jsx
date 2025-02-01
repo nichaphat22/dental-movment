@@ -66,9 +66,8 @@ const ChatBox = () => {
     };
 
     const handleSendMessage = () => {
-        sendTextMessage(textMessage, user, currentChat?._id, currentChat?.recipientId, selectedFile);
-     // Optionally reset input fields
-     setTextMessage("")
+        sendTextMessage(textMessage, user, currentChat?._id, selectedFile, setTextMessage, setSelectedFile);
+    setTextMessage("")
     };
 
     const handleImageClick = (data) => {
@@ -89,15 +88,13 @@ const ChatBox = () => {
         return <p style={{ textAlign: "center", width: "100%" }}>กำลังโหลดแชท...</p>;
     }
 
-
     return (
         <Stack gap={30} className="chat-box">
             <div className="chat-header">
                 <strong>{recipientUser.fname} {recipientUser.lname}</strong>
             </div>
             <Stack gap={3} className="messages">
-            {messages && messages.length > 0 ? (
-    messages.map((message, index) => (
+                {messages && messages.map((message, index) => (
                     <Stack
                         key={index}
                         className={`message ${message.senderId === user._id ? "self align-self-end flex-grow-0" : "align-self-start flex-grow-0"}`}
@@ -141,10 +138,7 @@ const ChatBox = () => {
 
                         {/* <span className="message-footer" style={{ fontSize: '8px', color: message.senderId === user._id ? '#F0F0F0' : '#666666 ' }}>{moment(message.createdAt).locale("th").calendar()}</span> */}
                     </Stack>
-                ))
-            ) : (
-                <p>No messages yet</p>
-            )}
+                ))}
             </Stack>
             <Stack direction="horizontal" className="chat-input flex-grow-0">
                 <InputEmoji

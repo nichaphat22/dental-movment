@@ -76,3 +76,33 @@ export const putRequest = async (url, body) => {
         return { error: true, message: error.message || "Unknown error" };
     }
 };
+
+export const patchRequest = async (url, body) => {
+    try {
+        const response = await fetch(url, {
+            method: "PATCH",
+            headers: { 
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+           },
+            body: JSON.stringify(body),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            let message = "An error occurred";
+
+            if (responseData?.message) {
+                message = responseData.message;
+            }
+
+            return { error: true, message };
+        }
+
+        return responseData;
+    } catch (error) {
+        console.error("Error in patchRequest:", error);
+        return { error: true, message: error.message || "Unknown error" };
+    }
+};

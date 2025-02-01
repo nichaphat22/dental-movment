@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const { ObjectId } = require('mongodb');
 const notificationChatModel = require('../Models/notificationChatModel'); // เรียกใช้โมเดล
 // const messageModel = require('../Models/messageModel'); // โมเดลของข้อความ
 
@@ -34,33 +36,7 @@ const notificationChatModel = require('../Models/notificationChatModel'); // เ
 
 
 
-// ฟังก์ชันรีเฟรชการแจ้งเตือนให้เป็น 0
-// ฟังก์ชันรีเซ็ตการแจ้งเตือนให้เป็น 0
-const resetNotifications = async (req, res) => {
-    const { senderId } = req.params;  // รับ userId จาก params
 
-    if (!senderId) {
-        return res.status(400).json({ message: "senderId is required" });
-    }
-
-    try {
-        // รีเฟรชการแจ้งเตือนทั้งหมดที่ยังไม่ได้อ่านให้เป็น read
-        await notificationChatModel.updateMany(
-            { senderId, isRead: false },
-            { $set: { isRead: true } }
-        );
-
-        res.status(200).json({
-            message: "Notifications reset successfully",
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Error resetting notifications",
-            error,
-        });
-    }
-};
 
 
 // ฟังก์ชันดึงการแจ้งเตือนทั้งหมดของผู้ใช้
@@ -85,30 +61,6 @@ const getNotifications = async (req, res) => {
     }
 };
 
-// ฟังก์ชันดึงการแจ้งเตือนที่ยังไม่ได้อ่าน
-const getUnreadNotifications = async (req, res) => {
-    const { senderId } = req.params;
 
-    try {
-        const unreadNotifications = await notificationChatModel.find({
-            senderId,
-            isRead: false,
-        })
-            .sort({ createdAt: -1 })
-            .exec();
 
-        res.status(200).json({
-            message: "Unread notifications fetched successfully",
-            unreadNotifications,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            message: "Error fetching unread notifications",
-            error,
-        });
-    }
-};
-
-module.exports = {resetNotifications, getNotifications, getUnreadNotifications
-};
+module.exports = {getNotifications};

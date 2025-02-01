@@ -2,75 +2,32 @@ import { Stack } from "react-bootstrap";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
-import { useNavigate } from "react-router-dom";
 import { BsChatTextFill } from "react-icons/bs";
-import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 import NotiChat from "./NotiChat";
 import moment from "moment/min/moment-with-locales";
 
 moment.locale("th");
 
 const Notifications = () => {
-  const { user } = useContext(AuthContext);
-  const [isOpen, setIsOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);  // State for unread count
-  // const { recipientUser } = useFetchRecipientUser(chat, user);
-  // ดึงข้อมูลและฟังก์ชันจาก ChatContext
-  const {
-    userChats,
-    notifications,  // Assuming this will hold all notifications
-    updateCurrentChat,
-    setNotifications
-     
-  } = useContext(ChatContext);
-
-  // Reset CurrentChat เมื่อปิด Notifications
-  useEffect(() => {
-    return () => {
-      updateCurrentChat(null);
+  const { user } = useContext(AuthContext);  // Context to get the current user data
+  const [isOpen, setIsOpen] = useState(false); // State to control visibility of the notification box
+  // Access context data for notifications
+  const { userChats, updateNotifications, setNotifications, notifications, updateCurrentChat } = useContext(ChatContext);
+  const [unreadCount, setUnreadCount] = useState(0);
+  // Reset CurrentChat when Notifications component is unmounted
+    // Reset CurrentChat when Notifications component is unmounted
+    useEffect(() => {
+      return () => {
+        updateCurrentChat(null);  // Reset current chat when component unmounts
+      };
+    }, [updateCurrentChat]);
+  
+    const handleNotificationsClick = () => {
+      setIsOpen(!isOpen);  // Toggle the visibility of the notification box
+      // notifications.length(0)
+      setNotifications([]);
     };
-  }, [updateCurrentChat]);
-
-
-  useEffect(() => {
-    // ดึงการแจ้งเตือนที่ยังไม่ได้อ่านจาก localStorage
-    const unreadNotifications = JSON.parse(localStorage.getItem("unreadNotifications")) || [];
-
-    if (unreadNotifications.length > 0) {
-        setNotifications(unreadNotifications);
-    }
-}, []);
-
-useEffect(() => {
-  if (!notifications) return;
-
-  // ตรวจสอบการแจ้งเตือนที่ยังไม่ได้อ่านจาก notifications
-  const unreadNotifications = notifications.filter(
-    (notification) => notification.senderId !== user._id && !notification.isRead
-  );
-
-  // อัปเดตจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน
-  setUnreadCount(unreadNotifications.length);
-
-  // บันทึกการแจ้งเตือนที่ยังไม่ได้อ่านและจำนวนการแจ้งเตือนลงใน localStorage
-  localStorage.setItem('unreadNotifications', JSON.stringify(unreadNotifications));
-  localStorage.setItem('unreadCount', unreadNotifications.length);
-}, [notifications, user._id]); // คำนวณใหม่ทุกครั้งที่ notifications หรือ user._id เปลี่ยนแปลง
-
-  const handleNotificationsClick = () => {
-    setIsOpen(!isOpen);
-    
-    // รีเซ็ต notifications เป็น 0
-    setNotifications([]);  // รีเซ็ตการแจ้งเตือนให้เป็นอาเรย์ว่าง
-    
-    // รีเซ็ตจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน
-    setUnreadCount(0);
-    
-    // รีเซ็ตการแจ้งเตือนใน localStorage
-    localStorage.setItem('unreadCount', '0');  // บันทึก 0 ใน localStorage เพื่อเก็บค่าใหม่
-};
-
- 
+  
   return (
     <div className="notifications">
       <div
@@ -90,7 +47,7 @@ useEffect(() => {
         onClick={handleNotificationsClick}
       >
         <BsChatTextFill size={20} />
-        {unreadCount > 0 && (
+        {notifications.length > 0 &&  (
           <div
             className="unread-count"
             style={{
@@ -104,7 +61,7 @@ useEffect(() => {
               fontSize: "12px",
             }}
           >
-            {unreadCount}
+            {notifications.length}  {/* Show the unread notification count */}
           </div>
         )}
       </div>
@@ -117,14 +74,14 @@ useEffect(() => {
 
           {userChats?.length > 0 ? (
             <Stack className="messages-box flex-grow-0" gap={3}>
-              {userChats.map((chat, index) => (
-                <div key={index} onClick={() => updateCurrentChat(chat)}>
+              {userChats.map((chat) => (
+                <div key={chat._id} onClick={() => updateCurrentChat(chat)}>
                   <NotiChat chat={chat} user={user} />
                 </div>
               ))}
             </Stack>
           ) : (
-            <p>No chats available</p>
+            <p>No chats available</p>  // If no chats are available
           )}
         </div>
       )}

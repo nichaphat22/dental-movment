@@ -18,27 +18,28 @@ io.on("connection", (socket) => {
   });
 
   // รับข้อความจากผู้ส่ง และส่งไปยังผู้รับ
-  socket.on("sendMessage", (message) => {
-    const recipientSocketId = socketMap.get(message.recipientId); // หาผู้รับด้วย recipientId
+// ตรวจสอบว่าเมื่อส่งข้อความไปที่ผู้รับ ต้องไม่ส่งให้ผู้ส่งเอง
+socket.on("sendMessage", (message,userId) => {
+  if (message.senderId === userId) return; // ถ้าเป็นข้อความของผู้ส่งเอง ไม่ต้องส่งแจ้งเตือนหรือข้อความให้กับผู้ส่ง
 
-    if (recipientSocketId) {
-        console.log("Sending message to recipient socket:", recipientSocketId);
+  const recipientSocketId = socketMap.get(message.recipientId); // หาผู้รับด้วย recipientId
 
-        // ส่งข้อความให้ผู้รับ
-        io.to(recipientSocketId).emit("getMessage", message);
+  if (recipientSocketId) {
+      console.log("Sending message to recipient socket:", recipientSocketId);
 
-        // ส่งการแจ้งเตือนให้ผู้รับ
-        io.to(recipientSocketId).emit("getNotification", {
-            senderId: message.senderId, // คนส่ง
-            recipientId: message.recipientId, // คนรับ
-            isRead: false, // สถานะการอ่าน
-            date: new Date(),
-        });
-    } else {
-        console.log("Recipient not connected:", message.recipientId);
-    }
+      // ส่งข้อความให้ผู้รับ
+      io.to(recipientSocketId).emit("getMessage", message);
+
+      // ส่งการแจ้งเตือนให้ผู้รับ
+      io.to(recipientSocketId).emit("getNotification", {
+          recipientId: message.recipientId, // คนรับ
+          isRead: false, // สถานะการอ่าน
+          date: new Date(),
+      });
+  } else {
+      console.log("Recipient not connected:", message.recipientId);
+  }
 });
-
 
   // เมื่อผู้ใช้ disconnect
   socket.on("disconnect", () => {

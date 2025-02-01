@@ -24,13 +24,13 @@ const createMessage = async (req, res) => {
 
         // Create a notification for the recipient user
         const notification = new notificationChatModel({
-            senderId: senderId, // Use recipientId for notification
-            recipientId:recipientId,
+            // senderId: senderId, 
+            recipientId: recipientId,
             relatedMessageId: message._id,
-            content: `${senderId} sent you a new message`,
+            content: `${senderId} sent you a new message`, // เปลี่ยนข้อความนี้ให้แสดงชื่อผู้ส่งได้ดียิ่งขึ้น
             isRead: false,
         });
-
+        
         await notification.save();
 
         res.status(201).json({ message: "Message created and notification sent.", message, notification });
@@ -40,7 +40,44 @@ const createMessage = async (req, res) => {
     }
 };
 
+const getUnreadNotifications = async (req, res) => { 
+    const { recipientId } = req.params;  // ถ้าค่า recipientId ถูกส่งใน URL parameter
+    console.log('Recipient ID:', recipientId);  // ตรวจสอบว่า recipientId มาถูกต้องหรือไม่
+   
+    try {
+        // ค้นหาการแจ้งเตือนที่ยังไม่ได้อ่านสำหรับ recipientId
+        const unreadNotifications = await notificationChatModel.find({
+            recipientId: recipientId,
+            isRead: false,
+        }).lean();  // ใช้ lean() หลัง find()
+        // ส่งข้อมูลการแจ้งเตือนที่ยังไม่ได้อ่านกลับไป
+        res.json(unreadNotifications);
+    } catch (error) {
+        console.error('Error fetching unread notifications:', error);
+        res.status(500).json({ error: 'Failed to fetch unread notifications' });
+    }
+};
+const updateNotificationsToRead = async (req, res) => {
+    const { recipientId } = req.params;  // ใช้ req.body แทน req.params
+    console.log('Recipient ID:', recipientId);  // ตรวจสอบค่า recipientId ที่ส่งมา
 
+    try {
+        // ค้นหาการแจ้งเตือนที่ยังไม่ได้อ่านสำหรับ recipientId
+        const notifications = await notificationChatModel.updateMany(
+            { recipientId: recipientId, isRead: false },  // ตรวจสอบว่าเป็นของ recipientId และยังไม่ได้อ่าน
+            { $set: { isRead: true } }  // อัปเดตสถานะเป็น read
+        );
+
+        if (notifications.nModified > 0) {  // ตรวจสอบว่าอัปเดตแล้วกี่รายการ
+            return res.status(200).json({ success: true, message: "Notifications marked as read" });
+        } else {
+            return res.status(404).json({ success: false, message: "No unread notifications found" });
+        }
+    } catch (error) {
+        console.error("Error updating notifications:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
 
 // getMessages
 const getMessages = async (req, res) => {
@@ -76,4 +113,4 @@ const getMessages = async (req, res) => {
 // };
 
 
-module.exports = {createMessage, getMessages};
+module.exports = {createMessage, getMessages, getUnreadNotifications,updateNotificationsToRead};
