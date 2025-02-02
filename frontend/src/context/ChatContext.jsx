@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useCallback } from "react";
 import { baseUrl, getRequest, postRequest, patchRequest } from "../utils/services";
 import { io } from "socket.io-client";
+// import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 
 export const ChatContext = createContext();
 
@@ -21,86 +22,94 @@ export const ChatContextProvider = ({ children, user }) => {
     const [allUsers, setAllUsers] = useState([]);
     const [unreadNotifications, setUnreadNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    
+    // const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
-    console.log("notifications", notifications)
+    // console.log(/"currentChat", currentChat)
 
     //socket
      // เชื่อมต่อ Socket
-     useEffect(() => {
+    // เชื่อมต่อ Socket
+    useEffect(() => {
         const newSocket = io("http://localhost:8800");
-        setSocket(newSocket);
     
-        newSocket.on('connect', () => {
-            console.log("Socket connected:", newSocket.id); // ตรวจสอบว่า socket เชื่อมต่อแล้ว
+        newSocket.on("connect", () => {
+            console.log("Socket connected:", newSocket.id); // ตรวจสอบว่าการเชื่อมต่อสำเร็จ
+            setSocket(newSocket);
+            // console.log("setSocket:", setSocket);
+            // เมื่อเชื่อมต่อสำเร็จแล้ว เพิ่ม userId
+            if (user?._id) {
+                newSocket.emit("addNewUser", user._id); // ส่ง userId ไปที่เซิร์ฟเวอร์
+                console.log("Adding user to socket:", user._id);
+            }
+        });
+    
+        newSocket.on("disconnect", () => {
+            console.log("Socket disconnected:", newSocket.id);
         });
     
         return () => {
             newSocket.disconnect();
         };
-    }, [user]);
+    }, [user]); // เพิ่ม `user` เป็น dependency
     
-
-    useEffect(() => {
-        if (socket && newMessage && currentChat && user?._id) {
-            // ตรวจสอบค่าของ currentChat และ user._id
-            const recipientId = currentChat.members?.find((id) => id !== user._id);
-            if (!recipientId) {
-                console.error("Recipient not found for chat:", currentChat);
-                return;  // หาก recipientId เป็น undefined ให้หยุดการส่งข้อความ
-            }
     
-            console.log("Sending message to recipient:", recipientId);
-            socket.emit("sendMessage", { ...newMessage, recipientId });
-        } else {
-            console.log("Missing values:", { socket, newMessage, currentChat, user });
-        }
-    }, [socket, newMessage, currentChat, user]);
     
-    // ส่ง userId เมื่อเชื่อมต่อ
-    useEffect(() => {
-        if (socket === null || !user?._id) return;
-
+ 
+// ส่ง userId เมื่อเชื่อมต่อ
+useEffect(() => {
+    if (socket && user?._id) {
         console.log("Adding user to socket:", user._id);
-        socket.emit("addNewUser", user._id);
-    }, [socket, user]);
+        socket.emit("addNewUser", user._id);  // ส่ง userId ไปที่เซิร์ฟเวอร์
+    }
+}, [user, socket]);  // เพิ่ม socket ใน dependencies เพื่อให้มั่นใจว่า `socket` ถูกกำหนดค่าแล้ว
 
-  
-    useEffect(() => {
-        if (socket === null) return;
-    
-        socket.on("getMessage", (message) => {
-            console.log("New message received:", message);
-    
-            setMessages((prevMessages) => {
-                return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
-            });
+// รับข้อความและการแจ้งเตือน
+useEffect(() => {
+    if (socket === null) {
+        console.log("Socket is not connected yet");
+        return; // หยุดการทำงานถ้ายังไม่มีการเชื่อมต่อ socket
+    }
+
+    socket.on("getMessage", (message) => {
+        console.log("New message received:", message);
+
+        setMessages((prevMessages) => {
+            return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
+        });
+    });
+
+    socket.on("getNotification", (notification) => {
+        console.log("Notification received:", notification);
+
+        if (notification.senderId === user._id) return;
+
+        setNotifications((prevNotifications) => {
+            // Avoid duplicate notifications
+            if (!prevNotifications.some((notif) => notif._id === notification._id)) {
+                return [...prevNotifications, notification];
+            }
+            return prevNotifications;
         });
     
-        socket.on("getNotification", (notification) => {
-            console.log("Notification received:", notification);
-    
-            if (notification.senderId === user._id) return;
-    
-            // เก็บการแจ้งเตือนที่ยังไม่ได้อ่านใน localStorage
-            setNotifications((prevNotifications) => {
-                const updatedNotifications = [...prevNotifications, notification];
-                console.log("Updated notifications:", updatedNotifications);
-    
-                // เก็บข้อมูลการแจ้งเตือนที่ยังไม่ได้อ่านใน localStorage
-                localStorage.setItem("unreadNotifications", JSON.stringify(updatedNotifications));
-    
-                return updatedNotifications;
+        if (!notification.isRead && notification.recipientId === user._id) {
+            setUnreadNotifications((prevUnread) => {
+                // Avoid duplicate unread notifications
+                if (!prevUnread.some((notif) => notif._id === notification._id)) {
+                    return [...prevUnread, notification];
+                }
+                return prevUnread;
             });
-        });
-    
-        return () => {
-            socket.off("getMessage");
-            socket.off("getNotification");
-        };
-    }, [socket, user]);
-    
-    
-    
+        }
+    });
+
+
+    return () => {
+        socket.off("getMessage");
+        socket.off("getNotification");
+        // socket.off("newNotification");
+    };
+}, [socket, user]);  // ใช้ socket และ user เป็น dependencies
 
  // Fetch all users from API
  useEffect(() => {
@@ -216,7 +225,6 @@ useEffect(() => {
     }
 }, [currentChat]);
 
-// ฟังก์ชันที่แยกการส่งข้อความ
 const sendTextMessage = useCallback(
     async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
       if (!textMessage && !fileMessage) return console.log("You must type something...");
@@ -243,49 +251,52 @@ const sendTextMessage = useCallback(
           ...prevMessages, 
           response.message
         ]);
+        setTextMessage("");  // Clear the text input
+        setFileMessage(null);  // Clear the file input
   
         // ส่งข้อความผ่าน Socket
         if (socket && socket.connected) {
           socket.emit("sendMessage", { ...response.message, recipientId });
+
+    // ส่งการแจ้งเตือนให้กับผู้รับ
+    socket.emit("getNotification", { ...response.notification });
         }
       } catch (error) {
         console.error("Error sending message:", error);
       }
     },
     [currentChat, socket]
-  );
+);
+
   
-  // ฟังก์ชันที่แยกการอัปเดตการแจ้งเตือน
- // ฟังก์ชันที่แยกการอัปเดตการแจ้งเตือน
-// const updateNotifications = useCallback(
-//     async (recipientId, user, setNotifications, setUnreadCount) => {
-//       try {
-//         // ดึงการแจ้งเตือนที่ยังไม่ได้อ่านหลังจากส่งข้อความ
-//         const unreadNotificationsResponse = await getRequest(
-//           `${baseUrl}/messages/notifications/unread/${recipientId}`
-//         );
-  
-//         if (unreadNotificationsResponse && unreadNotificationsResponse.length > 0) {
-//           setNotifications((prevNotifications) => [
-//             ...prevNotifications, 
-//             ...unreadNotificationsResponse.filter(
-//               (noti) => noti.recipientId === recipientId && noti.recipientId !== user._id
-//             ),
-//           ]);
-  
-//           const unreadForRecipient = unreadNotificationsResponse.filter(
-//             (noti) => noti.recipientId === recipientId && noti.recipientId !== user._id && !noti.isRead
-//           );
-//           setUnreadCount(unreadForRecipient.length); // อัปเดตจำนวนที่ยังไม่ได้อ่าน
-//         }
-//       } catch (error) {
-//         console.error("Error updating notifications:", error);
+//   const markNotificationsAsRead = async () => {
+//     const recipientId = currentChat?.members?.filter((id) => id !== user._id)[0];
+
+//     if (!recipientId) {
+//       console.log("No recipient found for notifications");
+//       return;
+//     }
+
+//     try {
+//       // เรียก API เพื่อเปลี่ยนสถานะการแจ้งเตือนเป็น "อ่านแล้ว"
+//       const res = await getRequest(`${baseUrl}/messages/notifications/read/${recipientId}`);
+//       if (!res.ok) {
+//         throw new Error(`Error: ${res.status}`);
 //       }
-//     },
-//     []
-//   );
+//       console.log("Notifications marked as read:", res.data);
+
+//       // อัปเดตสถานะการแจ้งเตือนในฝั่ง React
+//       setNotifications(res.data);
+//       setUnreadCount(0);  // รีเซ็ตจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน
+//     } catch (err) {
+//       console.error("Error marking notifications as read:", err);
+//     }
+// };
+
+
+// console.log('unreadcount',unreadCount)
+
   
-    
     
     useEffect(() => {
         console.log("Updated messages:", messages);
@@ -329,6 +340,11 @@ const sendTextMessage = useCallback(
                 notifications,
                 allUsers,
                 setNotifications,
+                setUnreadNotifications,
+                unreadNotifications
+                // fetchNotifications,
+
+                // markNotificationsAsRead
                 // setUnreadCount,
                 // unreadCount,
                 // updateNotifications

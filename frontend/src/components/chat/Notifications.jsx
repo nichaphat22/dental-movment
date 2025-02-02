@@ -1,3 +1,4 @@
+import { baseUrl, getRequest, postRequest, patchRequest } from "../../utils/services";
 import { Stack } from "react-bootstrap";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -5,28 +6,51 @@ import { ChatContext } from "../../context/ChatContext";
 import { BsChatTextFill } from "react-icons/bs";
 import NotiChat from "./NotiChat";
 import moment from "moment/min/moment-with-locales";
-
+import { useNavigate } from "react-router-dom";
+// import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 moment.locale("th");
 
-const Notifications = () => {
+const Notifications = ({}) => {
   const { user } = useContext(AuthContext);  // Context to get the current user data
   const [isOpen, setIsOpen] = useState(false); // State to control visibility of the notification box
-  // Access context data for notifications
-  const { userChats, updateNotifications, setNotifications, notifications, updateCurrentChat } = useContext(ChatContext);
-  const [unreadCount, setUnreadCount] = useState(0);
-  // Reset CurrentChat when Notifications component is unmounted
-    // Reset CurrentChat when Notifications component is unmounted
-    useEffect(() => {
-      return () => {
-        updateCurrentChat(null);  // Reset current chat when component unmounts
-      };
-    }, [updateCurrentChat]);
+  const { setNotifications,userChats,unreadNotifications,setUnreadNotifications } = useContext(ChatContext);
   
-    const handleNotificationsClick = () => {
-      setIsOpen(!isOpen);  // Toggle the visibility of the notification box
-      // notifications.length(0)
-      setNotifications([]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await getRequest(`${baseUrl}/messages/notifications/unread/${user?._id}`);
+        const notifications = response;
+        const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
+        setUnreadNotifications(unread);
+        setNotifications(notifications); // อัปเดตข้อมูลใน ChatContext
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
     };
+  
+    fetchNotifications();
+  }, [user?._id, setNotifications,setUnreadNotifications]);  // ดึงข้อมูลใหม่ทุกครั้งที่ user._id หรือ setNotifications เปลี่ยนแปลง
+  
+
+  const handleNotificationsClick = async () => {
+    try {
+      // อัปเดตสถานะ isRead เป็น true เมื่อคลิกที่การแจ้งเตือน
+      await patchRequest(`${baseUrl}/messages/notifications/read/${user._id}`, { isRead: true });
+  
+      // ปรับปรุงการแจ้งเตือนใน state หลังจากการอัปเดต
+      setIsOpen(!isOpen);  // Toggle visibility of notification box
+      setUnreadNotifications([]); // ลบการแจ้งเตือนที่ยังไม่ได้อ่านจาก state
+      // รีเฟรชการดึงข้อมูลใหม่
+      const response = await getRequest(`${baseUrl}/messages/notifications/unread/${user._id}`);
+      const notifications = response;
+      const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
+      setUnreadNotifications(unread);  // อัปเดตการแจ้งเตือนใหม่
+    } catch (error) {
+      console.error("Error updating notification:", error);
+    }
+  };
+  
   
   return (
     <div className="notifications">
@@ -44,26 +68,28 @@ const Notifications = () => {
           border: "none",
           cursor: "pointer",
         }}
-        onClick={handleNotificationsClick}
+        onClick={() => handleNotificationsClick()} 
+        // onClick={handleNotificationsClick}
       >
         <BsChatTextFill size={20} />
-        {notifications.length > 0 &&  (
-          <div
-            className="unread-count"
-            style={{
-              position: "absolute",
-              top: "-5px",
-              right: "-5px",
-              background: "red",
-              color: "white",
-              borderRadius: "50%",
-              padding: "5px",
-              fontSize: "12px",
-            }}
-          >
-            {notifications.length}  {/* Show the unread notification count */}
-          </div>
-        )}
+        {unreadNotifications.length > 0 ? (
+  <div
+    className="unread-count"
+    style={{
+      position: "absolute",
+      top: "-5px",
+      right: "-5px",
+      background: "red",
+      color: "white",
+      borderRadius: "50%",
+      padding: "5px",
+      fontSize: "12px",
+    }}
+  >
+    {unreadNotifications.length}  {/* แสดงจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน */}
+  </div>
+) : null}  {/* หรือถ้าไม่มีการแจ้งเตือนที่ยังไม่ได้อ่านก็จะไม่แสดง */}
+
       </div>
 
       {isOpen && (
@@ -88,5 +114,6 @@ const Notifications = () => {
     </div>
   );
 };
+
 
 export default Notifications;

@@ -34,11 +34,6 @@ const NotiChat = ({ chat, user }) => {
   }, [initialLatestMessage]);
 
 
-  // ใช้ useEffect เพื่อตรวจสอบสถานะออนไลน์ของผู้รับ
-  // useEffect(() => {
-  //   setIsOnline(onlineUsers?.some(user => user?.userId === recipientUser?._id));
-  // }, [onlineUsers, recipientUser]);
-
   // ฟังก์ชันสำหรับตัดข้อความให้สั้นลง
   const truncateText = text => {
     let shortText = text.substring(0, 20);

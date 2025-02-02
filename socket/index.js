@@ -1,52 +1,48 @@
 const { Server } = require("socket.io");
 const io = new Server(8800, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5173",  // เปลี่ยน URL ตามที่คุณใช้งาน
   },
 });
 
-// Map เก็บ socketId ของผู้ใช้
 const socketMap = new Map();
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
 
-  // บันทึก socketId ของผู้ใช้เมื่อเชื่อมต่อ
+  // เมื่อผู้ใช้เชื่อมต่อและส่ง userId มา
   socket.on("addNewUser", (userId) => {
-    socketMap.set(userId, socket.id); // map userId กับ socketId
+    socketMap.set(userId, socket.id); // เก็บ userId กับ socketId
     console.log("Current socket map:", Array.from(socketMap.entries()));
   });
 
-  // รับข้อความจากผู้ส่ง และส่งไปยังผู้รับ
-// ตรวจสอบว่าเมื่อส่งข้อความไปที่ผู้รับ ต้องไม่ส่งให้ผู้ส่งเอง
-socket.on("sendMessage", (message,userId) => {
-  if (message.senderId === userId) return; // ถ้าเป็นข้อความของผู้ส่งเอง ไม่ต้องส่งแจ้งเตือนหรือข้อความให้กับผู้ส่ง
+  // รับข้อความจากผู้ส่งและส่งให้ผู้รับ
+  socket.on("sendMessage", (message, userId) => {
+    if (message.senderId === userId) return; // ไม่ส่งข้อความให้ผู้ส่งเอง
 
-  const recipientSocketId = socketMap.get(message.recipientId); // หาผู้รับด้วย recipientId
-
-  if (recipientSocketId) {
+    const recipientSocketId = socketMap.get(message.recipientId);
+    if (recipientSocketId) {
       console.log("Sending message to recipient socket:", recipientSocketId);
-
-      // ส่งข้อความให้ผู้รับ
-      io.to(recipientSocketId).emit("getMessage", message);
-
-      // ส่งการแจ้งเตือนให้ผู้รับ
+      // Send the notification with the full data
       io.to(recipientSocketId).emit("getNotification", {
-          recipientId: message.recipientId, // คนรับ
-          isRead: false, // สถานะการอ่าน
-          date: new Date(),
+        _id: message._id, // Include message ID for proper notification tracking
+        chatId: message.chatId,
+        recipientId: message.recipientId,
+        relatedMessageId: message._id, // Using message._id directly, not message.message._id
+        // content: `${senderId} sent you a new message`, // Display sender's name dynamically
+        isRead: false,
+        date: new Date(),
       });
-  } else {
+    } else {
       console.log("Recipient not connected:", message.recipientId);
-  }
-});
+    }
+  });
 
   // เมื่อผู้ใช้ disconnect
   socket.on("disconnect", () => {
-    // ลบ socketId ออกจาก map
     for (const [userId, socketId] of socketMap.entries()) {
       if (socketId === socket.id) {
-        socketMap.delete(userId);
+        socketMap.delete(userId);  // ลบข้อมูล userId เมื่อผู้ใช้ตัดการเชื่อมต่อ
         break;
       }
     }

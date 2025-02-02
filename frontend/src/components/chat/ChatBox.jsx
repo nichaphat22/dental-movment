@@ -64,8 +64,9 @@ const ChatBox = () => {
         setSelectedFile(null);
         fileInputRef.current.value = "";
     };
-
+    console.log('currentChat',currentChat)
     const handleSendMessage = () => {
+       
         sendTextMessage(textMessage, user, currentChat?._id, selectedFile, setTextMessage, setSelectedFile);
     setTextMessage("")
     };
