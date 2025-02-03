@@ -1,13 +1,13 @@
 /**
- * Swiper Custom Element 11.1.14
+ * Swiper Custom Element 11.2.2
  * Most modern mobile touch slider and framework with hardware accelerated transitions
  * https://swiperjs.com
  *
- * Copyright 2014-2024 Vladimir Kharlampidi
+ * Copyright 2014-2025 Vladimir Kharlampidi
  *
  * Released under the MIT License
  *
- * Released on: September 12, 2024
+ * Released on: January 31, 2025
  */
 
 import { S as Swiper } from './shared/swiper-core.mjs';

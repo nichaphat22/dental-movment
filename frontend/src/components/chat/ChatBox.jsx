@@ -4,7 +4,7 @@ import { ChatContext } from "../../context/ChatContext";
 import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 import { Stack, Modal } from "react-bootstrap";
 // import moment from 'moment/min/moment-with-locales'; // Correct import statement
-
+// import { useLocation } from 'react-router-dom';  // Import useLocation
 // moment.locale('th'); // Set locale to Thai
 
 import InputEmoji from "react-input-emoji";
@@ -15,7 +15,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';  // Import Lazy
 
 const ChatBox = () => {
     const { user } = useContext(AuthContext);
-    const { currentChat, messages, isMessagesLoading, sendTextMessage } = useContext(ChatContext);
+    const { currentChat, messages, isMessagesLoading, sendTextMessage ,setNotificationsAsRead} = useContext(ChatContext);
     const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
     const [textMessage, setTextMessage] = useState("");
@@ -24,6 +24,9 @@ const ChatBox = () => {
     const [previewImage, setPreviewImage] = useState(null);
     const fileInputRef = useRef(null);
     const scroll = useRef();
+
+    // const location = useLocation();
+
 
     useEffect(() => {
         if (scroll.current) {
@@ -65,8 +68,10 @@ const ChatBox = () => {
         fileInputRef.current.value = "";
     };
     console.log('currentChat',currentChat)
+
     const handleSendMessage = () => {
-       
+        
+       setNotificationsAsRead();
         sendTextMessage(textMessage, user, currentChat?._id, selectedFile, setTextMessage, setSelectedFile);
     setTextMessage("")
     };
@@ -89,8 +94,13 @@ const ChatBox = () => {
         return <p style={{ textAlign: "center", width: "100%" }}>กำลังโหลดแชท...</p>;
     }
 
+    const handleClick = (id) =>{
+        setNotificationsAsRead(id);
+    }
     return (
-        <Stack gap={30} className="chat-box">
+        <Stack gap={30} className="chat-box"
+        onClick={() => handleClick(recipientUser._id)} // Click handler for image
+        >
             <div className="chat-header">
                 <strong>{recipientUser.fname} {recipientUser.lname}</strong>
             </div>

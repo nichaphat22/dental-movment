@@ -1,13 +1,13 @@
 /**
- * Swiper Custom Element 11.1.14
+ * Swiper Custom Element 11.2.2
  * Most modern mobile touch slider and framework with hardware accelerated transitions
  * https://swiperjs.com
  *
- * Copyright 2014-2024 Vladimir Kharlampidi
+ * Copyright 2014-2025 Vladimir Kharlampidi
  *
  * Released under the MIT License
  *
- * Released on: September 12, 2024
+ * Released on: January 31, 2025
  */
 
 (function () {
@@ -338,8 +338,9 @@
     if (selector === void 0) {
       selector = '';
     }
+    const window = getWindow();
     const children = [...element.children];
-    if (element instanceof HTMLSlotElement) {
+    if (window.HTMLSlotElement && element instanceof HTMLSlotElement) {
       children.push(...element.assignedElements());
     }
     if (!selector) {
@@ -347,11 +348,26 @@
     }
     return children.filter(el => el.matches(selector));
   }
+  function elementIsChildOfSlot(el, slot) {
+    // Breadth-first search through all parent's children and assigned elements
+    const elementsQueue = [slot];
+    while (elementsQueue.length > 0) {
+      const elementToCheck = elementsQueue.shift();
+      if (el === elementToCheck) {
+        return true;
+      }
+      elementsQueue.push(...elementToCheck.children, ...(elementToCheck.shadowRoot?.children || []), ...(elementToCheck.assignedElements?.() || []));
+    }
+  }
   function elementIsChildOf(el, parent) {
-    const isChild = parent.contains(el);
-    if (!isChild && parent instanceof HTMLSlotElement) {
+    const window = getWindow();
+    let isChild = parent.contains(el);
+    if (!isChild && window.HTMLSlotElement && parent instanceof HTMLSlotElement) {
       const children = [...parent.assignedElements()];
-      return children.includes(el);
+      isChild = children.includes(el);
+      if (!isChild) {
+        isChild = elementIsChildOfSlot(el, parent);
+      }
     }
     return isChild;
   }
@@ -1291,9 +1307,9 @@
       }
     } else {
       if (gridEnabled) {
-        activeSlide = slides.filter(slideEl => slideEl.column === activeIndex)[0];
-        nextSlide = slides.filter(slideEl => slideEl.column === activeIndex + 1)[0];
-        prevSlide = slides.filter(slideEl => slideEl.column === activeIndex - 1)[0];
+        activeSlide = slides.find(slideEl => slideEl.column === activeIndex);
+        nextSlide = slides.find(slideEl => slideEl.column === activeIndex + 1);
+        prevSlide = slides.find(slideEl => slideEl.column === activeIndex - 1);
       } else {
         activeSlide = slides[activeIndex];
       }
@@ -1458,7 +1474,7 @@
     if (swiper.virtual && params.virtual.enabled && params.loop) {
       realIndex = getVirtualRealIndex(activeIndex);
     } else if (gridEnabled) {
-      const firstSlideInColumn = swiper.slides.filter(slideEl => slideEl.column === activeIndex)[0];
+      const firstSlideInColumn = swiper.slides.find(slideEl => slideEl.column === activeIndex);
       let activeSlideIndex = parseInt(firstSlideInColumn.getAttribute('data-swiper-slide-index'), 10);
       if (Number.isNaN(activeSlideIndex)) {
         activeSlideIndex = Math.max(swiper.slides.indexOf(firstSlideInColumn), 0);
@@ -1927,6 +1943,11 @@
       }
       return true;
     }
+    const browser = getBrowser();
+    const isSafari = browser.isSafari;
+    if (isVirtual && !initial && isSafari && swiper.isElement) {
+      swiper.virtual.update(false, false, slideIndex);
+    }
     swiper.setTransition(speed);
     swiper.setTranslate(translate);
     swiper.updateActiveIndex(slideIndex);
@@ -1978,7 +1999,7 @@
         let targetSlideIndex;
         if (gridEnabled) {
           const slideIndex = newIndex * swiper.params.grid.rows;
-          targetSlideIndex = swiper.slides.filter(slideEl => slideEl.getAttribute('data-swiper-slide-index') * 1 === slideIndex)[0].column;
+          targetSlideIndex = swiper.slides.find(slideEl => slideEl.getAttribute('data-swiper-slide-index') * 1 === slideIndex).column;
         } else {
           targetSlideIndex = swiper.getSlideIndexByData(newIndex);
         }
@@ -2013,7 +2034,7 @@
         }
         if (gridEnabled) {
           const slideIndex = newIndex * swiper.params.grid.rows;
-          newIndex = swiper.slides.filter(slideEl => slideEl.getAttribute('data-swiper-slide-index') * 1 === slideIndex)[0].column;
+          newIndex = swiper.slides.find(slideEl => slideEl.getAttribute('data-swiper-slide-index') * 1 === slideIndex).column;
         } else {
           newIndex = swiper.getSlideIndexByData(newIndex);
         }
@@ -2100,8 +2121,9 @@
     }
     const normalizedTranslate = normalize(translate);
     const normalizedSnapGrid = snapGrid.map(val => normalize(val));
+    const isFreeMode = params.freeMode && params.freeMode.enabled;
     let prevSnap = snapGrid[normalizedSnapGrid.indexOf(normalizedTranslate) - 1];
-    if (typeof prevSnap === 'undefined' && params.cssMode) {
+    if (typeof prevSnap === 'undefined' && (params.cssMode || isFreeMode)) {
       let prevSnapIndex;
       snapGrid.forEach((snap, snapIndex) => {
         if (normalizedTranslate >= snap) {
@@ -2110,7 +2132,7 @@
         }
       });
       if (typeof prevSnapIndex !== 'undefined') {
-        prevSnap = snapGrid[prevSnapIndex > 0 ? prevSnapIndex - 1 : prevSnapIndex];
+        prevSnap = isFreeMode ? snapGrid[prevSnapIndex] : snapGrid[prevSnapIndex > 0 ? prevSnapIndex - 1 : prevSnapIndex];
       }
     }
     let prevIndex = 0;
@@ -2352,7 +2374,7 @@
     const appendSlidesIndexes = [];
     let activeIndex = swiper.activeIndex;
     if (typeof activeSlideIndex === 'undefined') {
-      activeSlideIndex = swiper.getSlideIndex(slides.filter(el => el.classList.contains(params.slideActiveClass))[0]);
+      activeSlideIndex = swiper.getSlideIndex(slides.find(el => el.classList.contains(params.slideActiveClass)));
     } else {
       activeIndex = activeSlideIndex;
     }
@@ -2712,7 +2734,7 @@
     }
     let targetTouch;
     if (e.type === 'touchmove') {
-      targetTouch = [...e.changedTouches].filter(t => t.identifier === data.touchId)[0];
+      targetTouch = [...e.changedTouches].find(t => t.identifier === data.touchId);
       if (!targetTouch || targetTouch.identifier !== data.touchId) return;
     } else {
       targetTouch = e;
@@ -2855,7 +2877,7 @@
     }
     let loopFixed;
     new Date().getTime();
-    if (data.isMoved && data.allowThresholdMove && prevTouchesDirection !== swiper.touchesDirection && isLoop && allowLoopFix && Math.abs(diff) >= 1) {
+    if (params._loopSwapReset !== false && data.isMoved && data.allowThresholdMove && prevTouchesDirection !== swiper.touchesDirection && isLoop && allowLoopFix && Math.abs(diff) >= 1) {
       Object.assign(touches, {
         startX: pageX,
         startY: pageY,
@@ -2963,7 +2985,7 @@
       if (e.pointerId !== data.pointerId) return;
       targetTouch = e;
     } else {
-      targetTouch = [...e.changedTouches].filter(t => t.identifier === data.touchId)[0];
+      targetTouch = [...e.changedTouches].find(t => t.identifier === data.touchId);
       if (!targetTouch || targetTouch.identifier !== data.touchId) return;
     }
     if (['pointercancel', 'pointerout', 'pointerleave', 'contextmenu'].includes(e.type)) {
@@ -3337,9 +3359,12 @@
     } = swiper;
     const breakpoints = params.breakpoints;
     if (!breakpoints || breakpoints && Object.keys(breakpoints).length === 0) return;
+    const document = getDocument();
 
-    // Get breakpoint for window width and update parameters
-    const breakpoint = swiper.getBreakpoint(breakpoints, swiper.params.breakpointsBase, swiper.el);
+    // Get breakpoint for window/container width and update parameters
+    const breakpointsBase = params.breakpointsBase === 'window' || !params.breakpointsBase ? params.breakpointsBase : 'container';
+    const breakpointContainer = ['window', 'container'].includes(params.breakpointsBase) || !params.breakpointsBase ? swiper.el : document.querySelector(params.breakpointsBase);
+    const breakpoint = swiper.getBreakpoint(breakpoints, breakpointsBase, breakpointContainer);
     if (!breakpoint || swiper.currentBreakpoint === breakpoint) return;
     const breakpointOnlyParams = breakpoint in breakpoints ? breakpoints[breakpoint] : undefined;
     const breakpointParams = breakpointOnlyParams || swiper.originalParams;
@@ -3915,7 +3940,7 @@
       return elementIndex(slideEl) - firstSlideIndex;
     }
     getSlideIndexByData(index) {
-      return this.getSlideIndex(this.slides.filter(slideEl => slideEl.getAttribute('data-swiper-slide-index') * 1 === index)[0]);
+      return this.getSlideIndex(this.slides.find(slideEl => slideEl.getAttribute('data-swiper-slide-index') * 1 === index));
     }
     recalcSlides() {
       const swiper = this;
@@ -4410,7 +4435,7 @@
     let loopNeedDestroy;
     let loopNeedEnable;
     let loopNeedReloop;
-    if (changedParams.includes('thumbs') && passedParams.thumbs && passedParams.thumbs.swiper && currentParams.thumbs && !currentParams.thumbs.swiper) {
+    if (changedParams.includes('thumbs') && passedParams.thumbs && passedParams.thumbs.swiper && !passedParams.thumbs.swiper.destroyed && currentParams.thumbs && (!currentParams.thumbs.swiper || currentParams.thumbs.swiper.destroyed)) {
       needThumbsInit = true;
     }
     if (changedParams.includes('controller') && passedParams.controller && passedParams.controller.control && currentParams.controller && !currentParams.controller.control) {
@@ -4600,7 +4625,7 @@
       });
     }
     attrsList.forEach(attr => {
-      const moduleParam = modulesParamsList.filter(mParam => attr.name.indexOf(`${mParam}-`) === 0)[0];
+      const moduleParam = modulesParamsList.find(mParam => attr.name.startsWith(`${mParam}-`));
       if (moduleParam) {
         const parentObjName = attrToProp(moduleParam);
         const subObjName = attrToProp(attr.name.split(`${moduleParam}-`)[1]);
@@ -4658,15 +4683,15 @@
   }
 
   /**
-   * Swiper Custom Element 11.1.14
+   * Swiper Custom Element 11.2.2
    * Most modern mobile touch slider and framework with hardware accelerated transitions
    * https://swiperjs.com
    *
-   * Copyright 2014-2024 Vladimir Kharlampidi
+   * Copyright 2014-2025 Vladimir Kharlampidi
    *
    * Released under the MIT License
    *
-   * Released on: September 12, 2024
+   * Released on: January 31, 2025
    */
 
 

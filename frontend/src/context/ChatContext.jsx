@@ -27,53 +27,47 @@ export const ChatContextProvider = ({ children, user }) => {
 
     // console.log(/"currentChat", currentChat)
 
-    //socket
-    // เชื่อมต่อ Socket
-    // เชื่อมต่อ Socket
     useEffect(() => {
-        const newSocket = io("http://localhost:8800");
-
-        newSocket.on("connect", () => {
-            console.log("Socket connected:", newSocket.id); // ตรวจสอบว่าการเชื่อมต่อสำเร็จ
-            setSocket(newSocket);
-            // console.log("setSocket:", setSocket);
+        const socket = io("http://localhost:8800");
+    
+        socket.on("connect", () => {
+            console.log("Socket connected:", socket.id);
+            setSocket(socket);
             // เมื่อเชื่อมต่อสำเร็จแล้ว เพิ่ม userId
             if (user?._id) {
-                newSocket.emit("addNewUser", user._id); // ส่ง userId ไปที่เซิร์ฟเวอร์
+                socket.emit("addNewUser", user._id); // ส่ง userId ไปที่เซิร์ฟเวอร์
                 console.log("Adding user to socket:", user._id);
             }
         });
-
-        newSocket.on("disconnect", () => {
-            console.log("Socket disconnected:", newSocket.id);
+    
+        socket.on("disconnect", () => {
+            console.log("Socket disconnected:", socket.id);
         });
-
+    
         return () => {
-            newSocket.disconnect();
+            socket.disconnect();
         };
-    }, [user]); // เพิ่ม `user` เป็น dependency
-
-
-
-
-    // ส่ง userId เมื่อเชื่อมต่อ
-    useEffect(() => {
-        if (socket && user?._id) {
-            console.log("Adding user to socket:", user._id);
-            socket.emit("addNewUser", user._id);  // ส่ง userId ไปที่เซิร์ฟเวอร์
-        }
-    }, [user, socket]);  // เพิ่ม socket ใน dependencies เพื่อให้มั่นใจว่า `socket` ถูกกำหนดค่าแล้ว
-
+    }, [user?._id]); // ทำงานเฉพาะเมื่อ user._id เปลี่ยนแปลง
+    
+    console.log("currentChat._id",currentChat);
     // รับข้อความและการแจ้งเตือน
     useEffect(() => {
-        if (socket === null) {
+        if (!socket) {
             return; // หยุดการทำงานถ้ายังไม่มีการเชื่อมต่อ socket
         }
+        
         socket.on("getMessage", (message) => {
-            setMessages((prevMessages) => {
-                return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
-            });
+            console.log('Received message:', message);
+            console.log('Current chat ID:', currentChat);
+            
+            if (currentChat?._id === message.chatId) {
+                setMessages((prevMessages) => {
+                    return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
+                });
+                console.log('Message added:', message);
+            }
         });
+    
 
         socket.on("getNotification", (notification) => {
             console.log("Notification received:", notification);
@@ -122,7 +116,7 @@ export const ChatContextProvider = ({ children, user }) => {
             socket.off("notificationRead");
             // socket.off("newNotification");
         };
-    }, [socket, user]);  // ใช้ socket และ user เป็น dependencies
+    }, [socket, user, currentChat]);  // ใช้ socket และ user เป็น dependencies
 
     // Fetch all users from API
     useEffect(() => {
@@ -242,7 +236,7 @@ export const ChatContextProvider = ({ children, user }) => {
         async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
             if (!textMessage && !fileMessage) return console.log("You must type something...");
 
-            const recipientId = currentChat?.members?.filter((id) => id !== sender?._id)[0];
+            const recipientId = currentChat?.members?.filter((id) => id !== user?._id)[0];
             if (!recipientId) return console.log("No recipient found!");
 
             try {
@@ -270,8 +264,7 @@ export const ChatContextProvider = ({ children, user }) => {
 
                 // ส่งข้อความผ่าน Socket
                 if (socket && socket.connected) {
-                    socket.emit("sendMessage", { ...response.message, recipientId });
-
+                    socket.emit("sendMessage", { ...response.message, recipientId, });
                     // ส่งการแจ้งเตือนให้กับผู้รับ
                     socket.emit("getNotification", { ...response.notification });
                 }
@@ -294,8 +287,15 @@ export const ChatContextProvider = ({ children, user }) => {
 
     // ฟังก์ชันเพื่ออัปเดตการแจ้งเตือนเป็น "อ่านแล้ว"
     const setNotificationsAsRead = async (senderId) => {
-        console.log('userId', senderId); // แสดงค่า id ที่ส่งเข้ามา
+        console.log('senderId', senderId); // แสดงค่า id ที่ส่งเข้ามา
         try {
+
+  // ตรวจสอบเงื่อนไขก่อนทำงาน
+  if (!senderId) {
+    console.log('Skipping update for this senderId:', senderId);
+    return; // ออกจากฟังก์ชันโดยไม่ทำอะไร
+}
+
             // อัปเดต state ใน frontend
             setNotifications((prevNotifications) =>
                 prevNotifications.map((notification) => {
@@ -317,6 +317,8 @@ export const ChatContextProvider = ({ children, user }) => {
 
             console.log('API Response:', response);
             console.log("✅ Updated notifications in database");
+
+            
         } catch (error) {
             console.error("❌ Error updating notifications:", error);
         }
