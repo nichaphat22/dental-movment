@@ -7,6 +7,11 @@ const notificationChatSchema = new mongoose.Schema(
                     ref: 'Chat', // Assuming there's a Chat model
                     required: true
                 },
+                 senderId: {
+                            type: mongoose.Schema.Types.ObjectId, // Use ObjectId for referencing
+                            ref: 'User', // Assuming there's a User model
+                            required: true
+                        },
         recipientId:{
   type: mongoose.Schema.Types.ObjectId,
             ref: 'User', // Assuming there's a User model

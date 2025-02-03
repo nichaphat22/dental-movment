@@ -10,6 +10,7 @@ const socketMap = new Map();
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
 
+  
   // เมื่อผู้ใช้เชื่อมต่อและส่ง userId มา
   socket.on("addNewUser", (userId) => {
     socketMap.set(userId, socket.id); // เก็บ userId กับ socketId
@@ -27,6 +28,7 @@ io.on("connection", (socket) => {
       io.to(recipientSocketId).emit("getNotification", {
         _id: message._id, // Include message ID for proper notification tracking
         chatId: message.chatId,
+        senderId: message.senderId,
         recipientId: message.recipientId,
         relatedMessageId: message._id, // Using message._id directly, not message.message._id
         // content: `${senderId} sent you a new message`, // Display sender's name dynamically
@@ -37,6 +39,15 @@ io.on("connection", (socket) => {
       console.log("Recipient not connected:", message.recipientId);
     }
   });
+  // ✅ รับ event "markAsRead" จาก client และแจ้งผู้ส่งว่าถูกอ่านแล้ว
+socket.on("markAsRead", ({ senderId }) => {
+  console.log(`📨 Notifications read for sender: ${senderId}`);
+
+  const senderSocketId = socketMap.get(senderId);
+  if (senderSocketId) {
+      io.to(senderSocketId).emit("notificationRead", { senderId });
+  }
+});
 
   // เมื่อผู้ใช้ disconnect
   socket.on("disconnect", () => {

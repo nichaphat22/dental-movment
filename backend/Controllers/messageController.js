@@ -25,6 +25,7 @@ const createMessage = async (req, res) => {
         // Create a notification for the recipient user
         const notification = new notificationChatModel({
             chatId: chatId, 
+            senderId: senderId,
             recipientId: recipientId,
             relatedMessageId: message._id,
             // content: `${senderId} sent you a new message`, // เปลี่ยนข้อความนี้ให้แสดงชื่อผู้ส่งได้ดียิ่งขึ้น
@@ -77,7 +78,20 @@ const updateNotificationsToRead = async (req, res) => {
     }
 };
 
+const notificationUserRead = async (req, res) => {
+    const { senderId } = req.params;
+    try {
+        // ค้นหาและอัปเดตแจ้งเตือนทั้งหมดที่ยังไม่อ่านจาก recipientId
+        const updatedNotifications = await notificationChatModel.updateMany(
+            { senderId, isRead: false }, 
+            { $set: { isRead: true } }
+        );
 
+        res.status(200).json(updatedNotifications);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
 
 // getMessages
 const getMessages = async (req, res) => {
@@ -113,4 +127,4 @@ const getMessages = async (req, res) => {
 // };
 
 
-module.exports = {createMessage, getMessages, getUnreadNotifications,updateNotificationsToRead};
+module.exports = {createMessage, getMessages, getUnreadNotifications,updateNotificationsToRead,notificationUserRead};

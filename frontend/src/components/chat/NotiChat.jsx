@@ -25,8 +25,6 @@ const NotiChat = ({ chat, user }) => {
   // สร้าง state สำหรับเก็บข้อความล่าสุด
   const [latestMessage, setLatestMessage] = useState(initialLatestMessage);
   
-  // สร้าง state สำหรับเก็บสถานะออนไลน์ของผู้รับ
-  const [isOnline, setIsOnline] = useState(false);
 
   // ใช้ useEffect เพื่ออัปเดตข้อความล่าสุดเมื่อ initialLatestMessage เปลี่ยนแปลง
   useEffect(() => {
@@ -45,10 +43,6 @@ const NotiChat = ({ chat, user }) => {
 
 // ฟังก์ชันในการคลิกเพื่อทำให้การแจ้งเตือนเป็น "อ่านแล้ว"
 const handleClick = (id) => {
-  // if (thisUserNotifications?.length > 0) {
-  //   NotificationsAsRead(notifications, recipientUser?._id); // ส่ง notifications และ recipientUserId
-  //   setThisUserNotifications([]); // ล้างสถานะการแจ้งเตือนหลังจากอ่าน
-  // }
   console.log("Navigating to:", `/chat/${id}`);
   navigate(`/chat/${id}`);
 };

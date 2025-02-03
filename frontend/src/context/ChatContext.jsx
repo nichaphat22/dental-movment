@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useCallback } from "react";
-import { baseUrl, getRequest, postRequest, patchRequest } from "../utils/services";
+import { baseUrl, getRequest, postRequest, putRequest, patchRequest } from "../utils/services";
 import { io } from "socket.io-client";
 // import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 
@@ -22,17 +22,17 @@ export const ChatContextProvider = ({ children, user }) => {
     const [allUsers, setAllUsers] = useState([]);
     const [unreadNotifications, setUnreadNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    
+
     // const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
     // console.log(/"currentChat", currentChat)
 
     //socket
-     // เชื่อมต่อ Socket
+    // เชื่อมต่อ Socket
     // เชื่อมต่อ Socket
     useEffect(() => {
         const newSocket = io("http://localhost:8800");
-    
+
         newSocket.on("connect", () => {
             console.log("Socket connected:", newSocket.id); // ตรวจสอบว่าการเชื่อมต่อสำเร็จ
             setSocket(newSocket);
@@ -43,285 +43,300 @@ export const ChatContextProvider = ({ children, user }) => {
                 console.log("Adding user to socket:", user._id);
             }
         });
-    
+
         newSocket.on("disconnect", () => {
             console.log("Socket disconnected:", newSocket.id);
         });
-    
+
         return () => {
             newSocket.disconnect();
         };
     }, [user]); // เพิ่ม `user` เป็น dependency
-    
-    
-    
- 
-// ส่ง userId เมื่อเชื่อมต่อ
-useEffect(() => {
-    if (socket && user?._id) {
-        console.log("Adding user to socket:", user._id);
-        socket.emit("addNewUser", user._id);  // ส่ง userId ไปที่เซิร์ฟเวอร์
-    }
-}, [user, socket]);  // เพิ่ม socket ใน dependencies เพื่อให้มั่นใจว่า `socket` ถูกกำหนดค่าแล้ว
 
-// รับข้อความและการแจ้งเตือน
-useEffect(() => {
-    if (socket === null) {
-        console.log("Socket is not connected yet");
-        return; // หยุดการทำงานถ้ายังไม่มีการเชื่อมต่อ socket
-    }
 
-    socket.on("getMessage", (message) => {
-        console.log("New message received:", message);
 
-        setMessages((prevMessages) => {
-            return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
-        });
-    });
 
-    socket.on("getNotification", (notification) => {
-        console.log("Notification received:", notification);
+    // ส่ง userId เมื่อเชื่อมต่อ
+    useEffect(() => {
+        if (socket && user?._id) {
+            console.log("Adding user to socket:", user._id);
+            socket.emit("addNewUser", user._id);  // ส่ง userId ไปที่เซิร์ฟเวอร์
+        }
+    }, [user, socket]);  // เพิ่ม socket ใน dependencies เพื่อให้มั่นใจว่า `socket` ถูกกำหนดค่าแล้ว
 
-        if (notification.senderId === user._id) return;
-
-        setNotifications((prevNotifications) => {
-            // Avoid duplicate notifications
-            if (!prevNotifications.some((notif) => notif._id === notification._id)) {
-                return [...prevNotifications, notification];
-            }
-            return prevNotifications;
-        });
-    
-        if (!notification.isRead && notification.recipientId === user._id) {
-            setUnreadNotifications((prevUnread) => {
-                // Avoid duplicate unread notifications
-                if (!prevUnread.some((notif) => notif._id === notification._id)) {
-                    return [...prevUnread, notification];
-                }
-                return prevUnread;
+    // รับข้อความและการแจ้งเตือน
+    useEffect(() => {
+        if (socket === null) {
+            console.log("Socket is not connected yet");
+            return; // หยุดการทำงานถ้ายังไม่มีการเชื่อมต่อ socket
+        }
+        socket.on("getMessage", (message) => {
+            setMessages((prevMessages) => {
+                return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
             });
-        }
-    });
+        });
 
+        socket.on("getNotification", (notification) => {
+            console.log("Notification received:", notification);
 
-    return () => {
-        socket.off("getMessage");
-        socket.off("getNotification");
-        // socket.off("newNotification");
-    };
-}, [socket, user]);  // ใช้ socket และ user เป็น dependencies
+            if (notification.senderId === user._id) return;
 
- // Fetch all users from API
- useEffect(() => {
-    const getUsers = async () => {
-        const response = await getRequest(`${baseUrl}/users`);
+            setNotifications((prevNotifications) => {
+                // Avoid duplicate notifications
+                if (!prevNotifications.some((notif) => notif._id === notification._id)) {
+                    return [...prevNotifications, notification];
+                }
+                return prevNotifications;
+            });
 
-        if (response.error) {
-            console.error("Error fetching users:", response);
-            return;
-        }
-
-        // Separate students and teachers
-        const students = response.filter((u) => u.role === 'student');
-        const teachers = response.filter((u) => u.role === 'teacher');
-
-        setAllUsers(response); // Set all users (students and teachers)
-
-        // Filter out potential chats (teachers not already in userChats)
-        const pChats = teachers.filter((teacher) => {
-            let isChatCreated = false;
-
-            if (user?._id === teacher._id) return false;
-
-            if (userChats) {
-                isChatCreated = userChats?.some((chat) => {
-                    return chat.members[0]===teacher._id || chat.members[1] === teacher._id;
+            if (!notification.isRead && notification.recipientId === user._id) {
+                setUnreadNotifications((prevUnread) => {
+                    // Avoid duplicate unread notifications
+                    if (!prevUnread.some((notif) => notif._id === notification._id)) {
+                        return [...prevUnread, notification];
+                    }
+                    return prevUnread;
                 });
             }
-            return !isChatCreated;
+            // ✅ รับ event "notificationRead" เมื่อข้อความถูกอ่าน
+            socket.on("notificationRead", ({ senderId }) => {
+                console.log("✅ Message read notification received for sender:", senderId);
+
+                // ✅ อัปเดต Notifications ให้เป็น isRead: true
+                setNotifications((prevNotifications) =>
+                    prevNotifications.map((notif) =>
+                        notif.senderId === senderId ? { ...notif, isRead: true } : notif
+                    )
+                );
+
+                // ✅ ลบออกจาก Unread Notifications
+                setUnreadNotifications((prevUnread) =>
+                    prevUnread.filter((notif) => notif.senderId !== senderId)
+                );
+            });
+            
         });
 
-        setPotentialChats(pChats);
-    };
+        return () => {
+            socket.off("getMessage");
+            socket.off("getNotification");
+            socket.off("notificationRead");
+            // socket.off("newNotification");
+        };
+    }, [socket, user]);  // ใช้ socket และ user เป็น dependencies
 
-    getUsers();
-}, [userChats, user]);
-
-// Fetch user chats and latest messages
-useEffect(() => {
-    const getUserChats = async () => {
-        if (!user?._id) return;
-
-        setIsUserChatsLoading(true);
-        setUserChatsError(null);
-
-        try {
-            const response = await getRequest(`${baseUrl}/chats/${user._id}`);
-
-            setIsUserChatsLoading(false);
+    // Fetch all users from API
+    useEffect(() => {
+        const getUsers = async () => {
+            const response = await getRequest(`${baseUrl}/users`);
 
             if (response.error) {
-                setUserChatsError(response);
+                console.error("Error fetching users:", response);
                 return;
             }
 
-            // Fetch latest message for each chat
-            const chatsWithLatestMessage = await Promise.all(
-                response.map(async (chat) => {
-                    const latestMessageResponse = await getRequest(`${baseUrl}/messages/${chat._id}`);
-                    if (!latestMessageResponse.error && latestMessageResponse.length > 0) {
-                        const lastMessage = latestMessageResponse[latestMessageResponse.length - 1];
-                        return { ...chat, latestMessage: lastMessage };
-                    }
-                    return { ...chat, latestMessage: null };
-                })
-            );
+            // Separate students and teachers
+            const students = response.filter((u) => u.role === 'student');
+            const teachers = response.filter((u) => u.role === 'teacher');
 
-            // Sort chats by latest message timestamp (assuming createdAt field exists in lastMessage)
-            const sortedChats = chatsWithLatestMessage.sort((a, b) => {
-                if (!a.latestMessage) return -1;
-                if (!b.latestMessage) return 1;
-                return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
+            setAllUsers(response); // Set all users (students and teachers)
+
+            // Filter out potential chats (teachers not already in userChats)
+            const pChats = teachers.filter((teacher) => {
+                let isChatCreated = false;
+
+                if (user?._id === teacher._id) return false;
+
+                if (userChats) {
+                    isChatCreated = userChats?.some((chat) => {
+                        return chat.members[0] === teacher._id || chat.members[1] === teacher._id;
+                    });
+                }
+                return !isChatCreated;
             });
 
-            setUserChats(sortedChats);
-        } catch (error) {
-            setIsUserChatsLoading(false);
-            setUserChatsError(error);
-        }
-    };
+            setPotentialChats(pChats);
+        };
 
-    getUserChats();
-}, [user]);
-    
+        getUsers();
+    }, [userChats, user]);
 
-useEffect(() => {
-    const getMessages = async () => {
-        setIsMessagesLoading(true);
-        setMessagesError(null);
+    // Fetch user chats and latest messages
+    useEffect(() => {
+        const getUserChats = async () => {
+            if (!user?._id) return;
 
-        try {
-            const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
+            setIsUserChatsLoading(true);
+            setUserChatsError(null);
 
-            console.log("Messages response:", response);  // ตรวจสอบข้อมูลที่ได้
+            try {
+                const response = await getRequest(`${baseUrl}/chats/${user._id}`);
 
-            if (response.error) {
-                setMessagesError(response);
-                return;
+                setIsUserChatsLoading(false);
+
+                if (response.error) {
+                    setUserChatsError(response);
+                    return;
+                }
+
+                // Fetch latest message for each chat
+                const chatsWithLatestMessage = await Promise.all(
+                    response.map(async (chat) => {
+                        const latestMessageResponse = await getRequest(`${baseUrl}/messages/${chat._id}`);
+                        if (!latestMessageResponse.error && latestMessageResponse.length > 0) {
+                            const lastMessage = latestMessageResponse[latestMessageResponse.length - 1];
+                            return { ...chat, latestMessage: lastMessage };
+                        }
+                        return { ...chat, latestMessage: null };
+                    })
+                );
+
+                // Sort chats by latest message timestamp (assuming createdAt field exists in lastMessage)
+                const sortedChats = chatsWithLatestMessage.sort((a, b) => {
+                    if (!a.latestMessage) return -1;
+                    if (!b.latestMessage) return 1;
+                    return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
+                });
+
+                setUserChats(sortedChats);
+            } catch (error) {
+                setIsUserChatsLoading(false);
+                setUserChatsError(error);
             }
-            
+        };
 
-            setMessages(response);
-        } catch (error) {
-            console.error("Error fetching messages:", error);
-            setMessagesError(error);
-        } finally {
-            setIsMessagesLoading(false);
+        getUserChats();
+    }, [user]);
+
+
+    useEffect(() => {
+        const getMessages = async () => {
+            setIsMessagesLoading(true);
+            setMessagesError(null);
+
+            try {
+                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
+
+                console.log("Messages response:", response);  // ตรวจสอบข้อมูลที่ได้
+
+                if (response.error) {
+                    setMessagesError(response);
+                    return;
+                }
+
+
+                setMessages(response);
+            } catch (error) {
+                console.error("Error fetching messages:", error);
+                setMessagesError(error);
+            } finally {
+                setIsMessagesLoading(false);
+            }
+        };
+
+        if (currentChat) {
+            getMessages();
         }
-    };
+    }, [currentChat]);
 
-    if (currentChat) {
-        getMessages();
-    }
-}, [currentChat]);
+    const sendTextMessage = useCallback(
+        async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
+            if (!textMessage && !fileMessage) return console.log("You must type something...");
 
-const sendTextMessage = useCallback(
-    async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
-      if (!textMessage && !fileMessage) return console.log("You must type something...");
-  
-      const recipientId = currentChat?.members?.filter((id) => id !== sender?._id)[0];
-      if (!recipientId) return console.log("No recipient found!");
-  
-      try {
-        const response = await postRequest(`${baseUrl}/messages`, {
-          chatId: currentChatId,
-          senderId: sender._id,
-          recipientId,
-          text: textMessage,
-          file: fileMessage,
-        });
-  
-        if (response.error) {
-          console.error("Send message error:", response);
-          return;
-        }
-  
-        // อัปเดตข้อความใหม่
-        setMessages((prevMessages) => [
-          ...prevMessages, 
-          response.message
-        ]);
-        setTextMessage("");  // Clear the text input
-        setFileMessage(null);  // Clear the file input
-  
-        // ส่งข้อความผ่าน Socket
-        if (socket && socket.connected) {
-          socket.emit("sendMessage", { ...response.message, recipientId });
+            const recipientId = currentChat?.members?.filter((id) => id !== sender?._id)[0];
+            if (!recipientId) return console.log("No recipient found!");
 
-    // ส่งการแจ้งเตือนให้กับผู้รับ
-    socket.emit("getNotification", { ...response.notification });
-        }
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
-    },
-    [currentChat, socket]
-);
+            try {
+                const response = await postRequest(`${baseUrl}/messages`, {
+                    chatId: currentChatId,
+                    senderId: sender._id,
+                    recipientId,
+                    text: textMessage,
+                    file: fileMessage,
+                });
 
-  
-//   const markNotificationsAsRead = async () => {
-//     const recipientId = currentChat?.members?.filter((id) => id !== user._id)[0];
+                if (response.error) {
+                    console.error("Send message error:", response);
+                    return;
+                }
 
-//     if (!recipientId) {
-//       console.log("No recipient found for notifications");
-//       return;
-//     }
+                // อัปเดตข้อความใหม่
+                setNewMessage(response);
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    response.message
+                ]);
+                setTextMessage("");  // Clear the text input
+                setFileMessage(null);  // Clear the file input
 
-//     try {
-//       // เรียก API เพื่อเปลี่ยนสถานะการแจ้งเตือนเป็น "อ่านแล้ว"
-//       const res = await getRequest(`${baseUrl}/messages/notifications/read/${recipientId}`);
-//       if (!res.ok) {
-//         throw new Error(`Error: ${res.status}`);
-//       }
-//       console.log("Notifications marked as read:", res.data);
+                // ส่งข้อความผ่าน Socket
+                if (socket && socket.connected) {
+                    socket.emit("sendMessage", { ...response.message, recipientId });
 
-//       // อัปเดตสถานะการแจ้งเตือนในฝั่ง React
-//       setNotifications(res.data);
-//       setUnreadCount(0);  // รีเซ็ตจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน
-//     } catch (err) {
-//       console.error("Error marking notifications as read:", err);
-//     }
-// };
+                    // ส่งการแจ้งเตือนให้กับผู้รับ
+                    socket.emit("getNotification", { ...response.notification });
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+            }
+        },
+        [currentChat, socket]
+    );
 
 
-// console.log('unreadcount',unreadCount)
-
-  
-    
     useEffect(() => {
         console.log("Updated messages:", messages);
     }, [messages]);
-    
+
 
     const updateCurrentChat = useCallback((chat) => {
         setCurrentChat(chat);
     }, []);
 
-    
-    
-///////////////////////
+    // ฟังก์ชันเพื่ออัปเดตการแจ้งเตือนเป็น "อ่านแล้ว"
+    const setNotificationsAsRead = async (senderId) => {
+        console.log('userId', senderId); // แสดงค่า id ที่ส่งเข้ามา
+        try {
+            // อัปเดต state ใน frontend
+            setNotifications((prevNotifications) =>
+                prevNotifications.map((notification) => {
+                    console.log('notification', notification); // แสดงค่า notification ในแต่ละรอบ
+                    return notification.senderId !== senderId  // ตรวจสอบว่า id ตรงกับ notification.id
+                        ? { ...notification, isRead: true } // ถ้า id ตรง ให้เปลี่ยนสถานะเป็น "อ่านแล้ว"
+                        : notification;
+                })
+            );
+
+            // ลบการแจ้งเตือนที่ยังไม่ได้อ่านจาก unreadNotifications
+            setUnreadNotifications((prevUnread) =>
+                prevUnread.filter((notification) => notification.senderId !== senderId)
+            );
+            // 🔥 ส่ง API ไปอัปเดตใน MongoDB หรือ Firebase
+            const response = await putRequest(`${baseUrl}/messages/notifications/userRead/${senderId}`, {
+                isRead: true,  // ส่งข้อมูลที่ต้องการอัปเดต
+            });
+
+            console.log('API Response:', response);
+            console.log("✅ Updated notifications in database");
+        } catch (error) {
+            console.error("❌ Error updating notifications:", error);
+        }
+    };
+
+
+    ///////////////////////
     const createChat = useCallback(
         async (studentId, teacherId) => {
-                const response = await postRequest(`${baseUrl}/chats`, {
-                    studentId,
-                    teacherId,
-                });
+            const response = await postRequest(`${baseUrl}/chats`, {
+                studentId,
+                teacherId,
+            });
 
-                if (response.error) {
-                    return console.error("Error creating chat:", response);
-                }
-                setUserChats((prev) => [...prev, response]);
-            },[]);
+            if (response.error) {
+                return console.error("Error creating chat:", response);
+            }
+            setUserChats((prev) => [...prev, response]);
+        }, []);
     return (
         <ChatContext.Provider
             value={{
@@ -341,8 +356,10 @@ const sendTextMessage = useCallback(
                 allUsers,
                 setNotifications,
                 setUnreadNotifications,
-                unreadNotifications
-                // fetchNotifications,
+                unreadNotifications,
+                setNotificationsAsRead,
+                newMessage
+                //setNotificationsAsRead,
 
                 // markNotificationsAsRead
                 // setUnreadCount,
