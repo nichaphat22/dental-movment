@@ -13,9 +13,14 @@ moment.locale("th");
 const Notifications = ({}) => {
   const { user } = useContext(AuthContext);  // Context to get the current user data
   const [isOpen, setIsOpen] = useState(false); // State to control visibility of the notification box
-  const { setNotifications,userChats,unreadNotifications,setUnreadNotifications } = useContext(ChatContext);
+  const { setNotifications,userChats,unreadNotifications,setUnreadNotifications,updateCurrentChat } = useContext(ChatContext);
   
-
+  useEffect(() => {
+    return () => {
+        updateCurrentChat(null);
+    };
+}, [updateCurrentChat]);
+  
   useEffect(() => {
     const fetchNotifications = async () => {
       try {

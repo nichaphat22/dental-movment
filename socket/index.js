@@ -10,7 +10,6 @@ const socketMap = new Map();
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
 
-  
   // เมื่อผู้ใช้เชื่อมต่อและส่ง userId มา
   socket.on("addNewUser", (userId) => {
     socketMap.set(userId, socket.id); // เก็บ userId กับ socketId
@@ -24,6 +23,8 @@ io.on("connection", (socket) => {
     const recipientSocketId = socketMap.get(message.recipientId);
     if (recipientSocketId) {
       console.log("Sending message to recipient socket:", recipientSocketId);
+       // ส่งข้อความไปยังผู้รับ
+    io.to(recipientSocketId).emit("getMessage", message);
       // Send the notification with the full data
       io.to(recipientSocketId).emit("getNotification", {
         _id: message._id, // Include message ID for proper notification tracking

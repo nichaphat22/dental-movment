@@ -67,7 +67,6 @@ export const ChatContextProvider = ({ children, user }) => {
     // รับข้อความและการแจ้งเตือน
     useEffect(() => {
         if (socket === null) {
-            console.log("Socket is not connected yet");
             return; // หยุดการทำงานถ้ายังไม่มีการเชื่อมต่อ socket
         }
         socket.on("getMessage", (message) => {
