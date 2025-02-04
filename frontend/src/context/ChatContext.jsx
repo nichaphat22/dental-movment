@@ -59,12 +59,12 @@ export const ChatContextProvider = ({ children, user }) => {
         
         
         socket.on("getMessage", (message) => {
-            console.log('Received message:', message);
-            
+            console.log("📩 Received message:", message);
+
             if (currentChat?._id === message.chatId) {
                 setMessages((prevMessages) => {
-                    // ถ้ามีข้อความก่อนหน้านี้ก็เพิ่มเข้าไป
-                    return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
+                    console.log("💬 Updating messages", prevMessages);
+                    return prevMessages ? [...prevMessages, message] : [message];
                 });
             }
     
@@ -81,19 +81,7 @@ export const ChatContextProvider = ({ children, user }) => {
                 });
             });
         });
-  // Update userChats if the message is in an existing chat
-//   setUserChats((prevChats) => {
-//     return prevChats.map((chat) => {
-//         if (chat._id === message.chatId) {
-//             return {
-//                 ...chat,
-//                 latestMessage: message
-//             };
-//         }
-//         return chat;
-//     });
-// });
-// });
+
         socket.on("getNotification", (notification) => {
             console.log("Notification received:", notification);
 
@@ -132,10 +120,24 @@ export const ChatContextProvider = ({ children, user }) => {
                     prevUnread.filter((notif) => notif.senderId !== senderId)
                 );
             });
+
+          
             
         });
 
+        socket.on("messageRead", ({ senderId, receiverId }) => {
+            console.log(`Message from ${senderId} was read by ${receiverId}`);
+            
+            // 🔄 อัปเดต UI หรือ state เพื่อให้แสดงว่าอ่านแล้ว
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.senderId === senderId ? { ...msg, isRead: true } : msg
+              )
+            );
+          });
+
         return () => {
+            socket.off("messageRead");
             socket.off("getMessage");
             socket.off("getNotification");
             socket.off("notificationRead");
@@ -259,7 +261,7 @@ export const ChatContextProvider = ({ children, user }) => {
         async (textMessage, sender, currentChatId, fileMessage, setTextMessage, setFileMessage) => {
             if (!textMessage && !fileMessage) return console.log("You must type something...");
 
-            const recipientId = currentChat?.members?.filter((id) => id !== user?._id)[0];
+            const recipientId = currentChat?.members?.find((id) => id !== user?._id);
             if (!recipientId) return console.log("No recipient found!");
 
             try {
@@ -347,51 +349,27 @@ export const ChatContextProvider = ({ children, user }) => {
         }
     };
 
-    // const markMessageAsRead = async (senderId, isRead) => {
-    //     if (!senderId || isRead) {
-    //         console.log('Skipping update for senderId:', senderId);
-    //         return;
-    //     }
+      // ✅ ฟังก์ชัน Mark Message as Read (ย้ายมาที่ Provider)
+  const markMessageAsRead = async (senderId, isRead) => {
+    if (!senderId || isRead) {
+      console.log('Skipping update for senderId:', senderId);
+      return;
+    }
 
-    //     try {
-    //         const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, {
-    //             isRead: true,
-    //         });
+    try {
+      const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, { isRead: true });
 
-    //         if (response.success) {
-    //             console.log("Message marked as read:", response);
-    //             // อัปเดตสถานะข้อความใน state หลังจากอ่านแล้ว
-    //             setMessages((prevMessages) =>
-    //                 prevMessages.map((msg) =>
-    //                     msg.senderId === senderId ? { ...msg, isRead: true } : msg
-    //                 )
-    //             );
-    //         } else {
-    //             console.warn("Failed to update message read status");
-    //         }
-    //     } catch (error) {
-    //         console.error("Error marking message as read:", error);
-    //     }
-    // };
-    // useEffect(() => {
-    //     ทำหหhasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
+      if (response.success) {
+        console.log("Message marked as read:", response);
+      } else {
+        console.warn("Failed to update message read status");
+      }
+    } catch (error) {
+      console.error("Error marking message as read:", error);
+    }
+  };
+  
 
-    //   }, [messages]);
-    
-         // ฟังก์ชันในการตรวจสอบว่ามีข้อความที่ยังไม่ได้อ่านหรือไม่
-//   const hasUnreadMessages = unreadNotifications.some(
-//     (notif) => notif.senderId === recipientUser?._id
-//   );
-
-  // ฟังก์ชันสำหรับอัปเดตการแจ้งเตือนว่าอ่านแล้ว
-//   const setNotificationsAsRead = (id) => {
-//     setUnreadNotifications((prevNotifications) =>
-//       prevNotifications.filter((notif) => notif.id !== id)
-//     );
-//   };
-
-        
-    //   },[]);
       
     ///////////////////////
     const createChat = useCallback(
@@ -428,7 +406,8 @@ export const ChatContextProvider = ({ children, user }) => {
                 unreadNotifications,
                 setNotificationsAsRead,
                 newMessage,
-                setCurrentChat
+                setCurrentChat,
+                markMessageAsRead
                 // markMessageAsRead,
                 // isUnread
                 //setNotificationsAsRead,

@@ -23,44 +23,32 @@ io.on("connection", (socket) => {
   });
   
 
-socket.on("sendMessage", (message, recipientId) => {
-  // ตรวจสอบว่า chatId ถูกต้องหรือไม่
-  if (!message.chatId) {
-    console.log("Error: message.chatId is undefined or invalid");
-    return; // ไม่ทำงานถ้าไม่มี chatId
-  }
+  socket.on("sendMessage", (message) => {
+    if (!message.chatId) {
+        console.log("Error: message.chatId is undefined or invalid");
+        return;
+    }
 
-  console.log("message.chatId:", message.chatId);
+    const recipientSocketId = socketMap.get(message.recipientId);
+    console.log("Recipient ID:", message.recipientId);
+    console.log("Recipient Socket ID:", recipientSocketId);
 
-  // ดึง recipientSocketId จาก socketMap
-  const recipientSocketId = socketMap.get(message.recipientId);
-  console.log("message.recipientId", message.recipientId);
-  console.log("recipientSocketId", recipientSocketId);
-  // ✅ ถ้า recipientId เป็นค่าที่ไม่ต้องการให้ return ออกไป
-  if (message.recipientId === "USER_ID_TO_IGNORE") {
-    console.log("Skipping recipient:", message.recipientId);
-    return;
-  }
+    if (!recipientSocketId) {
+        console.log("Recipient not connected:", message.recipientId);
+        return;
+    }
 
-  if (recipientSocketId) {
-    console.log("Sending message to recipient socket:", recipientSocketId);
-    
-    // ส่งข้อความไปยังผู้รับ
     io.to(recipientSocketId).emit("getMessage", message);
-    
-    // ส่ง Notification ไปยังผู้รับ
     io.to(recipientSocketId).emit("getNotification", {
-      _id: message._id, 
-      chatId: message.chatId,
-      senderId: message.senderId,
-      recipientId: message.recipientId,
-      relatedMessageId: message._id, 
-      isRead: false,
-      date: new Date(),
+        _id: message._id, 
+        chatId: message.chatId,
+        senderId: message.senderId,
+        recipientId: message.recipientId,
+        isRead: false,
+        date: new Date(),
     });
-  } else {
-    console.log("Recipient not connected:", message.recipientId);
-  }
+
+    console.log("Message sent to", recipientSocketId);
 });
 
   // ✅ รับ event "markAsRead" จาก client และแจ้งผู้ส่งว่าถูกอ่านแล้ว
@@ -72,6 +60,14 @@ socket.on("markAsRead", ({ senderId }) => {
       io.to(senderSocketId).emit("notificationRead", { senderId });
   }
 });
+
+socket.on("messageRead", ({ senderId, receiverId }) => {
+  console.log(`Notifying sender (${senderId}) that receiver (${receiverId}) read the message`);
+
+  // แจ้งเตือนผู้ส่งว่าข้อความถูกอ่าน
+  io.to(senderId).emit("messageRead", { senderId, receiverId });
+});
+
 
   // เมื่อผู้ใช้ disconnect
   socket.on("disconnect", () => {

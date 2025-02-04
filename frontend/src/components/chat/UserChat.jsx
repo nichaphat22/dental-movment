@@ -1,61 +1,35 @@
-import { baseUrl, patchRequest } from "../../utils/services"; 
-import { Stack } from "react-bootstrap";
 import { useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { ChatContext } from "../../context/ChatContext";
 import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage";
+import { Stack } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import moment from 'moment/min/moment-with-locales';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-moment.locale('th'); // ตั้งค่าเป็นภาษาไทย
+moment.locale('th');
 
 const UserChat = ({ chat, user }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
   const navigate = useNavigate();
 
-  // ดึงข้อมูลจาก ChatContext
-  const { setNotificationsAsRead } = useContext(ChatContext);
+  // ✅ ดึงฟังก์ชัน markMessageAsRead จาก ChatContext
+  const { markMessageAsRead, setNotificationsAsRead } = useContext(ChatContext);
 
   // ดึงข้อความล่าสุด
   const { latestMessage: initialLatestMessage } = useFetchLatestMessage(chat, user);
   const [latestMessage, setLatestMessage] = useState(initialLatestMessage);
-  // console.log("user:", user);
+
   useEffect(() => {
     setLatestMessage(initialLatestMessage);
   }, [initialLatestMessage]);
 
-  // ตรวจสอบว่ามีข้อความที่ยังไม่ได้อ่าน
   const hasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
-
-  // ✅ ฟังก์ชัน markMessageAsRead (ย้ายมาอยู่ใน UserChat)
-  const markMessageAsRead = async (senderId, isRead) => { 
-    if (!senderId || isRead) {
-      console.log('Skipping update for senderId:', senderId);
-      return;
-    }
-    
-
-    try {
-      const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, { isRead: true });
-
-      if (response.success) {
-        console.log("Message marked as read:", response);
-        
-        // ✅ อัปเดต UI ให้เป็นตัวบางแบบเรียลไทม์
-        setLatestMessage(prev => prev ? { ...prev, isRead: true } : prev);
-      } else {
-        console.warn("Failed to update message read status");
-      }
-    } catch (error) {
-      console.error("Error marking message as read:", error);
-    }
-  };
 
   // ✅ ฟังก์ชันเมื่อกดที่แชท
   const handleClick = async (id) => {
     if (latestMessage) {
-      await markMessageAsRead(id, latestMessage.isRead);
+      await markMessageAsRead(id, latestMessage.isRead); // 🔥 เรียกใช้จาก Provider
     }
 
     setNotificationsAsRead(id);

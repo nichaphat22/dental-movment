@@ -1,22 +1,22 @@
+import { baseUrl, patchRequest } from "../../utils/services"; 
 import { useContext, useState, useRef, useEffect } from "react"; 
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 import { Stack, Modal } from "react-bootstrap";
-// import moment from 'moment/min/moment-with-locales'; // Correct import statement
-// import { useLocation } from 'react-router-dom';  // Import useLocation
-// moment.locale('th'); // Set locale to Thai
+import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage";
+
 
 import InputEmoji from "react-input-emoji";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileImage, faFilePdf } from "@fortawesome/free-solid-svg-icons"; 
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faFileImage, faFilePdf } from "@fortawesome/free-solid-svg-icons"; 
 import './Chat.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';  // Import LazyLoadImage
 
-const ChatBox = ({ chatId, latestMessage }) => {
+const ChatBox = ({ chat,  }) => {
     const { user } = useContext(AuthContext);
-    const { currentChat, messages, isMessagesLoading, sendTextMessage ,setNotificationsAsRead} = useContext(ChatContext);
-    const { recipientUser } = useFetchRecipientUser(currentChat, user);
+    const { currentChat,markMessageAsRead,setCurrentChat, messages, isMessagesLoading, sendTextMessage ,setNotificationsAsRead} = useContext(ChatContext);
+    const { recipientUser } = useFetchRecipientUser(currentChat, user,chat);
 
     const [textMessage, setTextMessage] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
@@ -24,25 +24,29 @@ const ChatBox = ({ chatId, latestMessage }) => {
     const [previewImage, setPreviewImage] = useState(null);
     const fileInputRef = useRef(null);
     const scroll = useRef();
-
-    // const location = useLocation();
-
-
+      // ดึงข้อความล่าสุด
+      const { latestMessage: initialLatestMessage } = useFetchLatestMessage(currentChat,chat, user);
+      const [latestMessage, setLatestMessage] = useState(initialLatestMessage);
+      
+      useEffect(() => {
+        setLatestMessage(initialLatestMessage);
+      }, [initialLatestMessage]);
+      
+      console.log("Latest Message:", latestMessage);
+      console.log(messages)
+    
+    useEffect(() => {
+        if (chat) {
+            setCurrentChat(chat);  // ตั้งค่า currentChat เมื่อเปิดแชท
+        }
+     
+    }, [chat, setCurrentChat]);
+    
     useEffect(() => {
         if (scroll.current) {
             scroll.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
-
-    useEffect(() => {
-        const markAsRead = async () => {
-          if (latestMessage && !latestMessage.isRead) {
-            await markMessageAsRead(chatId, latestMessage.isRead);
-          }
-        };
-    
-        markAsRead();
-      }, [latestMessage, chatId]); // ทำงานเมื่อ latestMessage เปลี่ยนแปลง
 
     const formatFileName = (fileName) => {
         if (fileName.length > 10) {
@@ -104,11 +108,20 @@ const ChatBox = ({ chatId, latestMessage }) => {
         return <p style={{ textAlign: "center", width: "100%" }}>กำลังโหลดแชท...</p>;
     }
 
-    
 
-    const handleClick = (id) =>{
+      const handleClick = async (id) => {
+        if (latestMessage) {
+            await markMessageAsRead(id, latestMessage.isRead);
+        }
+        
+    // setNotificationsAsRead(id);
         setNotificationsAsRead(id);
-    }
+    };
+
+    console.log("User data:", user);
+console.log("Messages:", messages);
+
+    
     return (
         <Stack gap={30} className="chat-box"
         onClick={() => handleClick(recipientUser._id)} // Click handler for image
@@ -116,13 +129,18 @@ const ChatBox = ({ chatId, latestMessage }) => {
             <div className="chat-header">
                 <strong>{recipientUser.fname} {recipientUser.lname}</strong>
             </div>
+            
+
             <Stack gap={3} className="messages">
+          
                 {messages && messages.map((message, index) => (
+
                     <Stack
                         key={index}
                         className={`message ${message.senderId === user._id ? "self align-self-end flex-grow-0" : "align-self-start flex-grow-0"}`}
                         ref={index === messages.length - 1 ? scroll : null}
                     >
+
                         <span> 
                             {message.text && (
                                 <span className="textmessage" style={{ backgroundColor: message.senderId === user._id ? '#7600A9' : '#fff', borderRadius: '25px' }}>
@@ -130,6 +148,15 @@ const ChatBox = ({ chatId, latestMessage }) => {
                                 </span>
                             )}
                         </span>
+              
+                        {message?.senderId === user._id && message?.isRead && (
+    <span className="read-status">อ่านแล้ว</span>
+)}
+{/* {message.senderId === user._id && message.isRead && index === messages.length - 1 && (
+    <span className="read-status">อ่านแล้ว</span>
+)} */}
+
+
 
                         <span>
                             {message.file && message.file.type && message.file.data && (
