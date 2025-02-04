@@ -45,7 +45,7 @@ const Notifications = ({}) => {
   
       // ปรับปรุงการแจ้งเตือนใน state หลังจากการอัปเดต
       setIsOpen(!isOpen);  // Toggle visibility of notification box
-      setUnreadNotifications([]); // ลบการแจ้งเตือนที่ยังไม่ได้อ่านจาก state
+      // setUnreadNotifications([]); // ลบการแจ้งเตือนที่ยังไม่ได้อ่านจาก state
       // รีเฟรชการดึงข้อมูลใหม่
       const response = await getRequest(`${baseUrl}/messages/notifications/unread/${user._id}`);
       const notifications = response;
@@ -55,6 +55,7 @@ const Notifications = ({}) => {
       console.error("Error updating notification:", error);
     }
   };
+  
   
   
   return (

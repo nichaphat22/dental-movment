@@ -1,36 +1,29 @@
+import { baseUrl, patchRequest } from "../../utils/services"; 
 import { Stack } from "react-bootstrap";
 import { useContext, useState, useEffect } from "react";
-import { ChatContext } from "../../context/ChatContext";
 import { useNavigate } from "react-router-dom";
-import { unreadNotificationsFunc } from "../../utils/unreadNotificationsFunc";
+import { ChatContext } from "../../context/ChatContext";
 import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage";
-import moment from 'moment/min/moment-with-locales'; // Correct import statement
+import moment from 'moment/min/moment-with-locales';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
-moment.locale('th'); // Set locale to Thai
-
-import { LazyLoadImage } from 'react-lazy-load-image-component';  // Import LazyLoadImage
+moment.locale('th'); // ตั้งค่าเป็นภาษาไทย
 
 const NotiChat = ({ chat, user }) => {
-  // ดึงข้อมูลผู้รับจาก custom hook useFetchRecipientUser
   const { recipientUser } = useFetchRecipientUser(chat, user);
   const navigate = useNavigate();
 
   // ดึงข้อมูลจาก ChatContext
-  const {  } = useContext(ChatContext);
+  // const { setNotificationsAsRead } = useContext(ChatContext);
 
-  // ดึงข้อความล่าสุดจาก custom hook useFetchLatestMessage
+  // ดึงข้อความล่าสุด
   const { latestMessage: initialLatestMessage } = useFetchLatestMessage(chat, user);
-
-  // สร้าง state สำหรับเก็บข้อความล่าสุด
   const [latestMessage, setLatestMessage] = useState(initialLatestMessage);
-  
 
-  // ใช้ useEffect เพื่ออัปเดตข้อความล่าสุดเมื่อ initialLatestMessage เปลี่ยนแปลง
   useEffect(() => {
     setLatestMessage(initialLatestMessage);
   }, [initialLatestMessage]);
-
 
   // ฟังก์ชันสำหรับตัดข้อความให้สั้นลง
   const truncateText = text => {
@@ -41,12 +34,50 @@ const NotiChat = ({ chat, user }) => {
     return shortText;
   };
 
+  // ตรวจสอบว่ามีข้อความที่ยังไม่ได้อ่าน
+  const hasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
+
+
+    // ✅ ฟังก์ชัน markMessageAsRead (ย้ายมาอยู่ใน UserChat)
+    const markMessageAsRead = async (senderId, isRead) => { 
+      if (!senderId || isRead) {
+        console.log('Skipping update for senderId:', senderId);
+        return;
+      }
+  
+      try {
+        const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, { isRead: true });
+  
+        if (response.success) {
+          console.log("Message marked as read:", response);
+          
+          // ✅ อัปเดต UI ให้เป็นตัวบางแบบเรียลไทม์
+          setLatestMessage(prev => prev ? { ...prev, isRead: true } : prev);
+  
+          // ✅ อัปเดต Context ให้ UI เปลี่ยนเป็นตัวบางทันที
+          // setHasUnreadMessagesMap(prev => ({
+          //   ...prev,
+          //   [chat._id]: false
+          // }));
+        } else {
+          console.warn("Failed to update message read status");
+        }
+      } catch (error) {
+        console.error("Error marking message as read:", error);
+      }
+    };
+
+
+
+
 // ฟังก์ชันในการคลิกเพื่อทำให้การแจ้งเตือนเป็น "อ่านแล้ว"
-const handleClick = (id) => {
-  console.log("Navigating to:", `/chat/${id}`);
+const handleClick = async (id) => {
+  // setNotificationsAsRead(id);
+  if (latestMessage) {
+    await markMessageAsRead(id, latestMessage.isRead);
+  }
   navigate(`/chat/${id}`);
 };
-
   return (
     <Stack
       direction="horizontal"
@@ -65,8 +96,12 @@ const handleClick = (id) => {
           </div>
           <div className="text">
             {latestMessage?.text && (
-              <span
-            >
+                <span
+                style={{
+                  fontWeight: hasUnreadMessages ? "bold" : "normal", 
+                  color: hasUnreadMessages ? "#000" : "#888",
+                }}
+              >
               {truncateText(latestMessage?.text)}
             </span>
             )}

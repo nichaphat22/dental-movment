@@ -13,7 +13,7 @@ import { faFileImage, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import './Chat.css';
 import { LazyLoadImage } from 'react-lazy-load-image-component';  // Import LazyLoadImage
 
-const ChatBox = () => {
+const ChatBox = ({ chatId, latestMessage }) => {
     const { user } = useContext(AuthContext);
     const { currentChat, messages, isMessagesLoading, sendTextMessage ,setNotificationsAsRead} = useContext(ChatContext);
     const { recipientUser } = useFetchRecipientUser(currentChat, user);
@@ -33,6 +33,16 @@ const ChatBox = () => {
             scroll.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
+
+    useEffect(() => {
+        const markAsRead = async () => {
+          if (latestMessage && !latestMessage.isRead) {
+            await markMessageAsRead(chatId, latestMessage.isRead);
+          }
+        };
+    
+        markAsRead();
+      }, [latestMessage, chatId]); // ทำงานเมื่อ latestMessage เปลี่ยนแปลง
 
     const formatFileName = (fileName) => {
         if (fileName.length > 10) {
@@ -93,6 +103,8 @@ const ChatBox = () => {
     if (isMessagesLoading) {
         return <p style={{ textAlign: "center", width: "100%" }}>กำลังโหลดแชท...</p>;
     }
+
+    
 
     const handleClick = (id) =>{
         setNotificationsAsRead(id);

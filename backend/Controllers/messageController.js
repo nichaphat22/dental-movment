@@ -17,6 +17,7 @@ const createMessage = async (req, res) => {
             recipientId, // Use recipientId directly
             text,
             file,
+            isRead: false,
         });
 
         // Save the message to the database
@@ -40,6 +41,31 @@ const createMessage = async (req, res) => {
         res.status(500).json({ message: "An error occurred while creating the message and notification.", error });
     }
 };
+
+const markMessageAsRead = async (req, res) => {
+    const { senderId } = req.params;
+  
+    try {
+      // ค้นหาและอัปเดตข้อความทั้งหมดที่ยังไม่ได้อ่านของ recipientId
+      const result = await messageModel.updateMany(
+        { senderId, isRead: false },  // กรองเฉพาะข้อความที่ยังไม่ได้อ่าน
+        { $set: { isRead: true } },      // เปลี่ยนสถานะให้เป็น "อ่านแล้ว"
+        { new: true }                    // ให้คืนค่าข้อมูลที่อัปเดต
+      );
+      
+      // ถ้าไม่มีข้อความที่อัปเดต ให้แจ้งว่าไม่พบ
+      if (result.matchedCount === 0) {
+        return res.status(404).json({ message: 'No unread messages found' });
+      }
+  
+      // ส่งผลลัพธ์กลับไป
+      res.status(200).json({ message: 'Messages marked as read', result });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error marking messages as read' });
+    }
+};
+
 
 const getUnreadNotifications = async (req, res) => { 
         const { recipientId } = req.params;  // ใช้ req.params ในการรับค่า
@@ -127,4 +153,4 @@ const getMessages = async (req, res) => {
 // };
 
 
-module.exports = {createMessage, getMessages, getUnreadNotifications,updateNotificationsToRead,notificationUserRead};
+module.exports = {createMessage, getMessages,markMessageAsRead, getUnreadNotifications,updateNotificationsToRead,notificationUserRead};

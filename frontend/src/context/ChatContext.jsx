@@ -21,7 +21,8 @@ export const ChatContextProvider = ({ children, user }) => {
     const [notifications, setNotifications] = useState([]);
     const [allUsers, setAllUsers] = useState([]);
     const [unreadNotifications, setUnreadNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
+    const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+    
 
     // const { recipientUser } = useFetchRecipientUser(currentChat, user);
 
@@ -56,19 +57,43 @@ export const ChatContextProvider = ({ children, user }) => {
             return; // หยุดการทำงานถ้ายังไม่มีการเชื่อมต่อ socket
         }
         
+        
         socket.on("getMessage", (message) => {
             console.log('Received message:', message);
-            console.log('Current chat ID:', currentChat);
             
             if (currentChat?._id === message.chatId) {
                 setMessages((prevMessages) => {
+                    // ถ้ามีข้อความก่อนหน้านี้ก็เพิ่มเข้าไป
                     return Array.isArray(prevMessages) ? [...prevMessages, message] : [message];
                 });
-                console.log('Message added:', message);
             }
-        });
     
-
+            // อัปเดตแชทที่มีข้อความใหม่
+            setUserChats((prevChats) => {
+                return prevChats.map((chat) => {
+                    if (chat._id === message.chatId) {
+                        return {
+                            ...chat,
+                            latestMessage: message
+                        };
+                    }
+                    return chat;
+                });
+            });
+        });
+  // Update userChats if the message is in an existing chat
+//   setUserChats((prevChats) => {
+//     return prevChats.map((chat) => {
+//         if (chat._id === message.chatId) {
+//             return {
+//                 ...chat,
+//                 latestMessage: message
+//             };
+//         }
+//         return chat;
+//     });
+// });
+// });
         socket.on("getNotification", (notification) => {
             console.log("Notification received:", notification);
 
@@ -154,7 +179,6 @@ export const ChatContextProvider = ({ children, user }) => {
         getUsers();
     }, [userChats, user]);
 
-    // Fetch user chats and latest messages
     useEffect(() => {
         const getUserChats = async () => {
             if (!user?._id) return;
@@ -172,7 +196,7 @@ export const ChatContextProvider = ({ children, user }) => {
                     return;
                 }
 
-                // Fetch latest message for each chat
+                // ดึงข้อความล่าสุดสำหรับแต่ละแชท
                 const chatsWithLatestMessage = await Promise.all(
                     response.map(async (chat) => {
                         const latestMessageResponse = await getRequest(`${baseUrl}/messages/${chat._id}`);
@@ -184,7 +208,7 @@ export const ChatContextProvider = ({ children, user }) => {
                     })
                 );
 
-                // Sort chats by latest message timestamp (assuming createdAt field exists in lastMessage)
+                // เรียงลำดับแชทตาม timestamp ของข้อความล่าสุด
                 const sortedChats = chatsWithLatestMessage.sort((a, b) => {
                     if (!a.latestMessage) return -1;
                     if (!b.latestMessage) return 1;
@@ -199,9 +223,8 @@ export const ChatContextProvider = ({ children, user }) => {
         };
 
         getUserChats();
-    }, [user]);
-
-
+    }, [user,notifications]);
+    
     useEffect(() => {
         const getMessages = async () => {
             setIsMessagesLoading(true);
@@ -283,11 +306,11 @@ export const ChatContextProvider = ({ children, user }) => {
 
     const updateCurrentChat = useCallback((chat) => {
         setCurrentChat(chat);
-    }, []);
+    }, [setCurrentChat]);
 
     // ฟังก์ชันเพื่ออัปเดตการแจ้งเตือนเป็น "อ่านแล้ว"
     const setNotificationsAsRead = async (senderId) => {
-        console.log('senderId', senderId); // แสดงค่า id ที่ส่งเข้ามา
+        console.log('senderId', senderId); // แสดงค่า id ที่ส่งเข้ามา คนรับ
         try {
 
   // ตรวจสอบเงื่อนไขก่อนทำงาน
@@ -324,7 +347,52 @@ export const ChatContextProvider = ({ children, user }) => {
         }
     };
 
+    // const markMessageAsRead = async (senderId, isRead) => {
+    //     if (!senderId || isRead) {
+    //         console.log('Skipping update for senderId:', senderId);
+    //         return;
+    //     }
 
+    //     try {
+    //         const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, {
+    //             isRead: true,
+    //         });
+
+    //         if (response.success) {
+    //             console.log("Message marked as read:", response);
+    //             // อัปเดตสถานะข้อความใน state หลังจากอ่านแล้ว
+    //             setMessages((prevMessages) =>
+    //                 prevMessages.map((msg) =>
+    //                     msg.senderId === senderId ? { ...msg, isRead: true } : msg
+    //                 )
+    //             );
+    //         } else {
+    //             console.warn("Failed to update message read status");
+    //         }
+    //     } catch (error) {
+    //         console.error("Error marking message as read:", error);
+    //     }
+    // };
+    // useEffect(() => {
+    //     ทำหหhasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
+
+    //   }, [messages]);
+    
+         // ฟังก์ชันในการตรวจสอบว่ามีข้อความที่ยังไม่ได้อ่านหรือไม่
+//   const hasUnreadMessages = unreadNotifications.some(
+//     (notif) => notif.senderId === recipientUser?._id
+//   );
+
+  // ฟังก์ชันสำหรับอัปเดตการแจ้งเตือนว่าอ่านแล้ว
+//   const setNotificationsAsRead = (id) => {
+//     setUnreadNotifications((prevNotifications) =>
+//       prevNotifications.filter((notif) => notif.id !== id)
+//     );
+//   };
+
+        
+    //   },[]);
+      
     ///////////////////////
     const createChat = useCallback(
         async (studentId, teacherId) => {
@@ -359,7 +427,10 @@ export const ChatContextProvider = ({ children, user }) => {
                 setUnreadNotifications,
                 unreadNotifications,
                 setNotificationsAsRead,
-                newMessage
+                newMessage,
+                setCurrentChat
+                // markMessageAsRead,
+                // isUnread
                 //setNotificationsAsRead,
 
                 // markNotificationsAsRead
