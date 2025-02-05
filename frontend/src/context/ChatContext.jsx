@@ -111,27 +111,27 @@ export const ChatContextProvider = ({ children, user }) => {
             // ✅ รับ event "messageRead" เมื่อข้อความถูกอ่าน
     socket.on("messageRead", ({ senderId,recipientId }) => {
         console.log("✅ Message read event received for sender:", senderId);
-
-         // ✅ อัปเดตสถานะ isRead ของข้อความที่เกี่ยวข้อง
+        if (senderId === user._id) {
+            // ✅ อัปเดตสถานะ isRead ของข้อความที่เกี่ยวข้อง
          setMessages((prevMessages) =>
             prevMessages.map((msg) =>
                 msg.senderId === senderId && msg.recipientId === recipientId
                     ? { ...msg, isRead: true }
                     : msg
             )
-        );
+        )}
 
-        // ✅ อัปเดต Notifications ให้เป็น isRead: true
-        setNotifications((prevNotifications) =>
-            prevNotifications.map((notif) =>
-                notif.senderId === senderId ? { ...notif, isRead: true } : notif
-            )
-        );
+        // // ✅ อัปเดต Notifications ให้เป็น isRead: true
+        // setNotifications((prevNotifications) =>
+        //     prevNotifications.map((notif) =>
+        //         notif.senderId === senderId ? { ...notif, isRead: true } : notif
+        //     )
+        // );
 
-        // ✅ ลบออกจาก Unread Notifications
-        setUnreadNotifications((prevUnread) =>
-            prevUnread.filter((notif) => notif.senderId !== senderId)
-        );
+        // // ✅ ลบออกจาก Unread Notifications
+        // setUnreadNotifications((prevUnread) =>
+        //     prevUnread.filter((notif) => notif.senderId !== senderId)
+        // );
     });
     
         return () => {
@@ -142,6 +142,8 @@ export const ChatContextProvider = ({ children, user }) => {
             // socket.off("newNotification");
         };
     }, [socket, user, currentChat]);  // ใช้ socket และ user เป็น dependencies
+
+console.log('nmmmmmmmmmm',messagesRead)
 
     // Fetch all users from API
     useEffect(() => {
@@ -348,10 +350,10 @@ setUnreadNotifications((prevUnread) =>
         }
     };
 
-    const markMessageAsRead = async (senderId, isRead) => { 
+    const markMessageAsRead = async (senderId, isRead) => {
         if (!senderId || isRead || senderId === user._id) {
             console.log("Skipping update for:", { senderId, isRead, userId: user._id });
-            return;
+            return; // ถ้าข้อความถูกอ่านแล้ว หรือ senderId เหมือน user._id จะไม่อัปเดต
         }
         try {
             console.log("🔄 Sending request to mark message as read", { senderId });
@@ -360,25 +362,29 @@ setUnreadNotifications((prevUnread) =>
             const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, { isRead: true });
     
             console.log("📩 API Response:", response); // ดูค่าตอบกลับจาก API
-      // อัปเดต state ให้มีค่า isRead: true
-      if (response) {
-        // 🔄 แจ้ง Server ว่าผู้ใช้ได้อ่านข้อความแล้ว
-        socket.emit("markAsRead", { recipientId: user._id, senderId});
-
-        // ✅ อัปเดตค่า isRead เป็น true ใน state
-        setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-                msg.senderId === senderId ? { ...msg, isRead: true } : msg
-            )
-        );
-    } else {
+            
+            if (response) {
+                // 🔄 แจ้ง Server ว่าผู้ใช้ได้อ่านข้อความแล้ว
+                socket.emit("markAsRead", { recipientId: user._id, senderId });
+    
+                // ✅ อัปเดตค่า isRead เป็น true ใน state
+                // setMessages((prevMessages) =>
+                //     prevMessages.map((msg) => {
+                //         if (msg.senderId === senderId) {
+                //             console.log("✅ Message read: ", { senderId, msg });
+                //             return { ...msg, isRead: true };
+                //         }
+                //         return msg;
+                //     })
+                // );
+                
+            } else {
                 console.warn("⚠ Failed to update message read status", response);
             }
         } catch (error) {
             console.error("❌ Error marking message as read:", error);
         }
-    };    console.log('messRead',messagesRead)
-
+    };
     
     
 

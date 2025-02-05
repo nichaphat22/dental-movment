@@ -137,7 +137,7 @@ body {
 .message {
   
   color: black;
-  background:#fff;
+  /* background:#fff; */
   padding: 0.75rem;
   border-radius: 25px;
   max-width: 45%;
@@ -150,16 +150,33 @@ body {
 
 .message.self {
   color: white;
-  background: #7600A9 ;
-  border-radius: 20px 5px 20px 20px;
+   background: #7600A9 ; 
+  border-radius: 20px 5px 20px 20px; 
+
+}
+.message.you {
+  color: #000;
+   background:rgb(255, 255, 255) ; 
+  border-radius: 5px 20px 20px 20px; 
 
 }
 
 .textmessage {
+  padding:10px 15px;
   font-weight: 400;
   /* display:flex; */
+  
   word-wrap: break-word; /* เพิ่มบรรทัดนี้ */
   /* margin-bottom:px; */
+  /* border-radius: 20px 5px 20px 20px; */
+}
+
+span.messageRead{
+  color:#000;
+  font-weight: 300; 
+  font-size: 10px;
+  font-style: italic; /* ตัวเอียง */
+  /* font-weight: 10; */
 }
 /* 
 .me-2 img{

@@ -15,7 +15,7 @@ const NotiChat = ({ chat, user }) => {
   const navigate = useNavigate();
 
   // ดึงข้อมูลจาก ChatContext
-  // const { setNotificationsAsRead } = useContext(ChatContext);
+  const { setNotificationsAsRead,markMessageAsRead } = useContext(ChatContext);
 
   // ดึงข้อความล่าสุด
   const { latestMessage: initialLatestMessage } = useFetchLatestMessage(chat, user);
@@ -34,49 +34,20 @@ const NotiChat = ({ chat, user }) => {
     return shortText;
   };
 
-  // ตรวจสอบว่ามีข้อความที่ยังไม่ได้อ่าน
   const hasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
 
-
-    // ✅ ฟังก์ชัน markMessageAsRead (ย้ายมาอยู่ใน UserChat)
-    const markMessageAsRead = async (senderId, isRead) => { 
-      if (!senderId || isRead) {
-        console.log('Skipping update for senderId:', senderId);
-        return;
-      }
-  
-      try {
-        const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, { isRead: true });
-  
-        if (response.success) {
-          console.log("Message marked as read:", response);
-          
-          // ✅ อัปเดต UI ให้เป็นตัวบางแบบเรียลไทม์
-          setLatestMessage(prev => prev ? { ...prev, isRead: true } : prev);
-  
-          // ✅ อัปเดต Context ให้ UI เปลี่ยนเป็นตัวบางทันที
-          // setHasUnreadMessagesMap(prev => ({
-          //   ...prev,
-          //   [chat._id]: false
-          // }));
-        } else {
-          console.warn("Failed to update message read status");
-        }
-      } catch (error) {
-        console.error("Error marking message as read:", error);
-      }
-    };
-
-
-
-
 // ฟังก์ชันในการคลิกเพื่อทำให้การแจ้งเตือนเป็น "อ่านแล้ว"
+// ฟังก์ชัน handleClick ที่เรียกใช้งาน markMessageAsRead
 const handleClick = async (id) => {
-  // setNotificationsAsRead(id);
-  if (latestMessage) {
-    await markMessageAsRead(id, latestMessage.isRead);
+  if (!latestMessage || !id || latestMessage.isRead) return; // ตรวจสอบว่าข้อความไม่ถูกอ่านแล้ว
+
+  try {
+      await markMessageAsRead(id, latestMessage.isRead); // ส่งข้อมูลที่ต้องการไป
+      setNotificationsAsRead(id); // อัปเดตสถานะการแจ้งเตือน
+  } catch (error) {
+      console.error("❌ Error marking message as read:", error);
   }
-  navigate(`/chat/${id}`);
+  navigate(`/chat/${id}`); // นำทางไปที่หน้าห้องแชท
 };
   return (
     <Stack
