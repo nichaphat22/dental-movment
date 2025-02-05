@@ -28,12 +28,14 @@ const ChatBox = ({ chat,  }) => {
       const { latestMessage: initialLatestMessage } = useFetchLatestMessage(currentChat,chat, user);
       const [latestMessage, setLatestMessage] = useState(initialLatestMessage);
       
+
+      
       useEffect(() => {
         setLatestMessage(initialLatestMessage);
       }, [initialLatestMessage]);
       
-      console.log("Latest Message:", latestMessage);
-      console.log(messages)
+    //   console.log("Latest Message:", latestMessage);
+    //   console.log(messages)
     
     useEffect(() => {
         if (chat) {
@@ -81,7 +83,7 @@ const ChatBox = ({ chat,  }) => {
         setSelectedFile(null);
         fileInputRef.current.value = "";
     };
-    console.log('currentChat',currentChat)
+    // console.log('currentChat',currentChat)
 
     const handleSendMessage = () => {
         
@@ -109,17 +111,21 @@ const ChatBox = ({ chat,  }) => {
     }
 
 
-      const handleClick = async (id) => {
-        if (latestMessage) {
-            await markMessageAsRead(id, latestMessage.isRead);
+    const handleClick = async (senderId) => {
+        if (!latestMessage || !senderId) return;
+    
+        try {
+            await markMessageAsRead(senderId, latestMessage.isRead);
+  
+            // อัปเดตการแจ้งเตือน
+            setNotificationsAsRead(senderId);
+        } catch (error) {
+            console.error("❌ Error marking message as read:", error);
         }
-        
-    // setNotificationsAsRead(id);
-        setNotificationsAsRead(id);
     };
-
-    console.log("User data:", user);
-console.log("Messages:", messages);
+    
+//     console.log("User data:", user);
+// console.log("Messages:", messages);
 
     
     return (
@@ -152,10 +158,6 @@ console.log("Messages:", messages);
                         {message?.senderId === user._id && message?.isRead && (
     <span className="read-status">อ่านแล้ว</span>
 )}
-{/* {message.senderId === user._id && message.isRead && index === messages.length - 1 && (
-    <span className="read-status">อ่านแล้ว</span>
-)} */}
-
 
 
                         <span>

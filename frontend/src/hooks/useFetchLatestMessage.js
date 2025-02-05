@@ -9,7 +9,7 @@ export const useFetchLatestMessage = (chat) => {
     useEffect(() => {
         const getMessages = async () => {
             if (!chat?._id) {
-                console.log("No chatId provided");
+                // console.log("No chatId provided");
                 return;
             }
 

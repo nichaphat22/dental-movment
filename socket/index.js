@@ -51,22 +51,43 @@ io.on("connection", (socket) => {
     console.log("Message sent to", recipientSocketId);
 });
 
-  // ✅ รับ event "markAsRead" จาก client และแจ้งผู้ส่งว่าถูกอ่านแล้ว
-socket.on("markAsRead", ({ senderId }) => {
-  console.log(`📨 Notifications read for sender: ${senderId}`);
-
+socket.on("markAsRead", ({ senderId, recipientId }) => {
   const senderSocketId = socketMap.get(senderId);
-  if (senderSocketId) {
-      io.to(senderSocketId).emit("notificationRead", { senderId });
-  }
+  if (!senderSocketId) return;
+  
+  // ส่งกลับไปยังผู้ส่งให้ทราบว่าข้อความถูกอ่าน
+  io.to(senderSocketId).emit("messageRead", { senderId, recipientId });
+
+  console.log(`✅ Messages from ${senderId} marked as read by ${recipientId}`);
 });
 
-socket.on("messageRead", ({ senderId, receiverId }) => {
-  console.log(`Notifying sender (${senderId}) that receiver (${receiverId}) read the message`);
 
-  // แจ้งเตือนผู้ส่งว่าข้อความถูกอ่าน
-  io.to(senderId).emit("messageRead", { senderId, receiverId });
-});
+
+// socket.on("markAsRead", async ({ messageId, senderId }) => {
+//   try {
+//     // ✅ ค้นหา Socket ID ของผู้ส่ง
+//     const senderSocketId = socketMap.get(senderId);
+//     if (senderSocketId) {
+//       // 🔹 แจ้งให้ผู้ส่งอัปเดต UI
+//       io.to(senderSocketId).emit("messageRead", { senderId });
+
+//       // 🔹 แจ้งเตือนว่าอ่านแล้ว (ถ้ามีการใช้ระบบ notification)
+//       io.to(senderSocketId).emit("notificationRead", { senderId });
+//     }
+//   } catch (error) {
+//     console.error("❌ Error updating message as read:", error);
+//   }
+// });
+
+// socket.on("markMessageAsRead", async ({ senderId }) => {
+
+//       // ✅ ส่ง event ให้ผู้ส่งรู้ว่าข้อความถูกอ่านแล้ว
+//       io.to(senderId).emit("messageRead", { senderId });
+
+// });
+
+
+
 
 
   // เมื่อผู้ใช้ disconnect

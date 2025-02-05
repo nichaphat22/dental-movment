@@ -50,16 +50,19 @@ const markMessageAsRead = async (req, res) => {
       const result = await messageModel.updateMany(
         { senderId, isRead: false },  // กรองเฉพาะข้อความที่ยังไม่ได้อ่าน
         { $set: { isRead: true } },      // เปลี่ยนสถานะให้เป็น "อ่านแล้ว"
-        { new: true }                    // ให้คืนค่าข้อมูลที่อัปเดต
+        // { new: true }                    // ให้คืนค่าข้อมูลที่อัปเดต
       );
       
-      // ถ้าไม่มีข้อความที่อัปเดต ให้แจ้งว่าไม่พบ
-      if (result.matchedCount === 0) {
-        return res.status(404).json({ message: 'No unread messages found' });
-      }
-  
-      // ส่งผลลัพธ์กลับไป
-      res.status(200).json({ message: 'Messages marked as read', result });
+      if (result.modifiedCount > 0) {
+        // ดึงข้อมูลข้อความที่ isRead: true
+        const updatedMessages = await messageModel.find({ senderId, isRead: true });
+
+        return res.json(
+            updatedMessages, // ส่งคืนเฉพาะข้อความที่ถูกอัปเดตเป็น true
+        );
+    }
+
+    res.json({ success: false,message: "No messages updated." });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Error marking messages as read' });
