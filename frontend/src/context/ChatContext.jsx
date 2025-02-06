@@ -112,10 +112,11 @@ export const ChatContextProvider = ({ children, user }) => {
     socket.on("messageRead", ({ senderId,recipientId }) => {
         console.log("✅ Message read event received for sender:", senderId);
         if (senderId === user._id) {
+            console.log('recipientId',recipientId)
             // ✅ อัปเดตสถานะ isRead ของข้อความที่เกี่ยวข้อง
          setMessages((prevMessages) =>
             prevMessages.map((msg) =>
-                msg.senderId === senderId && msg.recipientId === recipientId
+                msg.senderId === senderId 
                     ? { ...msg, isRead: true }
                     : msg
             )

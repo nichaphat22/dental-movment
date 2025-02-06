@@ -29,26 +29,26 @@ const UserChat = ({ chat, user }) => {
   // ✅ ฟังก์ชันเมื่อกดที่แชท
  // ✅ ฟังก์ชันเมื่อกดที่แชท
 const handleClick = async (id) => {
-  // ตรวจสอบว่า latestMessage มีค่าหรือไม่ และข้อความยังไม่ได้อ่าน
-  if (!latestMessage || !id || latestMessage.isRead) {
-      // ถ้าข้อความถูกอ่านแล้ว หรือไม่มี latestMessage ก็ไม่ต้องทำอะไร
-      console.log("Message is already read or latestMessage is undefined.");
-      return;
-  }
+    // ตรวจสอบว่า latestMessage มีค่าหรือไม่ และข้อความยังไม่ได้อ่าน|| id !== user._id
+    if (!latestMessage || !id || latestMessage.isRead ) {
+        // ถ้าข้อความถูกอ่านแล้ว หรือไม่มี latestMessage ก็ไม่ต้องทำอะไร
+        console.log("Message is already read or latestMessage is undefined.");
+        return;
+    }
 
-  try {
-      // เรียกใช้งาน markMessageAsRead เพื่ออัปเดตสถานะการอ่าน
-      console.log("Marking message as read for sender:", id);
-      await markMessageAsRead(id, latestMessage.isRead);
+    try {
+        // เรียกใช้งาน markMessageAsRead เพื่ออัปเดตสถานะการอ่าน
+        console.log("Marking message as read for sender:", id);
+        await markMessageAsRead(id, latestMessage.isRead);
 
-      // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
-      setNotificationsAsRead(id);
-  } catch (error) {
-      console.error("❌ Error marking message as read:", error);
-  }
-  
-  // นำทางไปยังหน้าของแชท
-  navigate(`/chat/${id}`);
+        // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
+        setNotificationsAsRead(id);
+    } catch (error) {
+        console.error("❌ Error marking message as read:", error);
+    }
+    
+    // นำทางไปยังหน้าของแชท
+    navigate(`/chat/${id}`);
 };
 
 
