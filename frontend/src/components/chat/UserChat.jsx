@@ -30,7 +30,7 @@ const UserChat = ({ chat, user }) => {
  // ✅ ฟังก์ชันเมื่อกดที่แชท
 const handleClick = async (id) => {
     // ตรวจสอบว่า latestMessage มีค่าหรือไม่ และข้อความยังไม่ได้อ่าน|| id !== user._id
-    if (!latestMessage || !id || latestMessage.isRead ) {
+    if (!latestMessage || !id || latestMessage.isRead || latestMessage.senderId === user._id  ) {
         // ถ้าข้อความถูกอ่านแล้ว หรือไม่มี latestMessage ก็ไม่ต้องทำอะไร
         console.log("Message is already read or latestMessage is undefined.");
         return;

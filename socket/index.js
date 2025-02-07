@@ -5,100 +5,84 @@ const io = new Server(8800, {
   },
 });
 
+// ใช้ Map เพื่อเก็บ userId -> socketId ของทั้ง sender และ recipient
 const socketMap = new Map();
 
+
 io.on("connection", (socket) => {
-  console.log("New connection", socket.id);
+    console.log("New connection", socket.id);
 
-  // เมื่อผู้ใช้เชื่อมต่อและส่ง userId มา
-  socket.on("addNewUser", (userId) => {
-    if (!userId) {
-      console.log("Received undefined userId, ignoring...");
-      return;
-    }
-    
-    socketMap.set(userId, socket.id);
-    console.log(`✅ User added: ${userId} -> ${socket.id}`);
-    console.log("📌 Current socket map:", Array.from(socketMap.entries())); // log ค่าทั้งหมด
-  });
-  
+    // ✅ เมื่อมีผู้ใช้เชื่อมต่อ ให้เก็บ userId -> socketId
+    socket.on("addNewUser", ({ userId }) => {
+        if (!userId) {
+            console.log("Received undefined userId, ignoring...");
+            return;
+        }
 
-  socket.on("sendMessage", (message) => {
-    if (!message.chatId) {
-        console.log("Error: message.chatId is undefined or invalid");
-        return;
-    }
+        socketMap.set(userId, socket.id);
+        socket.userId = userId; // ผูก userId กับ socket
 
-    const recipientSocketId = socketMap.get(message.recipientId);
-    console.log("Recipient ID:", message.recipientId);
-    console.log("Recipient Socket ID:", recipientSocketId);
-
-    if (!recipientSocketId) {
-        console.log("Recipient not connected:", message.recipientId);
-        return;
-    }
-
-    io.to(recipientSocketId).emit("getMessage", message);
-    io.to(recipientSocketId).emit("getNotification", {
-        _id: message._id, 
-        chatId: message.chatId,
-        senderId: message.senderId,
-        recipientId: message.recipientId,
-        isRead: false,
-        date: new Date(),
+        console.log(`✅ User added: ${userId} -> ${socket.id}`);
+        console.log("📌 Current socket map:", Array.from(socketMap.entries()));
     });
 
-    console.log("Message sent to", recipientSocketId);
-});
+    // ✅ ส่งข้อความถึงผู้รับ และเก็บค่าของผู้ส่ง
+    socket.on("sendMessage", (message) => {
+        if (!message.chatId || !message.senderId || !message.recipientId) {
+            console.log("Error: Invalid message data", message);
+            return;
+        }
 
-socket.on("markAsRead", ({ senderId, recipientId }) => {
-  const senderSocketId = socketMap.get(senderId);
-  if (!senderSocketId) return;
-  
-  // ส่งกลับไปยังผู้ส่งให้ทราบว่าข้อความถูกอ่าน
-  io.to(senderSocketId).emit("messageRead", { senderId, recipientId });
+        // หา socket ของผู้รับ
+        const recipientSocketId = socketMap.get(message.recipientId);
+        const senderSocketId = socketMap.get(message.senderId); // ✅ เก็บค่า sender ไว้ด้วย
 
-  console.log(`✅ Messages from ${senderId} marked as read by ${recipientId}`);
-});
+        console.log(`📩 Message from ${message.senderId} to ${message.recipientId}`);
+        console.log("Sender Socket ID:", senderSocketId);
+        console.log("Recipient Socket ID:", recipientSocketId);
 
+        if (recipientSocketId) {
+            // ส่งข้อความไปยังผู้รับ
+            io.to(recipientSocketId).emit("getMessage", message);
+            io.to(recipientSocketId).emit("getNotification", {
+                _id: message._id,
+                chatId: message.chatId,
+                senderId: message.senderId,
+                recipientId: message.recipientId,
+                isRead: false,
+                date: new Date(),
+            });
 
+            console.log("✅ Message sent to", recipientSocketId);
+        } else {
+            console.log("❌ Recipient not connected:", message.recipientId);
+        }
+    });
 
-// socket.on("markAsRead", async ({ messageId, senderId }) => {
-//   try {
-//     // ✅ ค้นหา Socket ID ของผู้ส่ง
-//     const senderSocketId = socketMap.get(senderId);
-//     if (senderSocketId) {
-//       // 🔹 แจ้งให้ผู้ส่งอัปเดต UI
-//       io.to(senderSocketId).emit("messageRead", { senderId });
+    // ✅ แจ้งให้ sender รู้ว่าข้อความถูกอ่าน
+    socket.on("markAsRead", ({ updatedMessages,senderId, recipientId }) => {
+        console.log("✅ dgfdffffffffmessage", updatedMessages);
+        const senderSocketId = socketMap.get(senderId);
+        const recipientSocketId = socketMap.get(recipientId); // ✅ เก็บค่าของ recipient
 
-//       // 🔹 แจ้งเตือนว่าอ่านแล้ว (ถ้ามีการใช้ระบบ notification)
-//       io.to(senderSocketId).emit("notificationRead", { senderId });
-//     }
-//   } catch (error) {
-//     console.error("❌ Error updating message as read:", error);
-//   }
-// });
+        if (senderSocketId) {
+            io.to(senderSocketId).emit("messageRead", { senderId, recipientId,updatedMessages });
+            console.log(`✅ Messages from ${senderId} marked as read by ${recipientId}`);
+        } else {
+            console.log("❌ Sender is not connected:", senderId);
+        }
 
-// socket.on("markMessageAsRead", async ({ senderId }) => {
+        if (recipientSocketId) {
+            console.log(`📌 Recipient (${recipientId}) is connected at: ${recipientSocketId}`);
+        }
+    });
 
-//       // ✅ ส่ง event ให้ผู้ส่งรู้ว่าข้อความถูกอ่านแล้ว
-//       io.to(senderId).emit("messageRead", { senderId });
-
-// });
-
-
-
-
-
-  // เมื่อผู้ใช้ disconnect
-  socket.on("disconnect", () => {
-    for (const [userId, socketId] of socketMap.entries()) {
-      if (socketId === socket.id) {
-        socketMap.delete(userId);  // ลบข้อมูล userId เมื่อผู้ใช้ตัดการเชื่อมต่อ
-        break;
-      }
-    }
-    console.log("User disconnected", socket.id);
-    console.log("Updated socket map:", Array.from(socketMap.entries()));
-  });
+    // ✅ เมื่อผู้ใช้ disconnect ให้ลบจาก `socketMap`
+    socket.on("disconnect", () => {
+        if (socket.userId) {
+            socketMap.delete(socket.userId);
+            console.log(`❌ User disconnected: ${socket.userId}`);
+        }
+        console.log("Updated socket map:", Array.from(socketMap.entries()));
+    });
 });

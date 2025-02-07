@@ -114,7 +114,7 @@ const ChatBox = ({ chat, }) => {
 
 
     const handleClick = async (id) => {
-        if (!latestMessage || !id ||latestMessage.isRead ) {
+        if (!latestMessage || !id ||latestMessage.isRead || latestMessage.senderId === user._id ) {
             // ถ้าข้อความถูกอ่านแล้ว หรือไม่มี latestMessage ก็ไม่ต้องทำอะไร
             console.log("Message is already read or latestMessage is undefined.");
             return;
