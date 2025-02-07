@@ -14,7 +14,7 @@ const UserChat = ({ chat, user }) => {
   const navigate = useNavigate();
 
   // ✅ ดึงฟังก์ชัน markMessageAsRead จาก ChatContext
-  const { markMessageAsRead, setNotificationsAsRead } = useContext(ChatContext);
+  const { markMessageAsRead, setNotificationsAsRead,unradCount } = useContext(ChatContext);
 
   // ดึงข้อความล่าสุด
   const { latestMessage: initialLatestMessage } = useFetchLatestMessage(chat, user);
@@ -87,6 +87,7 @@ const handleClick = async (id) => {
         </div>
       </div>
       <div className="d-flex flex-column align-items-end">
+        <span>{unradCount}</span>
         <div className="date">
           {moment(latestMessage?.createdAt).locale("th").calendar()}
         </div>

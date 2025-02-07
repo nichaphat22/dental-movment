@@ -13,7 +13,7 @@ moment.locale("th");
 const Notifications = ({}) => {
   const { user } = useContext(AuthContext);  // Context to get the current user data
   const [isOpen, setIsOpen] = useState(false); // State to control visibility of the notification box
-  const { setNotifications,userChats,unreadNotifications,setUnreadNotifications,updateCurrentChat } = useContext(ChatContext);
+  const { unreadChatsCount,notifications,setNotifications,userChats,unreadNotifications,setUnreadNotifications,updateCurrentChat } = useContext(ChatContext);
   
   useEffect(() => {
     return () => {
@@ -56,7 +56,8 @@ const Notifications = ({}) => {
     }
   };
   
-  
+  const UnreadChats = unreadChatsCount(notifications);
+  console.log("Unread chats count:", UnreadChats);
   
   return (
     <div className="notifications">
@@ -78,7 +79,7 @@ const Notifications = ({}) => {
         // onClick={handleNotificationsClick}
       >
         <BsChatTextFill size={20} />
-        {unreadNotifications.length > 0 ? (
+        {UnreadChats > 0 ? (
   <div
     className="unread-count"
     style={{
@@ -92,7 +93,7 @@ const Notifications = ({}) => {
       fontSize: "12px",
     }}
   >
-    {unreadNotifications.length}  {/* แสดงจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน */}
+    {UnreadChats}  {/* แสดงจำนวนการแจ้งเตือนที่ยังไม่ได้อ่าน */}
   </div>
 ) : null}  {/* หรือถ้าไม่มีการแจ้งเตือนที่ยังไม่ได้อ่านก็จะไม่แสดง */}
 

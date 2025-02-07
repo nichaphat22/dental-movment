@@ -316,7 +316,6 @@ export const ChatContextProvider = ({ children, user }) => {
                 return; // ออกจากฟังก์ชันโดยไม่ทำอะไร
             }
 
-
             // 🔥 ส่ง API ไปอัปเดตใน MongoDB หรือ Firebase
             const response = await putRequest(`${baseUrl}/messages/notifications/userRead/${senderId}`, {
                 isRead: true,  // ส่งข้อมูลที่ต้องการอัปเดต
@@ -378,7 +377,18 @@ export const ChatContextProvider = ({ children, user }) => {
             console.error("❌ Error marking message as read:", error);
         }
     };
+// ฟังก์ชันสำหรับนับจำนวนแชทที่ยังไม่ได้อ่าน
+const unreadChatsCount = (notifications) => {
+    if (!notifications || notifications.length === 0) return 0;
 
+    // กรองเฉพาะ `senderId` ที่ยังไม่ได้อ่าน
+    const unreadChatIds = notifications
+        .filter((notification) => notification?.senderId && !notification.isRead) // ใช้ senderId
+        .map((notification) => notification.senderId); // ดึงเฉพาะ senderId
+
+    // คืนค่าจำนวน senderId ที่ไม่ซ้ำกัน
+    return [...new Set(unreadChatIds)].length;
+};
 
     ///////////////////////
     const createChat = useCallback(
@@ -417,6 +427,7 @@ export const ChatContextProvider = ({ children, user }) => {
                 newMessage,
                 setCurrentChat,
                 markMessageAsRead,
+                unreadChatsCount
             }}
         >
             {children}
