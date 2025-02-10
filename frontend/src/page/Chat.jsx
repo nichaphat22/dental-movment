@@ -17,6 +17,7 @@ const Chat = () => {
             updateCurrentChat(null);
         };
     }, [updateCurrentChat]);
+    
 
     return (
         <Container style={{ marginTop: '80px', padding: '0 0 0 5px' }}>
@@ -25,11 +26,12 @@ const Chat = () => {
                 <Stack direction="horizontal" gap={2} className="align-items-start">
                     <Stack className="messages-box flex-grow-0 pe-3">
                         {isUserChatsLoading && <p></p>}
-                        {userChats?.map((chat, index) => (
-                            <div key={index} onClick={() => updateCurrentChat(chat)}>
-                                <UserChat chat={chat} user={user} />
-                            </div>
-                        ))}
+                        {userChats?.map((chat) => (
+    <div key={chat._id} onClick={() => updateCurrentChat(chat)}>
+        <UserChat chat={chat} user={user} />
+    </div>
+))}
+
                     </Stack>
                     <ChatBox />
                 </Stack>

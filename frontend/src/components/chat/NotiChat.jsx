@@ -37,17 +37,28 @@ const NotiChat = ({ chat, user }) => {
   const hasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
 
 // ฟังก์ชันในการคลิกเพื่อทำให้การแจ้งเตือนเป็น "อ่านแล้ว"
-// ฟังก์ชัน handleClick ที่เรียกใช้งาน markMessageAsRead
+// ✅ ฟังก์ชันเมื่อกดที่แชท
 const handleClick = async (id) => {
-  if (!latestMessage || !id || latestMessage.isRead) return; // ตรวจสอบว่าข้อความไม่ถูกอ่านแล้ว
+  // ตรวจสอบว่า latestMessage มีค่าหรือไม่ และข้อความยังไม่ได้อ่าน|| id !== user._id
+  if (!latestMessage || !id  ) {
+      // ถ้าข้อความถูกอ่านแล้ว หรือไม่มี latestMessage ก็ไม่ต้องทำอะไร
+      console.log("Message is already read or latestMessage is undefined.");
+      return;
+  }
 
   try {
-      await markMessageAsRead(id, latestMessage.isRead); // ส่งข้อมูลที่ต้องการไป
-      setNotificationsAsRead(id); // อัปเดตสถานะการแจ้งเตือน
+      // เรียกใช้งาน markMessageAsRead เพื่ออัปเดตสถานะการอ่าน
+      console.log("Marking message as read for sender:", id);
+      await markMessageAsRead(id, latestMessage.isRead);
+
+      // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
+      setNotificationsAsRead(id);
   } catch (error) {
       console.error("❌ Error marking message as read:", error);
   }
-  navigate(`/chat/${id}`); // นำทางไปที่หน้าห้องแชท
+  
+  // นำทางไปยังหน้าของแชท
+  navigate(`/chat/${id}`);
 };
   return (
     <Stack
@@ -66,21 +77,36 @@ const handleClick = async (id) => {
             {recipientUser?.fname} {recipientUser?.lname}
           </div>
           <div className="text">
-            {latestMessage?.text && (
-                <span
-                style={{
-                  fontWeight: hasUnreadMessages ? "bold" : "normal", 
-                  color: hasUnreadMessages ? "#000" : "#888",
-                }}
-              >
-              {truncateText(latestMessage?.text)}
-            </span>
-            )}
-          </div>
+  {latestMessage && (
+    <span
+      style={{
+        fontWeight: hasUnreadMessages ? "bold" : "normal",
+        color: hasUnreadMessages ? "#000" : "#888",
+      }}
+    >
+      {latestMessage?.file ? (
+        latestMessage?.file?.type.includes("image")
+          ? "ส่งรูปภาพ"
+          : "ส่งไฟล์"
+      ) : (
+        latestMessage?.text?.length > 20
+          ? latestMessage?.text.substring(0, 20) + "..."
+          : latestMessage?.text
+      )}
+    </span>
+  )}
+</div>
+
         </div>
       </div>
       <div className="d-flex flex-column align-items-end">
-        <div className="date" style={{color:''}}>{moment(latestMessage?.createdAt).locale("th").calendar()}</div>
+         <div className="date">
+        {latestMessage ? (
+          moment(latestMessage?.createdAt).locale("th").calendar()
+        ) : (
+          null
+        )}
+      </div>
           {/* Display the number of unread notifications for each chat */}
           {/* <div className={thisUserNotifications?.length > 0 ? "this-user-notifications" : ""}>
                         {thisUserNotifications?.length > 0 ? thisUserNotifications.length : ""}

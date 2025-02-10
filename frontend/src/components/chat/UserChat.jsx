@@ -14,7 +14,7 @@ const UserChat = ({ chat, user }) => {
   const navigate = useNavigate();
 
   // ✅ ดึงฟังก์ชัน markMessageAsRead จาก ChatContext
-  const { markMessageAsRead, setNotificationsAsRead,unradCount } = useContext(ChatContext);
+  const { notifications,markMessageAsRead, setNotificationsAsRead, unreadChatsCount,socket } = useContext(ChatContext);
 
   // ดึงข้อความล่าสุด
   const { latestMessage: initialLatestMessage } = useFetchLatestMessage(chat, user);
@@ -25,6 +25,12 @@ const UserChat = ({ chat, user }) => {
   }, [initialLatestMessage]);
 
   const hasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
+
+  
+console.log('chat',chat._id)
+
+// const unreadMessages = unreadMessageCount(messages);
+
 
   // ✅ ฟังก์ชันเมื่อกดที่แชท
  // ✅ ฟังก์ชันเมื่อกดที่แชท
@@ -43,6 +49,8 @@ const handleClick = async (id) => {
 
         // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
         setNotificationsAsRead(id);
+         // ✅ ตรวจสอบว่ามีการเชื่อมต่อ socket ก่อนใช้
+        
     } catch (error) {
         console.error("❌ Error marking message as read:", error);
     }
@@ -50,6 +58,7 @@ const handleClick = async (id) => {
     // นำทางไปยังหน้าของแชท
     navigate(`/chat/${id}`);
 };
+const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
 
 
   return (
@@ -73,24 +82,44 @@ const handleClick = async (id) => {
             {recipientUser?.fname} {recipientUser?.lname}
           </div>
           <div className="text">
-            {latestMessage?.text && (
-              <span
-                style={{
-                  fontWeight: hasUnreadMessages ? "bold" : "normal", 
-                  color: hasUnreadMessages ? "#000" : "#888",
-                }}
-              >
-                {latestMessage?.text.length > 20 ? latestMessage?.text.substring(0, 20) + "..." : latestMessage?.text}
-              </span>
-            )}
-          </div>
+  {latestMessage && (
+    <span
+      style={{
+        fontWeight: hasUnreadMessages ? "bold" : "normal",
+        color: hasUnreadMessages ? "#000" : "#888",
+      }}
+    >
+      {latestMessage?.file ? (
+        latestMessage?.file?.type.includes("image")
+          ? "ส่งรูปภาพ"
+          : "ส่งไฟล์"
+      ) : (
+        latestMessage?.text?.length > 20
+          ? latestMessage?.text.substring(0, 20) + "..."
+          : latestMessage?.text
+      )}
+    </span>
+  )}
+</div>
+
+
         </div>
       </div>
       <div className="d-flex flex-column align-items-end">
-        <span>{unradCount}</span>
-        <div className="date">
-          {moment(latestMessage?.createdAt).locale("th").calendar()}
-        </div>
+        {/* ✅ แสดงเฉพาะถ้าจำนวนข้อความที่ยังไม่ได้อ่านมากกว่า 0 */}
+        {unreadMessages > 0 && (
+          <span style={{ color: '#000' }}>
+            {unreadMessages} <span>ข้อความที่ยังไม่ได้อ่าน</span>
+          </span>
+        )}
+       <div className="date">
+  {latestMessage ? (
+    moment(latestMessage?.createdAt).locale("th").calendar()
+  ) : (
+    null
+  )}
+</div>
+
       </div>
     </Stack>
   );

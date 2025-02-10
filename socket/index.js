@@ -57,7 +57,16 @@ io.on("connection", (socket) => {
         } else {
             console.log("❌ Recipient not connected:", message.recipientId);
         }
+        
     });
+
+    socket.on("notificationRead", ({ senderId, recipientId }) => {
+        console.log(`🔔 Notification read by ${recipientId} for sender ${senderId}`);
+        
+        // ส่งอัปเดตไปยังผู้ส่งว่าข้อความถูกอ่านแล้ว
+        io.to(senderId).emit("updateNotification", { recipientId });
+    });
+    
 
     // ✅ แจ้งให้ sender รู้ว่าข้อความถูกอ่าน
     socket.on("markAsRead", ({ updatedMessages,senderId, recipientId }) => {

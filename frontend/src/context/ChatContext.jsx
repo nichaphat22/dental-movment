@@ -65,69 +65,95 @@ export const ChatContextProvider = ({ children, user }) => {
 
         socket.on("getMessage", (message) => {
             console.log("📩 Received message:", message);
-
+        
+            // ถ้าเป็นแชทที่เปิดอยู่ ให้เพิ่มข้อความใหม่ในแชทปัจจุบัน
             if (currentChat?._id === message.chatId) {
                 setMessages((prevMessages) => {
                     console.log("💬 Updating messages", prevMessages);
                     return prevMessages ? [...prevMessages, message] : [message];
                 });
             }
+
+            // อัพเดทแชทที่มีข้อความใหม่
+      setUserChats((prevChats) => {
+        const updatedChats = prevChats.map((chat) =>
+          chat._id === message.chatId
+            ? { ...chat, latestMessage: message, updatedAt: new Date() }
+            : chat
+        );
+
+        // เรียงลำดับแชทใหม่หลังจากได้รับข้อความใหม่
+        const sortedChats = updatedChats.sort((a, b) => {
+          if (!a.latestMessage) return 1;
+          if (!b.latestMessage) return -1;
+          return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
         });
 
+        return sortedChats;
+      });
+    });
+
+   
         socket.on("getNotification", (notification) => {
-            console.log("🔔 Notification received:", notification);
-        
-            if (notification.senderId === user._id) return; // ข้ามหากเป็นของตัวเอง
-        
+            console.log("Notification received:", notification);
+
+            if (notification.senderId === user._id) return;
+
             setNotifications((prevNotifications) => {
-                // 🔥 เก็บแค่ 1 การแจ้งเตือนต่อ senderId (แทนที่ของเก่าถ้ามี)
-                const filteredNotifications = prevNotifications.filter(
-                    (notif) => notif.senderId !== notification.senderId
-                );
-                return [...filteredNotifications, notification]; 
+                // Avoid duplicate notifications
+                if (!prevNotifications.some((notif) => notif._id === notification._id)) {
+                    return [...prevNotifications, notification];
+                }
+                return prevNotifications;
             });
-        
+
             if (!notification.isRead && notification.recipientId === user._id) {
                 setUnreadNotifications((prevUnread) => {
-                    // 🔥 คงเหลือแค่ 1 การแจ้งเตือนต่อ senderId
-                    const filteredUnread = prevUnread.filter(
-                        (notif) => notif.senderId !== notification.senderId
-                    );
-                    return [...filteredUnread, notification];
+                    // Avoid duplicate unread notifications
+                    if (!prevUnread.some((notif) => notif._id === notification._id)) {
+                        return [...prevUnread, notification];
+                    }
+                    return prevUnread;
                 });
             }
-        
             // ✅ รับ event "notificationRead" เมื่อข้อความถูกอ่าน
             socket.on("notificationRead", ({ senderId }) => {
                 console.log("✅ Message read notification received for sender:", senderId);
-        
+
                 // ✅ อัปเดต Notifications ให้เป็น isRead: true
                 setNotifications((prevNotifications) =>
                     prevNotifications.map((notif) =>
                         notif.senderId === senderId ? { ...notif, isRead: true } : notif
                     )
                 );
-        
+
                 // ✅ ลบออกจาก Unread Notifications
                 setUnreadNotifications((prevUnread) =>
                     prevUnread.filter((notif) => notif.senderId !== senderId)
                 );
             });
-        });
-        
 
-        // ✅ รับ event "messageRead" เมื่อข้อความถูกอ่าน
-        socket.on("messageRead", ({ senderId, updatedMessages, recipientId }) => {
+        });
+
+         // ✅ รับ event "messageRead" เมื่อข้อความถูกอ่าน
+         socket.on("messageRead", ({ senderId, updatedMessages, recipientId }) => {
             console.log("✅ Message read event received for sender:", senderId);
             if (senderId === user._id) {
-                console.log('updatedMessages', recipientId)
-                console.log('updatedMessages', updatedMessages)
+                console.log('updatedMessages', updatedMessages);
+                
                 // ✅ อัปเดตสถานะ isRead ของข้อความที่เกี่ยวข้อง
                 setMessages((prevMessages) => 
-                    prevMessages.map((message) => {
-                    return updatedMessages ? { ...message, isRead: true } : message;
-                }))}
-        })
+                    // ตรวจสอบว่า prevMessages เป็นอาร์เรย์หรือไม่
+                    Array.isArray(prevMessages) 
+                        ? prevMessages.map((message) => {
+                            return updatedMessages ? { ...message, isRead: true } : message;
+                        })
+                        : prevMessages // ถ้าไม่ใช่อาร์เรย์ ให้คืนค่า prevMessages โดยตรง
+                );
+            }
+        });
+        
+        
         return () => {
             socket.off("messageRead");
             socket.off("getMessage");
@@ -137,7 +163,18 @@ export const ChatContextProvider = ({ children, user }) => {
         };
     }, [socket, user, currentChat]);  // ใช้ socket และ user เป็น dependencies
 
+    const unreadChatsCount = (notifications, userId) => {
+        if (!notifications || notifications.length === 0 || !userId) return 0;
+    
+        console.log("🔍 Calculating unread messages for user:", userId);
+        
+        return notifications.filter(
+            (notification) => notification.senderId === userId && !notification.isRead
+        ).length;
+    };
+    
 
+    // console.log('messages',messages)
 
     // Fetch all users from API
     useEffect(() => {
@@ -178,20 +215,19 @@ export const ChatContextProvider = ({ children, user }) => {
     useEffect(() => {
         const getUserChats = async () => {
             if (!user?._id) return;
-
+    
             setIsUserChatsLoading(true);
             setUserChatsError(null);
-
+    
             try {
                 const response = await getRequest(`${baseUrl}/chats/${user._id}`);
-
                 setIsUserChatsLoading(false);
-
+    
                 if (response.error) {
                     setUserChatsError(response);
                     return;
                 }
-
+    
                 // ดึงข้อความล่าสุดสำหรับแต่ละแชท
                 const chatsWithLatestMessage = await Promise.all(
                     response.map(async (chat) => {
@@ -203,24 +239,25 @@ export const ChatContextProvider = ({ children, user }) => {
                         return { ...chat, latestMessage: null };
                     })
                 );
-
+    
                 // เรียงลำดับแชทตาม timestamp ของข้อความล่าสุด
                 const sortedChats = chatsWithLatestMessage.sort((a, b) => {
-                    if (!a.latestMessage) return -1;
-                    if (!b.latestMessage) return 1;
+                    if (!a.latestMessage) return 1;  // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
+                    if (!b.latestMessage) return -1; // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
                     return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
                 });
-
+                
+    console.log('sortedChats',sortedChats)
                 setUserChats(sortedChats);
             } catch (error) {
                 setIsUserChatsLoading(false);
                 setUserChatsError(error);
             }
         };
-
+    
         getUserChats();
-    }, [user, notifications]);
-
+    }, [user, notifications]);  // เพิ่ม dependencies เพื่อให้โหลดใหม่เมื่อมีการเปลี่ยนแปลง
+    
     useEffect(() => {
         const getMessages = async () => {
             setIsMessagesLoading(true);
@@ -286,15 +323,35 @@ export const ChatContextProvider = ({ children, user }) => {
                 if (socket && socket.connected) {
                     socket.emit("sendMessage", { ...response.message, recipientId, });
                     // ส่งการแจ้งเตือนให้กับผู้รับ
-                    socket.emit("getNotification", { ...response.notification });
+                    socket.emit("getNotification", { ...response.notification ,recipientId,});
                 }
-            } catch (error) {
-                console.error("Error sending message:", error);
-            }
-        },
-        [currentChat, socket]
-    );
+            // อัปเดต userChats และเรียงลำดับใหม่
+            setUserChats((prevChats) => {
+                const updatedChats = prevChats.map((chat) => {
+                    if (chat._id === currentChatId) {
+                        // ปรับปรุงแชทที่ถูกส่งข้อความใหม่
+                        return {
+                            ...chat,
+                            latestMessage: response.message,
+                        };
+                    }
+                    return chat;
+                });
 
+                // เรียงลำดับแชทใหม่ตาม timestamp ของข้อความล่าสุด
+                return updatedChats.sort((a, b) => {
+                    if (!a.latestMessage) return 1;  // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
+                    if (!b.latestMessage) return -1; // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
+                    return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
+                });
+            });
+
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    },
+    [currentChat, socket]
+);
 
     useEffect(() => {
         // console.log("Updated messages:", messages);
@@ -316,6 +373,7 @@ export const ChatContextProvider = ({ children, user }) => {
                 return; // ออกจากฟังก์ชันโดยไม่ทำอะไร
             }
 
+
             // 🔥 ส่ง API ไปอัปเดตใน MongoDB หรือ Firebase
             const response = await putRequest(`${baseUrl}/messages/notifications/userRead/${senderId}`, {
                 isRead: true,  // ส่งข้อมูลที่ต้องการอัปเดต
@@ -328,7 +386,7 @@ export const ChatContextProvider = ({ children, user }) => {
             setNotifications((prevNotifications) =>
                 prevNotifications.map((notification) => {
                     console.log('notification', notification); // แสดงค่า notification ในแต่ละรอบ
-                    return notification.senderId !== senderId  // ตรวจสอบว่า id ตรงกับ notification.id
+                    return notification.senderId === senderId  // ตรวจสอบว่า id ตรงกับ notification.id
                         ? { ...notification, isRead: true } // ถ้า id ตรง ให้เปลี่ยนสถานะเป็น "อ่านแล้ว"
                         : notification;
                 })
@@ -338,6 +396,9 @@ export const ChatContextProvider = ({ children, user }) => {
             setUnreadNotifications((prevUnread) =>
                 prevUnread.filter((notification) => notification.senderId !== senderId)
             );
+
+             // 🔄 แจ้งเตือนผ่าน Socket.io (ย้ายไป Server)
+        socket.emit("notificationRead", { senderId, recipientId: user._id,});
         } catch (error) {
             console.error("❌ Error updating notifications:", error);
         }
@@ -377,18 +438,7 @@ export const ChatContextProvider = ({ children, user }) => {
             console.error("❌ Error marking message as read:", error);
         }
     };
-// ฟังก์ชันสำหรับนับจำนวนแชทที่ยังไม่ได้อ่าน
-const unreadChatsCount = (notifications) => {
-    if (!notifications || notifications.length === 0) return 0;
 
-    // กรองเฉพาะ `senderId` ที่ยังไม่ได้อ่าน
-    const unreadChatIds = notifications
-        .filter((notification) => notification?.senderId && !notification.isRead) // ใช้ senderId
-        .map((notification) => notification.senderId); // ดึงเฉพาะ senderId
-
-    // คืนค่าจำนวน senderId ที่ไม่ซ้ำกัน
-    return [...new Set(unreadChatIds)].length;
-};
 
     ///////////////////////
     const createChat = useCallback(
@@ -427,7 +477,8 @@ const unreadChatsCount = (notifications) => {
                 newMessage,
                 setCurrentChat,
                 markMessageAsRead,
-                unreadChatsCount
+                unreadChatsCount,
+                socket
             }}
         >
             {children}
