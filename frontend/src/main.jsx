@@ -5,7 +5,7 @@ import './index.css'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthContextProvider } from './context/AuthContext.jsx'
 import { Provider } from 'react-redux'
-import store from './redux/store.jsx'
+import store from '../src/redux/store.js'
 
 
 

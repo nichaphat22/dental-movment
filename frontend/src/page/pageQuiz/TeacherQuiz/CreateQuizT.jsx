@@ -4,7 +4,7 @@ import CreateQuiz from '../../../components/Quiz/Teacher/CreateQuiz'
 
 const CreateQuizT = () => {
   return (
-    <div className="mb-2" style={{marginTop: "100px"}}>
+    <div className="mb-2" style={{marginTop: "90px"}}>
        
       <CreateQuiz/>
         

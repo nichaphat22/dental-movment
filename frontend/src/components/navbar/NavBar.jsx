@@ -1,23 +1,33 @@
-import { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
-import { HiOutlineMenu, HiOutlineX, HiSearch, HiOutlineBell } from 'react-icons/hi';
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+import {
+  HiOutlineMenu,
+  HiOutlineX,
+  HiSearch,
+  HiOutlineBell,
+} from "react-icons/hi";
 import GoogleLogin from "../GoogleLoginButton";
-import MenuProfile from '../Profile/MenuProfile';
-import '../../tailwind.css';
-
+import MenuProfile from "../Profile/MenuProfile";
+// import NotificationBell from "../Notification/NotificationBell";
+import "../../tailwind.css";
 
 const NavBar = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isLessonDropdownOpen, setIsLessonDropdownOpen] = useState(false);
   const { user, logoutUser, loginWithGoogle } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
       navigate(`/?search=${searchTerm}`);
     }
+  };
+
+  const toggleNotificationBell = () => {
+    setIsNotificationOpen(!isNotificationOpen);
   };
 
   const toggleMenu = () => {
@@ -32,13 +42,11 @@ const NavBar = () => {
     setIsLessonDropdownOpen(!isLessonDropdownOpen);
   };
 
-
-  // Menu Profile 
+  // Menu Profile
   const [openProfile, setOpenProfile] = useState(false);
 
   return (
     <nav className="bg-white shadow-sm fixed w-full top-0 z-50">
-      
       <div className="container mx-auto flex justify-between items-center py-2 px-6">
         {/* Mobile Menu Icon */}
         <div className="md:hidden flex items-center space-x-4">
@@ -50,25 +58,25 @@ const NavBar = () => {
               <HiOutlineMenu className="text-3xl text-purple-600" />
             )}
           </button>
-        {/* Logo */}
-        <div className="text-2xl font-bold text-purple-600">
-          <Link to="/dashboard">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
-              alt="Logo"
-              width="50"
-              height="50"
-            />
-          </Link>
+          {/* Logo */}
+          <div className="text-2xl font-bold text-purple-600">
+            <Link to="/dashboard">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                alt="Logo"
+                width="50"
+                height="50"
+              />
+            </Link>
+          </div>
         </div>
-      </div>
 
-      {/* Manu phon & ipad  */}
-      <div className="md:hidden flex items-center space-x-4">
-        {user ? (
-          //Search Button
-          <div className="relative flex items-center">
-            <div className="absolute pointer-events-auto ml-2 text-gray-400">
+        {/* Manu phon & ipad  */}
+        <div className="md:hidden flex items-center space-x-4">
+          {user ? (
+            <div className="relative flex items-center">
+              {/* Search Button */}
+              {/* <div className="absolute pointer-events-auto ml-2 text-gray-400">
               <HiSearch/>
             </div>     
             <input
@@ -77,43 +85,54 @@ const NavBar = () => {
               className='border rounded-lg px-6 py-2 mr-6'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} 
-            />
+            /> */}
 
-            {/* แจ้งเตือน */}
-            {/* <button onClick={handleSearch} className="ml-2 mr-2 text-purple-600">
+             
+              {/* <button onClick={handleSearch} className="ml-2 mr-2 text-purple-600">
               <HiSearch className="text-xl" />
             </button> */}
-            <button>
-              <HiOutlineBell className='text-purple-500 w-6 h-6 mr-4'/>
-            </button>
-            <button onClick={() => setOpenProfile(!openProfile)}>
-                <img src={user?.img} alt="" width="38" height="38" className="rounded-full cursor-pointer" />
-                {
-                  openProfile && (
-                    <MenuProfile/>
-                  )
-                }
-                
-            </button>
-          </div>
 
+             {/* แจ้งเตือน */}
+              <div className="relative">
+                <button onClick={toggleNotificationBell} className="relative">
+                  <HiOutlineBell className="text-purple-500 w-6 h-6" />
+                </button>
 
+                {/* ✅ แสดง NotificationBell เมื่อ isNotificationOpen เป็น true */}
+                {/* {isNotificationOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-50">
+                    <NotificationBell />
+                  </div>
+                )} */}
+              </div>
 
-        ) : (
-           // If user is not logged in, show GoogleLogin and Login link
-          <div className="flex items-center space-x-4">
-            <GoogleLogin onLoginSuccess={loginWithGoogle}/>
-            <Link to="/login" className="text-gray-800 hover:text-purple-600">Login</Link>
-          </div>
-        )}
-      </div>
-
-      
-        
+              
+              {/* Profile */}
+              <button onClick={() => setOpenProfile(!openProfile)}>
+                <img
+                  src={user?.img}
+                  alt=""
+                  width="38"
+                  height="38"
+                  className="rounded-full cursor-pointer"
+                />
+                {openProfile && <MenuProfile />}
+              </button>
+            </div>
+          ) : (
+            // If user is not logged in, show GoogleLogin and Login link
+            <div className="flex items-center space-x-4">
+              <GoogleLogin onLoginSuccess={loginWithGoogle} />
+              <Link to="/login" className="text-gray-800 hover:text-purple-600">
+                Login
+              </Link>
+            </div>
+          )}
+        </div>
 
         {/* Desktop menu */}
-      <div className="hidden md:flex space-x-4 items-center">
-        <Link to="/dashboard">
+        <div className="hidden md:flex space-x-4 items-center">
+          <Link to="/dashboard">
             <img
               src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
               alt="Logo"
@@ -121,17 +140,38 @@ const NavBar = () => {
               height="50"
             />
           </Link>
-          <Link to="/lesson" className="text-gray-800 hover:text-purple-600 focus:text-purple-600" >บทเรียน</Link>
-          <Link to="/ListQuiz" className="text-gray-800 hover:text-purple-600 focus:text-purple-600">แบบทดสอบ</Link>
-          <Link to="/lectureHistory" className="text-gray-800 hover:text-purple-600 focus:text-purple-600">ประวัติการเลกเชอร์</Link>
-          <Link to="/bookmark" className="text-gray-800 hover:text-purple-600 focus:text-purple-600">รายการโปรด</Link>
+          <Link
+            to="/lesson"
+            className="text-gray-800 hover:text-purple-600 focus:text-purple-600"
+          >
+            บทเรียน
+          </Link>
+          <Link
+            to="/ListQuiz"
+            className="text-gray-800 hover:text-purple-600 focus:text-purple-600"
+          >
+            แบบทดสอบ
+          </Link>
+          <Link
+            to="/lectureHistory"
+            className="text-gray-800 hover:text-purple-600 focus:text-purple-600"
+          >
+            ประวัติการเลกเชอร์
+          </Link>
+          <Link
+            to="/bookmark"
+            className="text-gray-800 hover:text-purple-600 focus:text-purple-600"
+          >
+            รายการโปรด
+          </Link>
           {/* <Link to="/Form" className="text-gray-800 hover:text-purple-600 focus:text-purple-600">เพิ่มรายชื่อนักศึกษา</Link> */}
-      </div>
-      <div className="hidden md:flex space-x-4 items-center">
+        </div>
+        <div className="hidden md:flex space-x-4 items-center">
           {/* Search & User Options */}
           {user && (
             <div className="hidden md:flex ml-auto justify-end  items-center space-x-4">
-              <div className="relative flex items-center">
+              {/* Search Button  */}
+              {/* <div className="relative flex items-center">
                 <div className="absolute pointer-events-auto  ml-2 text-gray-400">
                   <HiSearch/>
                 </div>      
@@ -142,27 +182,41 @@ const NavBar = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)} 
             />
+              </div> */}
+              {/* notification */}
+              <div className="relative">
+                <button onClick={toggleNotificationBell} className="relative">
+                  <HiOutlineBell className="text-purple-500 w-6 h-6" />
+                </button>
+
+                {/* ✅ แสดง NotificationBell เมื่อ isNotificationOpen เป็น true */}
+                {/* {isNotificationOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-50">
+                    <NotificationBell />
+                  </div>
+                )} */}
               </div>
-              <button>
-                <HiOutlineBell className='text-purple-500 w-6 h-6 mr-4'/>
-              </button>
 
               {/* <button onClick={logoutUser} className="text-gray-800 hover:text-purple-600">Logout</button> */}
               <button onClick={() => setOpenProfile(!openProfile)}>
-                <img src={user?.img} alt="" width="38" height="38" className="rounded-full" />
-                {
-                  openProfile && (
-                    <MenuProfile/>
-                  )
-                }
+                <img
+                  src={user?.img}
+                  alt=""
+                  width="38"
+                  height="38"
+                  className="rounded-full"
+                />
+                {openProfile && <MenuProfile />}
               </button>
             </div>
           )}
 
           {!user && (
             <div className="flex items-center space-x-4">
-              <GoogleLogin onLoginSuccess={loginWithGoogle}/>
-              <Link to="/login" className="text-gray-800 hover:text-purple-600">Login</Link>
+              <GoogleLogin onLoginSuccess={loginWithGoogle} />
+              <Link to="/login" className="text-gray-800 hover:text-purple-600">
+                Login
+              </Link>
             </div>
           )}
         </div>
@@ -180,43 +234,88 @@ const NavBar = () => {
           {/* Side Menu */}
           <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50">
             <div className="p-4 flex justify-between items-center">
-              <span className="text-2xl font-bold text-purple-600"><img src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
-              alt="Logo"
-              width="50"
-              height="50" /></span>
+              <span className="text-2xl font-bold text-purple-600">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                  alt="Logo"
+                  width="50"
+                  height="50"
+                />
+              </span>
               <button onClick={toggleMenu}>
                 <HiOutlineX className="text-2xl text-purple-600" />
               </button>
             </div>
 
             <nav className="flex flex-col space-y-4 px-4">
-            <div className="relative">
-                <button onClick={toggleLessonDropdown} className="text-gray-800 hover:text-purple-600 focus:text-purple-600">
+              <div className="relative">
+                <button
+                  onClick={toggleLessonDropdown}
+                  className="text-gray-800 hover:text-purple-600 focus:text-purple-600"
+                >
                   บทเรียน
                 </button>
                 {isLessonDropdownOpen && (
                   <div className="pl-0">
-                    <Link to="/Biomechanical-consideration" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:text-purple-600" onClick={closeMenu}>
-                    Biomechanical consideration
+                    <Link
+                      to="/Biomechanical-consideration"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:text-purple-600"
+                      onClick={closeMenu}
+                    >
+                      Biomechanical consideration
                     </Link>
-                    <Link to="/home" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
-                    Possible movement of RPD
+                    <Link
+                      to="/home"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={closeMenu}
+                    >
+                      Possible movement of RPD
                     </Link>
-                    <Link to="/MovementOfRPD" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
+                    <Link
+                      to="/MovementOfRPD"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={closeMenu}
+                    >
                       การเคลื่อนที่ของฟันเทียม
                     </Link>
-                    <Link to="/home" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
-                    RPD sample case
+                    <Link
+                      to="/home"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={closeMenu}
+                    >
+                      RPD sample case
                     </Link>
-                    <Link to="/AR-RPD" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
-                    View AR
+                    <Link
+                      to="/AR-RPD"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      onClick={closeMenu}
+                    >
+                      View AR
                     </Link>
                   </div>
                 )}
               </div>
-              <Link to="/ListQuiz" className="text-gray-800 hover:text-purple-600"onClick={closeMenu}>แบบทดสอบ</Link>
-              <Link to="/lectureHistory" className="text-gray-800 hover:text-purple-600"onClick={closeMenu}>ประวัติการเลกเชอร์</Link>
-              <Link to="/bookmark" className="text-gray-800 hover:text-purple-600"onClick={closeMenu}>รายการโปรด</Link>
+              <Link
+                to="/ListQuiz"
+                className="text-gray-800 hover:text-purple-600"
+                onClick={closeMenu}
+              >
+                แบบทดสอบ
+              </Link>
+              <Link
+                to="/lectureHistory"
+                className="text-gray-800 hover:text-purple-600"
+                onClick={closeMenu}
+              >
+                ประวัติการเลกเชอร์
+              </Link>
+              <Link
+                to="/bookmark"
+                className="text-gray-800 hover:text-purple-600"
+                onClick={closeMenu}
+              >
+                รายการโปรด
+              </Link>
               {/* <Link to="/Form" className="text-gray-800 hover:text-purple-600"onClick={closeMenu}>เพิ่มรายชื่อนักศึกษา</Link> */}
 
               {user && (

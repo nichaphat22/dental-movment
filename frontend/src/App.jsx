@@ -50,6 +50,9 @@ import CreateQuizT from './page/pageQuiz/TeacherQuiz/CreateQuizT';
 import DetailQ from './page/pageQuiz/TeacherQuiz/DetailQ';
 import EditQuiz from './page/pageQuiz/TeacherQuiz/EditQuiz';
 
+//Notification
+// import NotificationBell from './components/Notification/NotificationBell';
+
 
 
 // import HomeS from "./page/home/homeStudent/homeS";
@@ -81,11 +84,11 @@ function App () {
 
       <Container className="text-secondary">
         <Routes>
-          <Route path="/" element={<Home/>}/>
+          <Route path="/" element={user ?<Home/>: <Login />}/>
           <Route path="/googleLogin" element={<GoogleLoginButton/>}/>
         
           <Route path="/register" element={user ? <Chat /> :<Register />} />
-          <Route path="/login" element={user ? <Chat /> : <Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>
           <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
           <Route path="/chat" element={user ? <Chat /> : <Login />} />
@@ -93,7 +96,7 @@ function App () {
 
           {user && user.role === 'teacher' && (
             <>
-              <Route path='/teacher-dashboard' element={<DashboardTeacher/>}/>
+              <Route path='/dashboard' element={user ?<DashboardTeacher/>: <Login />}/>
               <Route path="/lesson" element={user ?<HomeTeacher /> : <Login />}/>
               <Route path="/Edit-RPD/:name/edit" element={user ? <EditRPDSampleCase /> : <Login />} />
               <Route path="/Add-RPD" element={user ? <AddRPDSampleCase /> : <Login />} />
@@ -113,12 +116,14 @@ function App () {
               <Route path='/Add-Quiz' element={user? <CreateQuizT/>: <Login/>}/> 
               <Route path='/quiz/:id' element={user? <DetailQ/>: <Login/>}/> 
               <Route path='/quiz/:id/edit' element={user? <EditQuiz/>: <Login/>}/> 
+              {/* <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/> */}
+
             </>
           )}
 
           {user && user.role === 'student' && (
             <>
-              <Route path='/student-dashboard' element={<DashboardStudent/>}/>
+              <Route path='/dashboard' element={user ?<DashboardStudent/>: <Login />}/>
               <Route path="/lesson" element={user ? <HomeStudent />: <Login />} />
               <Route path="/ListQuiz" element={user ? <ListQuiz/>: <Login />}/>
               <Route path='/Quiz/:id/start' element={user ? <QuizStart/> : <Login/>}/>
@@ -130,6 +135,7 @@ function App () {
               <Route path="/animation3d/:name/view" element={user ? <ViewMovementOfRPD /> : <Login />} />
               <Route path="/Possible-Movement-Of-RPD" element={user ? <PossibleMovementOfRPDStudent/> : <Login/>}/>
               <Route path="/MovementOfRPD" element={user ? <MovementOfRPDStudent /> : <Login />} />
+              {/* <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/> */}
             </>
             
           )}

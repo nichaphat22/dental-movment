@@ -6,6 +6,9 @@ import { CiEdit, CiTrash } from "react-icons/ci";
 import Swal from "sweetalert2";
 import { toast,Flip, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Progress, Typography } from "@material-tailwind/react"
+import { HiOutlineClipboard } from "react-icons/hi";
+import { PiClipboardTextDuotone } from "react-icons/pi";
 
 
 const QuizList = () => {
@@ -94,57 +97,52 @@ const QuizList = () => {
   };
 
   return (
-    <div className="relative grid grid-cols-1 gap-6 mt-4 m-10 lg:m-48">
+    <div className="relative grid grid-cols-1 gap-6 mt-4 m-10 md:m-60">
       <ToastContainer  />             
       {quizzes.length > 0 ? (
         quizzes.map((quiz) => (
           <div
             key={quiz._id}
-            className="relative p-4 mb-4 bg-white border rounded-xl shadow-sm hover:bg-gray-100 cursor-pointer"
+            className="relative p-4 bg-white hover:border-b-2 hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl transition hover:-translate cursor-pointer duration-300 ease-in-out transform hover:scale-x-105"
           >
-            {/* ปุ่มแก้ไขและลบ */}
-            <CiTrash
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteQuiz(quiz._id);
-              }}
-              className="absolute top-4 right-4 text-xl cursor-pointer text-gray-500 hover:text-red-500"
-            />
-            <CiEdit
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditQuiz(quiz._id);
-              }}
-              className="absolute top-4 right-10 text-xl cursor-pointer text-gray-500 hover:text-blue-500"
-            />
-
+            <div className="mb-2">
+              {/* ปุ่มแก้ไขและลบ */}
+                <CiTrash
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteQuiz(quiz._id);
+                  }}
+                  className="absolute top-4 right-4 text-xl cursor-pointer text-gray-500 hover:text-red-500"
+                />
+                <CiEdit
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditQuiz(quiz._id);
+                  }}
+                  className="absolute top-4 right-10 text-xl cursor-pointer text-gray-500 hover:text-blue-500"
+                />
+            </div>
+            
             {/* คอนเทนต์หลัก */}
             <div className="flex" onClick={() => handleQuizClick(quiz._id)}>
-              {quiz.image ? (
-                <img
-                  src={quiz.image}
-                  alt={quiz.title}
-                  className="w-40 h-40 rounded-md"
-                />
-              ) : (
-                <img
-                  src={defaultImage}
-                  alt="Quiz"
-                  className="w-40 h-40 object-cover rounded-md shadow-none"
-                />
-              )}
-
-              <div className="ml-8 flex flex-col justify-between w-full mt-4">
+             
+              <div className=" flex flex-col justify-between w-full md:px-4">
                 <div>
                   {/* ชื่อแบบทดสอบ */}
-                  <h3 className="text-lg font-medium text-indigo-500 cursor-pointer">
+                  <div className="flex items-center space-x-6 ">
+                  <PiClipboardTextDuotone className="text-3xl md:text-4xl text-purple-600 mt-2 flex-shrink-0"/>
+                  <h3 className="text-2xl md:text-3xl font-bold text-gray-700 cursor-pointer break-words whitespace-normal">
                     {quiz.title}
                   </h3>
+                  </div>
+                  
 
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 ml-14 md:ml-16 mt-2 mb-2">
                     จำนวนข้อ: {quiz.questions?.length || 0}
                   </p>
                 </div>
+
+              
 
                 {/* วันที่สร้าง */}
                 <div className="mt-4 text-sm text-gray-600 text-end">

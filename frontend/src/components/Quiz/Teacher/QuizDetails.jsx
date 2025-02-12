@@ -115,7 +115,7 @@ const QuizDetails = () => {
                   )}
                   
                 </div>
-                <ul className="list-disc pl-6 text-gray-700">
+                <ol className="list-decimal pl-6 text-gray-700">
                     {question.choices && question.choices.length > 0 ? (
                     question.choices.map((option, i) => (
                         <li
@@ -130,7 +130,7 @@ const QuizDetails = () => {
                     ) : (
                     <li className="text-gray-500">ไม่มีตัวเลือก</li>
                     )}
-                </ul>
+                </ol>
                 {question.answerExplanation && (
                     <p className="text-sm text-gray-600 mt-2">
                     คำอธิบาย: {question.answerExplanation}
@@ -144,7 +144,7 @@ const QuizDetails = () => {
 
       <div className="flex justify-center">
         <button
-          className="mt-6 px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+          className="mt-6 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
           onClick={() => navigate("/ListQuiz")}
         >
           ย้อนกลับ

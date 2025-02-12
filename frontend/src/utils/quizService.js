@@ -43,6 +43,7 @@ const quizService = {
       throw error;
     }
   }, // อัปเดตควิซ
+
   deleteQuiz: async (id) => {
     try {
       // เรียกดูคำถามที่เกี่ยวข้องกับควิซก่อนลบ
@@ -57,23 +58,32 @@ const quizService = {
       // ลบควิซ
       return await axios.delete(`${BASE_URL}/${id}`);
     } catch (error) {
-      // จัดการข้อผิดพลาดในการลบ
       console.error('Error deleting quiz or related questions:', error);
-      throw error;  // ทำให้ error นี้ถูกโยนกลับไปที่ฝั่ง client
+      throw error;
     }
   },
 
+  submitResult: (userId, quizId, correctAnswers, totalQuestions) => {
+    return axios.post(`${BASE_URL}/submitResult`, {
+      userId,
+      quizId,
+      correctAnswers,
+      totalQuestions,
+    });
+  },
+
+  getQuizScores: (quizId) => {
+    return axios.get(`${BASE_URL}/results/${quizId}`);  // ดึงคะแนนจาก API
+  },
+
+  
+
   // Question services
-  getQuestionsByQuizId: (quizId) =>
-    axios.get(`${BASE_URL}/${quizId}/questions`), // ดึงคำถามทั้งหมดในควิซ
-  getQuestionById: (quizId, questionId) =>
-    axios.get(`${BASE_URL}/${quizId}/questions/${questionId}`), // ดึงคำถามตาม ID
-  createQuestion: (quizId, questionData) =>
-    axios.post(`${BASE_URL}/${quizId}/questions`, questionData), // เพิ่มคำถาม
-  updateQuestion: (quizId, questionId, questionData) =>
-    axios.put(`${BASE_URL}/${quizId}/questions/${questionId}`, questionData), // อัปเดตคำถาม
-  deleteQuestion: (quizId, questionId) =>
-    axios.delete(`${BASE_URL}/${quizId}/questions/${questionId}`), // ลบคำถาม
+  getQuestionsByQuizId: (quizId) => axios.get(`${BASE_URL}/${quizId}/questions`), // ดึงคำถามทั้งหมดในควิซ
+  getQuestionById: (quizId, questionId) => axios.get(`${BASE_URL}/${quizId}/questions/${questionId}`), // ดึงคำถามตาม ID
+  createQuestion: (quizId, questionData) => axios.post(`${BASE_URL}/${quizId}/questions`, questionData), // เพิ่มคำถาม
+  updateQuestion: (quizId, questionId, questionData) => axios.put(`${BASE_URL}/${quizId}/questions/${questionId}`, questionData), // อัปเดตคำถาม
+  deleteQuestion: (quizId, questionId) => axios.delete(`${BASE_URL}/${quizId}/questions/${questionId}`), // ลบคำถาม
 };
 
 export default quizService;

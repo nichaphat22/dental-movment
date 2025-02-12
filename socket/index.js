@@ -7,6 +7,8 @@ const io = new Server(8800, {
 });
 
 let onlineUsers = [];
+// ✅ เปลี่ยนจาก Array เป็น Set เพื่อป้องกัน User ซ้ำ
+// let onlineUsers = new Map();
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
@@ -27,17 +29,25 @@ io.on("connection", (socket) => {
   // Sending message
   socket.on("sendMessage", (message) => {
     const user = onlineUsers.find(
-      (user) => user.userId === message.recipientId);
+      (user) => user.userId === message.recipientId
+    );
 
     if (user) {
-      io.to(user.socketId).emit("getMessage", message); 
-      io.to(user.socketId).emit("getNotification", { 
+      io.to(user.socketId).emit("getMessage", message);
+      io.to(user.socketId).emit("getNotification", {
         senderId: message.senderId,
         isRead: false,
-        date: new Date()
+        date: new Date(),
       });
     }
   });
+
+  //แจ้งเตือนทั่วไป
+  // socket.on("sendNotification", (data) => {
+  //   console.log("sending notification:", data);
+  //   io.emit("newNotification", data);
+    
+  // });
 
   // Disconnection
   socket.on("disconnect", () => {

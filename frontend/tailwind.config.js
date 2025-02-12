@@ -8,6 +8,8 @@ export default {
       "./src/components/lesson/MovementOfRPD/**/*.{js,ts,jsx,tsx}",
       "./src/components/navbar/**/*.{js,ts,jsx,tsx}",
       "./src/page/pageQuiz/**/*.{js,ts,jsx,tsx}",
+      "./src/page/home/**/*.{js,ts,jsx,tsx}",
+      "./src/page/MovementOfRPD3D/**/*.{js,ts,jsx,tsx}",
       
       // เพิ่ม Material Tailwind ไลบรารี
     "./node_modules/@material-tailwind/react/**/*.{js,jsx,ts,tsx}",
@@ -16,14 +18,14 @@ export default {
     ],
     theme: {
       extend: {
-        // fontFamily:{
-        // 'sans': ['Helvetica', 'Arial', 'sans-serif'],
-        // 'display': ['Oswald'],
-        // 'body': ['"Open Sans"']
-        // },
-        // gridTemplateColumns:{
-        //   '70/30':'70% 28%',
-        // }
+        fontFamily:{
+        'sans': ['Helvetica', 'Arial', 'sans-serif'],
+        'display': ['Oswald'],
+        'body': ['"Open Sans"']
+        },
+        gridTemplateColumns:{
+          '70/30':'70% 28%',
+        }
       },
       screens: {
       'sm': '640px',
