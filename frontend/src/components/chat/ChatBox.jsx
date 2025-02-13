@@ -5,15 +5,20 @@ import { ChatContext } from "../../context/ChatContext";
 import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 import { Stack, Modal } from "react-bootstrap";
 import { useFetchLatestMessage } from "../../hooks/useFetchLatestMessage";
-
-
+import { BiSolidDownload } from "react-icons/bi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faFileImage, faFilePdf } from "@fortawesome/free-solid-svg-icons"; // นำเข้ารูปไอคอนจาก FontAwesome
+import { FaFileImage } from "react-icons/fa6";
+import { TfiDownload } from "react-icons/tfi";
 import InputEmoji from "react-input-emoji";
+import { FaFile } from "react-icons/fa6";
+import { MdOutlineAttachFile } from "react-icons/md";
 // import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 // import { faFileImage, faFilePdf } from "@fortawesome/free-solid-svg-icons"; 
 import './Chat.css';
 import moment from 'moment/min/moment-with-locales';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-
+import { MdCancel } from "react-icons/md";
 moment.locale('th');
 const ChatBox = ({ chat, }) => {
     const { user } = useContext(AuthContext);
@@ -209,7 +214,29 @@ const ChatBox = ({ chat, }) => {
            </Stack>
          
                 ))}
+                            {/* แสดงไฟล์ที่เลือก */}
+            {selectedFile && (
+                <div className="selected-file" style={{display:'flex'}}>
+                  <div className="flie" style={{backgroundColor:'#ddd',borderRadius:'15px',padding:'10px 10px'}}>
+                    {selectedFile.type.startsWith('image') ? (
+                        <img src={selectedFile.data} alt={selectedFile.name} className="file-preview-image" style={{ maxWidth: '200px', maxHeight: '100px' }} />
+                    ) : (
+                        <div className="file-preview2">
+                            <Stack direction="horizontal" gap={2} className="file-preview">
+                            <FaFile size={'28'} style={{color:'#000'}}/>
+                                <div className="file-info">
+                                    <span  style={{color:'#000',fontSize:'14px',fontWeight:'bold',}}>{formatFileName(selectedFile.name)}</span>
+                                    <span className="size" style={{color:'#000',fontSize:'12px',fontWeight:'400px'}}>{formatBytes(selectedFile.size)}</span>
+                                </div>
+                            </Stack>
+                        </div>
+                    )}
+                    </div>
+                    <button onClick={clearFile} className="clear-file-button" style={{color:'red',fontSize:'18px'}}><MdCancel /></button>
+                </div>
+            )}
             </Stack>
+ 
             <Stack direction="horizontal" className="chat-input flex-grow-0">
                 <InputEmoji
                     value={textMessage}
@@ -226,28 +253,29 @@ const ChatBox = ({ chat, }) => {
                         ref={fileInputRef}
                         style={{ display: 'none' }}
                     />
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" style={{ color: '#232323' }} className="bi bi-images" viewBox="0 0 16 16">
-                        <path d="M4.502 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3" />
-                        <path d="M14.002 13a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10zm-2-8a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0zm-6 4a1 1 0 0 1 .8-.4h1.6a1 1 0 0 1 .8.4l1.2 1.2L12.8 9a1 1 0 0 1 1.4-.1l1.6 1.6V12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-5.6L1.8 6l1.6 1.6a1 1 0 0 1 1.4-.1L7 9l.8-.8a1 1 0 0 1 1.4 0L10.8 11 12 12.2l-1.2 1.2-2.8-2.8a1 1 0 0 1-.4-.8z" />
-                    </svg>
+                    <MdOutlineAttachFile size={'28'} style={{color:'#000'}}/>
                 </label>
-                <button className="send-button" onClick={handleSendMessage}>Send</button>
+                <button className="send-button" onClick={handleSendMessage} style={{color:'#fff', backgroundColor:'rgb(125, 26, 167)',padding:'10px 15px',borderRadius:'7px'}}>ส่ง</button>
             </Stack>
+
+           
 
             {/* Modal for Image Preview */}
             <Modal show={showImageModal} onHide={handleCloseModal}>
-                <Modal.Header closeButton >
-                    <Modal.Title>Image Preview</Modal.Title>
+            {/* closeButton */}
+                <Modal.Header  >
+                    <Modal.Title>รูปภาพ</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <img src={previewImage} alt="Preview" style={{ width: '100%', height: 'auto' }} />
-                    <a href={previewImage} download="image-preview.jpg" className="btn btn-primary" style={{ marginTop: '10px' }}>
-                        Download
+                <a href={previewImage} download="image-preview.jpg" className="btn " style={{float:'right'}}>
+                        <TfiDownload size={'24'}/>
                     </a>
+                    <img src={previewImage} alt="Preview" style={{ width: '100%', height: 'auto' }} />
+                 
                 </Modal.Body>
                 <Modal.Footer>
                     <button variant="secondary" onClick={handleCloseModal}>
-                        Close
+                        ปิด
                     </button>
                 </Modal.Footer>
             </Modal>

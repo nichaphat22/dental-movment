@@ -11,6 +11,7 @@ const animation3DRoute = require("./Routes/animation3DRoute");
 const lectureRoute = require("./Routes/lectureRoute");
 const quizRoute = require("./Routes/quizRoute");
 const notiRoute = require("./Routes/notiChat")
+const bookmarkRoute = require("./Routes/bookmarkRoute")
 const bodyParser = require('body-parser');
 
 
@@ -65,7 +66,7 @@ app.use("/api/animation3D", animation3DRoute);
 app.use("/api/lecture", lectureRoute);
 app.use("/api/quiz", quizRoute);
 app.use("/api/notiChat", notiRoute)
-
+app.use("/api/bookmark", bookmarkRoute)
 
 
 

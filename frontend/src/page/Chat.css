@@ -1,0 +1,16 @@
+/* Hide ChatBox on mobile and only show UserChat */
+@media (max-width: 767px) {
+    .chat-box {
+        width: 100%;
+    }
+    .messages-box1 {
+        display: none;
+    }
+}
+
+/* Display ChatBox when UserChat is clicked */
+@media (min-width: 768px) {
+    .messages-box + .chat-box {
+        display: block;
+    }
+}

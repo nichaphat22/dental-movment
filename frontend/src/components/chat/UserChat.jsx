@@ -108,8 +108,8 @@ const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
       <div className="d-flex flex-column align-items-end">
         {/* ✅ แสดงเฉพาะถ้าจำนวนข้อความที่ยังไม่ได้อ่านมากกว่า 0 */}
         {unreadMessages > 0 && (
-          <span style={{ color: '#000' }}>
-            {unreadMessages} <span>ข้อความที่ยังไม่ได้อ่าน</span>
+          <span style={{ color: '#000',fontSize:'14px',fontWeight:'400' }}>
+            {unreadMessages} <span style={{color: '#000',fontSize:'14px',fontWeight:'400' }}>ข้อความใหม่</span>
           </span>
         )}
        <div className="date">

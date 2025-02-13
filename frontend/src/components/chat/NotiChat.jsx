@@ -15,7 +15,7 @@ const NotiChat = ({ chat, user }) => {
   const navigate = useNavigate();
 
   // ดึงข้อมูลจาก ChatContext
-  const { setNotificationsAsRead,markMessageAsRead } = useContext(ChatContext);
+  const { notifications,setNotificationsAsRead,unreadChatsCount,markMessageAsRead } = useContext(ChatContext);
 
   // ดึงข้อความล่าสุด
   const { latestMessage: initialLatestMessage } = useFetchLatestMessage(chat, user);
@@ -60,6 +60,9 @@ const handleClick = async (id) => {
   // นำทางไปยังหน้าของแชท
   navigate(`/chat/${id}`);
 };
+
+const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
+
   return (
     <Stack
       direction="horizontal"
@@ -70,13 +73,13 @@ const handleClick = async (id) => {
     >
       <div className="d-flex">
         <div className="me-2" style={{margin: 'auto'}}>
-        <LazyLoadImage src={recipientUser?.img} alt="profile"  style={{borderRadius:'50%',display: 'block',width:"40px" ,height:"40px"}} />
+        <LazyLoadImage src={recipientUser?.img} alt="profile"  style={{borderRadius:'50%',display: 'block',width:"32px" ,height:"32px"}} />
         </div>
         <div className="text-content">
           <div className="name" style={{ color: "black" }}>
             {recipientUser?.fname} {recipientUser?.lname}
           </div>
-          <div className="text">
+          <div className="text" style={{fontSize:'12.5px'}}>
   {latestMessage && (
     <span
       style={{
@@ -100,7 +103,12 @@ const handleClick = async (id) => {
         </div>
       </div>
       <div className="d-flex flex-column align-items-end">
-         <div className="date">
+        {unreadMessages > 0 && (
+                <span style={{ color: '#000',fontSize:'12px',fontWeight:'400' }}>
+                  {unreadMessages} <span style={{color: '#000',fontSize:'12px',fontWeight:'400' }}>ข้อความใหม่</span>
+                </span>
+              )}
+             <div className="date">
         {latestMessage ? (
           moment(latestMessage?.createdAt).locale("th").calendar()
         ) : (

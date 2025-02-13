@@ -83,13 +83,15 @@ const Notifications = ({}) => {
     className="unread-count"
     style={{
       position: "absolute",
-      top: "-5px",
+      top: "0",
       right: "-5px",
       background: "red",
       color: "white",
       borderRadius: "50%",
       padding: "5px",
-      fontSize: "12px",
+      // fontSize: "24px",
+      width:'12px',
+      height:'12px'
     }}
   >
   </div>
@@ -100,7 +102,7 @@ const Notifications = ({}) => {
       {isOpen && (
         <div className="notifications-box" onClick={() => setIsOpen(false)}>
           <div className="notifications-header">
-            <h3 style={{ color: "#000", textAlign: "center" }}>แชท</h3>
+            <h3 style={{ color: "#000", textAlign: "center",fontSize:'16px' }}>แชท</h3>
           </div>
 
           {userChats?.length > 0 ? (
