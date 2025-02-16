@@ -80,7 +80,7 @@ function Edit_Biomechanical_consideration() {
       newAnimationDescription !== originalAnimationDescription ||
       selectedFile ||
       selectedImage;
-
+  
     if (!isDataChanged) {
       alert("You haven't made any changes to the data.");
       return;
@@ -95,12 +95,17 @@ function Edit_Biomechanical_consideration() {
     formData.append("Ani_name", newAnimationName);
     formData.append("Ani_description", newAnimationDescription);
   
+    // ถ้าไม่ได้เลือกไฟล์ใหม่ ก็ใช้ไฟล์เดิม
     if (selectedFile) {
-      formData.append("Ani_animation", selectedFile); // ส่งไฟล์โดยตรง
+      formData.append("Ani_animation", selectedFile); // ส่งไฟล์ใหม่
+    } else if (existingAnimation) {
+      formData.append("Ani_animation", existingAnimation); // ส่งไฟล์เดิม
     }
   
     if (selectedImage) {
-      formData.append("Ani_image", selectedImage); // ส่งไฟล์โดยตรง
+      formData.append("Ani_image", selectedImage); // ส่งไฟล์ใหม่
+    } else if (existingImage) {
+      formData.append("Ani_image", existingImage); // ส่งไฟล์เดิม
     }
   
     setUploading(true);
@@ -130,8 +135,8 @@ function Edit_Biomechanical_consideration() {
         setUploadProgress(0);
         alert("ไม่สามารถแก้ไขแอนิเมชันได้");
       });
-      
   };
+  
     // ฟังก์ชันเพื่อกลับไปหน้าก่อนหน้า
     const handleCancel = () => {
       navigate('/Biomechanical-consideration');  // ย้อนกลับไปยังหน้าที่แล้วในประวัติการเรียกดู

@@ -9,17 +9,18 @@ h1 {
 }
 
 .title-h1 {
-    margin: 20px 0 10px 20px;
+    margin: 20px 0 10px 20px !important;
     font-size:1.8rem;
   }
 
 .title {
     margin: 10px 0 20px 20px;
+    font-size:1.2rem;
 }
 h3 {
     text-align: start;
     /* margin-top: 10px; */
-    margin:10px 5px 5px 10px;
+    margin:10px 0 5px 0;
     color:#000;
     white-space: nowrap;        /* บังคับให้ข้อความอยู่ในบรรทัดเดียว */
   overflow: hidden;           /* ซ่อนข้อความที่เกินขอบ */
@@ -112,11 +113,15 @@ video {
 }
 
 .AnimationName {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: bold;
     padding-top: 20px;
     text-align: center;
     /* padding-bottom: 10px; */
+}
+
+#animationVideo{
+  width:85%;
 }
 .viewvdo {
     
@@ -127,10 +132,13 @@ video {
   }
 
   .ani_descrip{
-    text-indent: 70px;
+    font-size: 1rem;
+    text-indent: 50px;
+    text-align: justify;
     margin:5px 20px 20px 20px;
     color:#000;
     /* width: 50vw; */
+    /* hyphens: auto; */
     
   }
 
@@ -172,31 +180,41 @@ video {
   
 }
 
-.animationid img{
-    border-radius: 10px 10px 0 0; 
+.animationid .img_ani{
+  display:block;
+    border-radius: 0 !important; 
     cursor: pointer;
-    height:140px;
-   width:250px;
-    /* width:20vw;
-   height:10vw; */
-   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+      height: 140px !important;
+      /* max-width: 250px !important; */
+      width: 100% !important;
+
+   box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.075);
    transition: transform 0.3s ease;
 }
 
-.animationid img:hover {
+.animationid .img_ani:hover {
     /* transform:scale(1.02); */
     /* z-index: 2; */
     /* box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.05); */
-    transform: scale(1.075);
+    transform: scale(1.05);
 }
 .animationid{
   margin-bottom:30px;
 }
 .ani {
-    /* max-height:120px; */
-    /* border-radius: 10px;  */
-   
+  width: 100%;  /* ป้องกันขยายเกินขนาด Col */
+  margin: auto; /* จัดให้อยู่กึ่งกลาง */
+  padding-bottom: 15px;
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  /* border-radius: 10px; */
+  background: white;
 }
+/* @media (min-width: 1024px) {
+  .ani {
+    width: calc(100% / 3 - 20px); /* แบ่ง 3 คอลัมน์ */
+    /* margin: auto; 
+  }
+} */ 
 
 .upload-status {
     font-weight: bold;
@@ -217,87 +235,57 @@ video {
 .nameandbt{
   display: flex;
   justify-content: space-between;
+  margin:0 10px 0 10px;
 }
 
 .bt{
   float:right;
+  align-items: end;
+
 }
 
 .button-remove-ani{
-  color: #d5d5d5;
-  border:none !important;
-background:none !important;
+  justify-items: center;
+  /* justify-content: center; */
+  height:25px;
+  width:35px;
+  color:rgb(255, 255, 255);
+  /* border:2px solid #ff4040 !important; */
+  /* border:none !important; */
+background:rgb(255, 64, 64) !important;
 margin:0 !important;
-font-size:22px !important;
+font-size:18px !important;
 padding:3px !important;
-transition: transform 0.2s ease;
+/* transition: transform 0.2s ease; */
+border-radius:5px;
 }
 
 .button-remove-ani:hover{
-  color: #ff4040;
-  transform: scale(1.2);
+  color:rgb(255, 255, 255);
+  background:rgb(242, 19, 19) !important;
+  /* transform: scale(1.1); */
+  /* border:2px solid #ff4040 !important; */
+  /* background: #ff4040 !important; */
 }
 
 .button-edit-ani{
-  color: #d5d5d5;
-  border:none !important;
-  background:none !important;
+  justify-items: center;
+  /* border */
+  height:25px;
+  width:35px;
+  color:rgb(255, 255, 255);
+  /* border:2px solidrgb(41, 41, 41) !important; */
+  background:rgba(39, 39, 39, 0.8) !important; 
   margin:0 !important;
-  font-size:22px !important;
+  font-size:18px !important;
   padding:3px !important;
-  transition: transform 0.2s ease;
+  /* transition: transform 0.2s ease; */
+  border-radius:5px;
 }
 .button-edit-ani:hover{
-  color: #ffbc25;
-  transform: scale(1.2);
+  /* color:rgb(255, 255, 255); */
+  /* transform: scale(1.1); */
+  background:rgba(19, 19, 19, 0.8) !important; 
+  /* background: #ffb819 !important;  */
 }
-/* 
-   .button-edit-ani {
-    text-align: center;
-      font-size:0.85rem !important;
-      color: #000;
-      background-color: #dbdbdb !important;
-      margin-right: 2px;
-      border-radius: 0.3rem !important;
-      border-style: none !important;
-      padding: 0.3rem !important;
-      margin: 0.3rem !important;
-      width: 55px !important;
-    } */
-    /* .button-edit-ani:hover {
-        color: #000;
-        /* background-color:rgb(209, 209, 209) !important; */
-        /* box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1); */
-      /* } */ 
-      /* .button-edit:active {
-        color: #000 !important;
-        background-color: #b8b8b8 !important;
-      } */
-        
-      
-    /* .remove-ani {
-      background-color: red; 
-      color: white; 
-      border-radius: 0.3rem;
-      border-style: none;
-      padding: 0.1rem 0.5rem;
-      justify-content: center;
-      
-    }
-    
-    .button-remove-ani {
-      font-size:0.85rem !important;
-      background-color: #ff2828 !important; 
-      color: white; 
-      margin: 0.3rem !important;
-      border-radius: 0.3rem;
-      border-style: none;
-      padding: 0.3rem;
-      width:  55px;
-    } */
-  
-    /* .button-remove-ani:hover {
-      background-color: #df0000 !important; 
-      color: white;  */
-      /* border:1px solid rgb */
-    /* } */
+

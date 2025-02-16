@@ -13,7 +13,8 @@ const Animation = require('../Models/animationModel.js');
 // GET all Animations
 const getAnimation = async (req, res) => {
   try {
-    const animations = await Animation.find().lean();
+    const animations = await Animation.find().limit(10).lean();
+
     res.json(animations);
   } catch (error) {
     console.error(error);
@@ -38,27 +39,50 @@ const getAnimationById = async (req, res) => {
   }
 }
 
-// Update an existing Animation
 const updateAnimation = async (req, res) => {
-  const id = req.params._id; // ใช้ id แทน _id
+  const id = req.params._id;  // ใช้ id แทน _id
   const { Ani_name, Ani_description } = req.body;
-  const { Ani_animation, Ani_image } = req.files;
 
   try {
+    // หาค่าปัจจุบันจากฐานข้อมูล
+    const animation = await Animation.findById(id);
+    
+    // ตรวจสอบว่าไฟล์ใหม่ถูกส่งมาไหม และอัปเดตเฉพาะกรณีที่ไฟล์ใหม่ถูกส่ง
     let updateData = {
-      Ani_name, Ani_description,
-      Ani_animation: { data: Ani_animation[0].buffer, contentType: Ani_animation[0].mimetype, size: Ani_animation[0].size },
-      Ani_image: { data: Ani_image[0].buffer, contentType: Ani_image[0].mimetype, size: Ani_image[0].size }
+      Ani_name: Ani_name || animation.Ani_name,  // หากไม่ส่งมาใช้ค่าเดิม
+      Ani_description: Ani_description || animation.Ani_description,  // หากไม่ส่งมาใช้ค่าเดิม
     };
 
+    // ตรวจสอบว่าไฟล์ใหม่ถูกส่งมาในคำขอ
+    if (req.files) {
+      const { Ani_animation, Ani_image } = req.files;
 
-    await Animation.findByIdAndUpdate(id, updateData); // ใช้ id แทน _id
+      // อัปเดตเฉพาะเมื่อไฟล์ใหม่ถูกส่ง
+      if (Ani_animation) {
+        updateData.Ani_animation = {
+          data: Ani_animation[0].buffer,
+          contentType: Ani_animation[0].mimetype,
+          size: Ani_animation[0].size
+        };
+      }
+
+      if (Ani_image) {
+        updateData.Ani_image = {
+          data: Ani_image[0].buffer,
+          contentType: Ani_image[0].mimetype,
+          size: Ani_image[0].size
+        };
+      }
+    }
+
+    // อัปเดตข้อมูลในฐานข้อมูล
+    await Animation.findByIdAndUpdate(id, updateData);
     res.json("Updated Successfully");
   } catch (err) {
     console.error(err);
     res.status(500).json({ err: err, msg: "Something went wrong!" });
   }
-}
+};
 
 
 
