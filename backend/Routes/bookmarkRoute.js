@@ -8,6 +8,6 @@ router.get('/:userId', getBookmarks);
 // API สำหรับอัปเดตข้อมูล bookmarks ของผู้ใช้
 router.post('/:userId', updateBookmarks);
 
-router.delete('/remove-bookmark/:userId/:modelName', removeBookmark);
+router.delete('/remove-bookmark/:userId/:modelId', removeBookmark);
 
 module.exports = router;

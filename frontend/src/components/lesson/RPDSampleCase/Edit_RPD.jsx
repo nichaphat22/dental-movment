@@ -72,7 +72,7 @@ const Edit_RPD = () => {
   const handleSaveModel = async (event) => {
     event.preventDefault();
     setUploading(true);
-
+  
     try {
       if (fileModel && existingModel.url) {
         await deleteOldFile(existingModel.url);
@@ -83,16 +83,16 @@ const Edit_RPD = () => {
       if (fileImage && existingModel.imageUrl) {
         await deleteOldFile(existingModel.imageUrl);
       }
-      
-
+  
       const modelUrl = fileModel ? await uploadFile(fileModel, 'models', `${name}-model-${Date.now()}`) : existingModel.url;
       const patternUrl = filePattern ? await uploadFile(filePattern, 'patterns', `${name}-pattern-${Date.now()}`) : existingModel.patternUrl;
       const imageUrl = fileImage ? await uploadFile(fileImage, 'images', `${name}-image-${Date.now()}`) : existingModel.imageUrl;
-
-      const updatedModel = { name, url: modelUrl, patternUrl, imageUrl };
-      const modelsRef = dbRef(database, 'models/' + existingModel.name);
+  
+      // แทนที่การใช้ name ด้วย id เพื่อไม่ให้เกิดการสร้าง entry ใหม่
+      const updatedModel = { id: existingModel.id, name, url: modelUrl, patternUrl, imageUrl };
+      const modelsRef = dbRef(database, 'models/' + existingModel.id);
       await set(modelsRef, updatedModel);
-
+  
       setUploading(false);
       setUploadProgress(0);
       alert("แก้ไขโมเดลสำเร็จ!");
@@ -102,7 +102,7 @@ const Edit_RPD = () => {
       setUploading(false);
     }
   };
-
+  
   const handleCancel = () => {
     navigate('/');
   };

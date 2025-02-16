@@ -54,11 +54,12 @@ function BookMark() {
       const modelsData = modelsSnapshot.val();
       
       // คัดกรองเฉพาะโมเดลที่ถูกบุ๊คมาร์คจากฐานข้อมูล
-      const modelsWithUrls = filteredBookmarks.map((modelName) => {
-        const model = modelsData[modelName];
+      const modelsWithUrls = filteredBookmarks.map((modelId) => {
+        const model = modelsData[modelId];
         if (model) {
           return {
-            name: modelName,
+            id: model.id,
+            name: model.name,
             url: model.url || '',
             patternUrl: model.patternUrl || '',
             imageUrl: model.imageUrl || ''
@@ -88,15 +89,15 @@ function BookMark() {
     });
   };
 
-  const handleRemoveBookmark = async (modelName) => {
+  const handleRemoveBookmark = async (modelId,modelName) => {
     const confirmDelete = window.confirm(`ต้องการลบ ${modelName} ออกจากรายการโปรดใช่ไหม?`);
     if (confirmDelete) {
       try {
-        // Send a DELETE request with the correct model name
-        await axios.delete(`${baseUrl}/bookmark/remove-bookmark/${user._id}/${modelName}`);
+        // Send a DELETE request with the correct modelId
+        await axios.delete(`${baseUrl}/bookmark/remove-bookmark/${user._id}/${modelId}`);
         
-        // Update UI to remove the model
-        setBookmarkedModels(prevModels => prevModels.filter(model => model.name !== modelName));
+        // Update UI to remove the model using modelId
+        setBookmarkedModels(prevModels => prevModels.filter(model => model.id !== modelId)); // ใช้ model.id แทน model.name
       } catch (error) {
         console.error("Error removing bookmark:", error);
       }
@@ -118,7 +119,7 @@ function BookMark() {
             />
             <div className="model-container" style={{ justifyContent: 'space-between', marginTop: '10px' }}>
               <span style={{ marginLeft: '10px', fontSize: "0.95rem", color: "#000", fontWeight: '500'  }}>{model.name}</span>
-              <button className="remove" onClick={() => handleRemoveBookmark(model.name)}>ลบ</button>
+              <button className="remove" onClick={() => handleRemoveBookmark(model.id,model.name)}>ลบ</button>
             </div>
           </div>
         ))}

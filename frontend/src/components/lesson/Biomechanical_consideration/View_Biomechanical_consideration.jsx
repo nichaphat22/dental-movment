@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col } from 'react-bootstrap';
 import { baseUrl } from '../../../utils/services';
 import { HiPlusSm } from "react-icons/hi";
-
+import { MdDelete } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
 function View_Biomechanical_consideration() {
   const [animations, setAnimations] = useState([]);
   const navigate = useNavigate();
@@ -71,22 +72,26 @@ function View_Biomechanical_consideration() {
       <Row>
         {animations.map((animation) => (
           <Col sm={6} md={4} lg={3} className="mb-4" key={animation._id}>
-            <div className="animationid" style={{ textAlign: 'center' }}>
+            <div className="animationid" style={{ textAlign: 'center',justifyItems:'center' }}>
+             <div className="ani">
               <img
               title="คลิกเพื่อเล่นวิดีโอ"
                 onClick={() => handleImageClick(animation._id)}
                 src={`data:${animation.Ani_image.contentType};base64,${animation.Ani_image.data}`}
                 alt={animation.Ani_name}
                 width="100%"
-                max-height="120px"
-                style={{  cursor: "pointer" }}
+
+                style={{  cursor: "pointer",borderRadius:'10px' }}
               />
-              <h3 className="Ani_name">{animation.Ani_name}</h3>
-             <div className="bt">
-             <Button className="button-edit-ani" onClick={() => goToEditPage(animation._id)}>แก้ไข</Button>
-             <Button className="button-remove-ani" onClick={() => removeAnimation(animation._id)}>ลบ</Button>
+            
+             <div className="nameandbt">
+             <h3 className="Ani_name">{animation.Ani_name}</h3>
+             <sapan className="bt" style={{}}>
+             <Button className="button-edit-ani" title="แก้ไขแอนิเมชัน" onClick={() => goToEditPage(animation._id)}><MdEdit/></Button>
+             <Button className="button-remove-ani" title="ลบแอนิเมชัน" onClick={() => removeAnimation(animation._id)}><MdDelete/></Button>
+             </sapan>
              </div>
-             
+             </div>
             </div>
           </Col>
         ))}

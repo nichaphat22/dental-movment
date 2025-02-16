@@ -102,6 +102,7 @@ const ViewModel = () => {
     const controls = new OrbitControls(camera, renderer.domElement);
     controlsRef.current = controls;
     controls.enableDamping = true;
+    controls.screenSpacePanning = true; // เพิ่มการสนับสนุนสำหรับการเลื่อนโมเดล
 
     // ใช้ Pointer Events
     renderer.domElement.addEventListener("pointerdown", (e) => {
@@ -120,6 +121,24 @@ const ViewModel = () => {
     renderer.domElement.addEventListener("pointerup", () => {
       controls.enabled = true; // ให้สามารถหมุนโมเดลได้หลังจากสัมผัสเสร็จ
     });
+
+      // ปรับการจัดการสัมผัสให้รองรับอุปกรณ์
+  renderer.domElement.addEventListener("touchstart", (e) => {
+    if (e.touches.length === 1) {
+      controls.enabled = true; // ให้ใช้ OrbitControls ขณะสัมผัส
+    }
+  });
+
+  renderer.domElement.addEventListener("touchmove", (e) => {
+    if (e.touches.length === 1) {
+      e.preventDefault(); // ป้องกันการเลื่อนหน้าจอ
+      controls.update(); // ใช้การอัพเดตจาก OrbitControls
+    }
+  });
+
+  renderer.domElement.addEventListener("touchend", () => {
+    controls.enabled = true; // ปล่อยการควบคุมเมื่อสัมผัสเสร็จ
+  });
 
     const container = containerRef.current;
     container.appendChild(renderer.domElement);

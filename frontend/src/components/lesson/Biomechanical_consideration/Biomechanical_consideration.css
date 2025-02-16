@@ -175,19 +175,27 @@ video {
 .animationid img{
     border-radius: 10px 10px 0 0; 
     cursor: pointer;
-    width:20vw;
-   height:10vw;
+    height:140px;
+   width:250px;
+    /* width:20vw;
+   height:10vw; */
+   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+   transition: transform 0.3s ease;
 }
 
 .animationid img:hover {
     /* transform:scale(1.02); */
     /* z-index: 2; */
     /* box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.05); */
+    transform: scale(1.075);
 }
-.animationid {
-    height:16vw;
-    border-radius: 10px; 
-    box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.075);
+.animationid{
+  margin-bottom:30px;
+}
+.ani {
+    /* max-height:120px; */
+    /* border-radius: 10px;  */
+   
 }
 
 .upload-status {
@@ -206,30 +214,68 @@ video {
  margin: 20px;
    }
 
+.nameandbt{
+  display: flex;
+  justify-content: space-between;
+}
+
+.bt{
+  float:right;
+}
+
+.button-remove-ani{
+  color: #d5d5d5;
+  border:none !important;
+background:none !important;
+margin:0 !important;
+font-size:22px !important;
+padding:3px !important;
+transition: transform 0.2s ease;
+}
+
+.button-remove-ani:hover{
+  color: #ff4040;
+  transform: scale(1.2);
+}
+
+.button-edit-ani{
+  color: #d5d5d5;
+  border:none !important;
+  background:none !important;
+  margin:0 !important;
+  font-size:22px !important;
+  padding:3px !important;
+  transition: transform 0.2s ease;
+}
+.button-edit-ani:hover{
+  color: #ffbc25;
+  transform: scale(1.2);
+}
+/* 
    .button-edit-ani {
     text-align: center;
       font-size:0.85rem !important;
       color: #000;
       background-color: #dbdbdb !important;
-      /* margin-right: 2px; */
+      margin-right: 2px;
       border-radius: 0.3rem !important;
       border-style: none !important;
       padding: 0.3rem !important;
       margin: 0.3rem !important;
-      width: 10vw !important;
-    }
-    .button-edit-ani:hover {
+      width: 55px !important;
+    } */
+    /* .button-edit-ani:hover {
         color: #000;
-        background-color:rgb(209, 209, 209) !important;
+        /* background-color:rgb(209, 209, 209) !important; */
         /* box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1); */
-      }
-      .button-edit:active {
+      /* } */ 
+      /* .button-edit:active {
         color: #000 !important;
         background-color: #b8b8b8 !important;
-      }
+      } */
         
       
-    .remove-ani {
+    /* .remove-ani {
       background-color: red; 
       color: white; 
       border-radius: 0.3rem;
@@ -247,11 +293,11 @@ video {
       border-radius: 0.3rem;
       border-style: none;
       padding: 0.3rem;
-      width: 10vw;
-    }
+      width:  55px;
+    } */
   
-    .button-remove-ani:hover {
+    /* .button-remove-ani:hover {
       background-color: #df0000 !important; 
-      color: white; 
+      color: white;  */
       /* border:1px solid rgb */
-    }
+    /* } */

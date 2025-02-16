@@ -43,7 +43,7 @@ const updateBookmarks = async (req, res) => {
   }
 };
 const removeBookmark = async (req, res) => {
-  const { userId, modelName } = req.params;
+  const { userId, modelId } = req.params;
 
   try {
     // Query by userId
@@ -57,10 +57,10 @@ const removeBookmark = async (req, res) => {
     console.log('User bookmarks:', user.bookmarks);
 
     // Remove the model from the Map
-    if (user.bookmarks.has(modelName)) {
-      user.bookmarks.delete(modelName);
+    if (user.bookmarks.has(modelId)) {
+      user.bookmarks.delete(modelId);
       await user.save();
-      res.status(200).json({ message: `${modelName} has been removed from bookmarks` });
+      res.status(200).json({ message: `${modelId} has been removed from bookmarks` });
     } else {
       res.status(404).json({ error: 'Model not found in bookmarks' });
     }
