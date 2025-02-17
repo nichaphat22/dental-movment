@@ -109,18 +109,19 @@ function BookMark() {
       <h1 className="title-h1">รายการโปรด</h1>
       <div className="grid-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
         {bookmarkedModels.map((model) => (
-          <div className="modelrow" key={model.name} style={{ width: '200px', maxHeight: '240px' }}>
+          <div className="modelrow-bookmark" key={model.name} style={{ maxWidth: '200px', height: 'auto' }}>
             <img
-              className="img-model"
+              className="img-bookmark"
               src={model.imageUrl} 
               alt={model.name} 
-              style={{ cursor: 'pointer', width: '100%', height: 'auto', objectFit: 'cover' }}
+              style={{ cursor: 'pointer', width: '100%', }}
               onClick={() => handleModelClick(model.name, model.url, model.patternUrl)}
             />
-            <div className="model-container" style={{ justifyContent: 'space-between', marginTop: '10px' }}>
-              <span style={{ marginLeft: '10px', fontSize: "0.95rem", color: "#000", fontWeight: '500'  }}>{model.name}</span>
-              <button className="remove" onClick={() => handleRemoveBookmark(model.id,model.name)}>ลบ</button>
+            <div className="model-container" style={{ justifyContent: 'space-between', marginTop: '10px',marginBottom:'20px',clear:'both' }}>
+              <span style={{ marginLeft: '', fontSize: "0.85rem", color: "#000", fontWeight: '500'  }}>{model.name}</span>
+              <button title="ลบออกจากรายการโปรด" className="remove-bookmark" onClick={() => handleRemoveBookmark(model.id,model.name)}>ลบ</button>
             </div>
+           
           </div>
         ))}
       </div>

@@ -17,8 +17,8 @@
 .button-edit {
   text-align: center;
     font-size:0.85rem !important;
-    color: #000;
-    background-color: #dbdbdb !important;
+    color: #fff;
+    background-color: rgba(19, 19, 19, 0.8)!important;  
     /* margin-right: 2px; */
     border-radius: 0.3rem !important;
     border-style: none !important;
@@ -27,29 +27,34 @@
     width: 5rem !important;
   }
   .button-edit:hover {
-      color: #000;
-      background-color:rgb(209, 209, 209) !important;
+      color: #fff;
+      background:rgba(0, 0, 0, 0.8) !important; 
       /* box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1); */
     }
-    .button-edit:active {
+    /* .button-edit:active {
       color: #000 !important;
       background-color: #b8b8b8 !important;
     }
-      
+       */
     
-  .remove {
+  .remove-bookmark {
     background-color: red; 
     color: white; 
     border-radius: 0.3rem;
     border-style: none;
     padding: 0.1rem 0.5rem;
     justify-content: center;
-    
+    float:right;
+    font-size:0.85rem !important;
+  }
+
+  .remove-bookmark:hover {
+    background:rgb(226, 0, 0)!important;
   }
   
   .button-remove {
     font-size:0.85rem !important;
-    background-color: #ff2828 !important; 
+    background:rgb(250, 9, 9) !important;
     color: white; 
     margin: 0.3rem !important;
     border-radius: 0.3rem;
@@ -59,7 +64,7 @@
   }
 
   .button-remove:hover {
-    background-color: #df0000 !important; 
+    background:rgb(226, 0, 0)!important;
     color: white; 
     /* border:1px solid rgb */
   }
@@ -143,7 +148,11 @@ border: none;
   background-color: #3A005B    ;
 }
 
-
+.bt3DModel{
+  display: flex;
+  justify-content: space-between;
+  margin:0 10px 0 10px;
+}
 
 
 /* .viewmodel {
@@ -160,7 +169,7 @@ border: none;
 .grid-container {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  /* justify-content: center; */
 }
 
 .model-container-draw{
@@ -169,12 +178,34 @@ border: none;
 
 .model-container span {
   display: inline-block;
-  max-width: 170px; 
+  /* max-width: 170px;  */
+
   /* white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; */
 }
 
+.modelrow-bookmark{
+  box-sizing:unset;
+  
+  display: inline-block;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  background-color: #ffffff; 
+  border-radius: 5px; 
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  transition: transform 0.3s ease;
+  height: auto;
+  margin: 5px 15px 20px 15px;
+  justify-content: center;
+  
+}
+
+.modelrow-bookmark:hover{
+  transform: scale(1.075);
+}
 
 /* white: 90%; */
 .modelrow {
@@ -186,34 +217,49 @@ border: none;
   padding-top: 20px;
   padding-bottom: 20px;
   background-color: #ffffff; 
-  border-radius: 10px; 
-  box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.075);
+  border-radius: 5px; 
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  transition: transform 0.3s ease;
   height: auto;
   margin: 5px 15px 20px 15px;
   justify-content: center;
   
 }
+
+.modelrow:hover {
+  transform: scale(1.075);
+}
 /* 
 .Frame{
   
 } */
-.viewmodel:hover {
-    transform:scale(1.01);
+
+/* .viewmodel{
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  transition: transform 0.3s ease;
+} */
+
+/* .viewmodel:hover {
+  transform: scale(1.075); */
     /* z-index: 2; */
-    box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1); */
   
-}
+/* } */
 .modelrow canvas{
   border-radius: 15px;
+  
 }
 
-.modelrow:hover {
-  transform:scale(1.01);
+/* .modelrow:hover {
+  transform:scale(1.01); */
+ 
   /* z-index: 2; */
-  box-shadow: 0 0 10px 4px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
+} */
+
+.remove-bookmark{
+
 }
-
-
 
 span {
   /* text-align: center; */
@@ -253,19 +299,20 @@ padding:0;
 }
 
 
-.img-model{
+/* .img-bookmark{ */
   border-radius: 10px;
   /* border: 1px solid #000; */
-  box-shadow: none; 
+  /* box-shadow: none; 
   max-height:17vw;
-}
+ 
+} */
 /* img {
 
 } */
-.img-model:hover {
+/* .img-model:hover {
   transform: scale(1); /* ขยายขนาดรูปภาพ */
-  box-shadow: none; /* เพิ่มเงา */
-}
+  /* box-shadow: none; /* เพิ่มเงา */
+/* } */ 
 .img-model{
 
 }
@@ -473,7 +520,7 @@ form.d-flex.search-form{
   border:1px solid #dee2e6;
  }
 div.form-outline{
-  width:18%;
+  width:200px;
   
   /* border-radius:3px 0 0 3px; */
   

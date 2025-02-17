@@ -9,6 +9,8 @@ import { IoIosSearch } from "react-icons/io";
 import { baseUrl } from '../../../utils/services';
 import axios from 'axios';
 import { AuthContext } from '../../../context/AuthContext';
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { MdEdit } from "react-icons/md";
 
 const ViewRPDSampleCase = () => {
   const [models, setModels] = useState([]);
@@ -218,7 +220,7 @@ const ViewRPDSampleCase = () => {
 
       <div className="grid-container" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
-          <div className="modelrow" key={model.id} style={{ maxWidth: '210px' }}>
+          <div className="modelrow" key={model.id} style={{ maxWidth: '200px' }}>
             <div className="modelbtw">
               <div className="modelname">
                 <img
@@ -226,15 +228,17 @@ const ViewRPDSampleCase = () => {
                   src={model.imageUrl}
                   alt={model.name}
                   onClick={() => handleModelClick(model)}
-                  style={{ cursor: 'pointer', width: '100%', height: '180px' }}
+                  style={{ cursor: 'pointer', width: '100%', height: '150px' }}
                 />
                 <div className="model-container-view" style={{ columnCount: '2', justifyContent: 'space-between' }}>
                   <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500', maxWidth:'80%' }}>
                     {model.name}
                   </span>
-                  <button className="bookmark" onClick={() => handleBookmarkClick(user._id, model.id)}>
+                  <button 
+                  title="บันทึกเป็นรายการโปรด"
+                  className="bookmark" onClick={() => handleBookmarkClick(user._id, model.id)}>
                     <img
-                      className="img-model"
+                      className="img-bookmark"
                       src={clickedBookmark[model.id] ? '/bookmark.png' : '/bookmark1.png'}
                       alt="bookmark"
                       width="28"
@@ -243,6 +247,7 @@ const ViewRPDSampleCase = () => {
                   </button>
                 </div>
               </div>
+              <div className="bt3DModel">
               <button
                 className="button-edit"
                 onClick={() => goToEditPage(model)}
@@ -255,6 +260,7 @@ const ViewRPDSampleCase = () => {
               >
                 ลบ
               </button>
+              </div>
             </div>
           </div>
         ))}

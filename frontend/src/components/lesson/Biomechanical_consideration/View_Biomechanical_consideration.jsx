@@ -92,11 +92,11 @@ function View_Biomechanical_consideration() {
              <div className="nameandbt">
              <h3 className="Ani_name">{animation.Ani_name}</h3>
              <sapan className="bt" style={{}}>
-             {/* <Button className="button-edit-ani" title="แก้ไขแอนิเมชัน" onClick={() => goToEditPage(animation._id)}>แก้ไข</Button>
+             <Button className="button-edit-ani" title="แก้ไขแอนิเมชัน" onClick={() => goToEditPage(animation._id)}>แก้ไข</Button>
              <Button className="button-remove-ani" title="ลบแอนิเมชัน" onClick={() => removeAnimation(animation._id)}>ลบ</Button>
-            */}
-            <Button className="button-edit-ani" title="แก้ไขแอนิเมชัน" onClick={() => goToEditPage(animation._id)}><MdEdit/></Button>
-             <Button className="button-remove-ani" title="ลบแอนิเมชัน" onClick={() => removeAnimation(animation._id)}><RiDeleteBin6Line/></Button>
+         
+            {/* <Button className="button-edit-ani" title="แก้ไขแอนิเมชัน" onClick={() => goToEditPage(animation._id)}><MdEdit/></Button>
+             <Button className="button-remove-ani" title="ลบแอนิเมชัน" onClick={() => removeAnimation(animation._id)}><RiDeleteBin6Line/></Button> */}
           
              </sapan>
              </div>
