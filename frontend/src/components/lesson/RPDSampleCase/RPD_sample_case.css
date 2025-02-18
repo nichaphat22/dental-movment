@@ -165,11 +165,27 @@ border: none;
   white: 90%;
 } */
 
+/* align-items: flex-start !important; ทำให้ items อยู่บนสุด */
+
+
+
 
 .grid-container {
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
-  /* justify-content: center; */
+  justify-content: center; /* ทำให้ items อยู่ตรงกลาง */
+  /* gap: 10px; */ 
+
+  /* width: 80%; จำกัดความกว้าง */
+  /* max-width: 1200px;
+  margin: auto; */
+}
+
+.containerModel {
+  /* display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* จัดเรียงจากซ้ายไปขวา */
+  /* width: 100%; */ 
 }
 
 .model-container-draw{
@@ -186,47 +202,53 @@ border: none;
 }
 
 .modelrow-bookmark{
-  box-sizing:unset;
+  /* box-sizing:unset;
   
   display: inline-block;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 20px; */
   background-color: #ffffff; 
   border-radius: 5px; 
   box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
   transition: transform 0.3s ease;
-  height: auto;
-  margin: 5px 15px 20px 15px;
-  justify-content: center;
-  
+  height: 280px; /* กำหนดความสูง */
+  width: 100%;  /* ป้องกันขยายเกินขนาด Col */
+  margin: auto; /* จัดให้อยู่กึ่งกลาง */
 }
 
 .modelrow-bookmark:hover{
   transform: scale(1.075);
 }
 
-/* white: 90%; */
-.modelrow {
-  box-sizing:unset;
-  
-  display: inline-block;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  background-color: #ffffff; 
-  border-radius: 5px; 
-  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
-  transition: transform 0.3s ease;
-  height: auto;
-  margin: 5px 15px 20px 15px;
-  justify-content: center;
-  
+.grid-container {
+  display: flex;
+  flex-wrap: wrap; /* ให้คอนเทนต์ที่มีขนาดเกินไปเลื่อนไปที่บรรทัดถัดไป */
+  justify-content: flex-start; /* เรียงจากซ้ายไปขวา */
+  gap: 10px; /* ระยะห่างระหว่าง .modelrow */
+  width: 100%;
+  margin: 0 auto; /* ทำให้ container อยู่ตรงกลาง */
 }
 
-.modelrow:hover {
+.modelbtw {
+  height: 350px; /* กำหนดความสูง */
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  transition: transform 0.3s ease;
+  width: 100%;  /* ป้องกันขยายเกินขนาด Col */
+  margin: auto; /* จัดให้อยู่กึ่งกลาง */
+}
+
+
+/* @media (min-width: 1024px) {
+  .modelrow {
+  }
+} */
+
+.modelbtw:hover {
   transform: scale(1.075);
 }
 /* 

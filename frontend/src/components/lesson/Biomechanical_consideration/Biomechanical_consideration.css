@@ -182,7 +182,7 @@ video {
 
 .animationid .img_ani{
   display:block;
-    border-radius: 0 !important; 
+    border-radius: 5px 5px 0 0 !important; 
     cursor: pointer;
       height: 140px !important;
       /* max-width: 250px !important; */
@@ -209,6 +209,8 @@ video {
   /* border-radius: 10px; */
   transition: transform 0.3s ease;
   background: white;
+  border-radius: 5px; 
+
 }
 .ani:hover {
   transform: scale(1.075);
@@ -232,9 +234,9 @@ video {
     color: green;
   }
    */
-   .row{
+   /* .row{
  margin: 20px;
-   }
+   } */
 
 .nameandbt{
   display: flex;

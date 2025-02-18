@@ -11,6 +11,7 @@ import axios from 'axios';
 import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { MdEdit } from "react-icons/md";
+import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 
 const ViewRPDSampleCase = () => {
   const [models, setModels] = useState([]);
@@ -192,7 +193,7 @@ const ViewRPDSampleCase = () => {
   };
 
   return (
-    <div className="Content">
+    <div className="Content" style={{}}>
       <div className="flex justify-between my-2 mx-4">
         <h1 className="my-2 text-xl font-semibold">RPD sample case</h1>
         <button 
@@ -217,18 +218,21 @@ const ViewRPDSampleCase = () => {
           <IoIosSearch />
         </button>
       </div>
+      {/* display: 'flex', justifyContent: 'center', flexWrap: 'wrap' */}
 
-      <div className="grid-container" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+  <Container className="container-model">
+    <Row >
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
-          <div className="modelrow" key={model.id} style={{ maxWidth: '200px' }}>
-            <div className="modelbtw">
+        //  <div className="grid-contaioner">
+         <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.id} style={{  }}>
+            <div className="modelbtw  h-80">
               <div className="modelname">
                 <img
                   className="img-model"
                   src={model.imageUrl}
                   alt={model.name}
                   onClick={() => handleModelClick(model)}
-                  style={{ cursor: 'pointer', width: '100%', height: '150px' }}
+                  style={{ cursor: 'pointer', width: '100%', height: 'auto' }}
                 />
                 <div className="model-container-view" style={{ columnCount: '2', justifyContent: 'space-between' }}>
                   <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500', maxWidth:'80%' }}>
@@ -246,8 +250,7 @@ const ViewRPDSampleCase = () => {
                     />
                   </button>
                 </div>
-              </div>
-              <div className="bt3DModel">
+                <div className="bt3DModel">
               <button
                 className="button-edit"
                 onClick={() => goToEditPage(model)}
@@ -261,11 +264,16 @@ const ViewRPDSampleCase = () => {
                 ลบ
               </button>
               </div>
+              </div>
+              
+              
             </div>
-          </div>
+          </Col>
+          // </div>
         ))}
-      </div>
-    </div>
+        </Row>
+        </Container>
+        </div>
   );
 };
 

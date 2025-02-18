@@ -6,6 +6,8 @@ import "./RPD_sample_case.css";
 import axios from "axios"; // นำเข้า axios
 import { baseUrl } from "../../../utils/services";
 import { AuthContext } from '../../../context/AuthContext';
+import { Card, Button, Row, Col,Container } from 'react-bootstrap';
+
 
 function BookMark() {
   const [bookmarkedModels, setBookmarkedModels] = useState([]);
@@ -107,25 +109,31 @@ function BookMark() {
   return (
     <div className="Content" style={{ backgroundColor: "#fff" }}>
       <h1 className="title-h1">รายการโปรด</h1>
-      <div className="grid-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+      {/* <div className="grid-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}> */}
+      <Container className="container-model">
+      <Row >
         {bookmarkedModels.map((model) => (
-          <div className="modelrow-bookmark" key={model.name} style={{ maxWidth: '200px', height: 'auto' }}>
+         
+        <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.name} style={{ maxWidth: '200px', height: 'auto' }}>
+           <div className="modelrow-bookmark  h-80">
             <img
               className="img-bookmark"
               src={model.imageUrl} 
               alt={model.name} 
-              style={{ cursor: 'pointer', width: '100%', }}
+              style={{ cursor: 'pointer', maxWidth: '100%',height:'150px' }}
               onClick={() => handleModelClick(model.name, model.url, model.patternUrl)}
             />
-            <div className="model-container" style={{ justifyContent: 'space-between', marginTop: '10px',marginBottom:'20px',clear:'both' }}>
+            <div className="model-container " style={{height:'110px', display:'flex',flexDirection:'column',justifyContent: 'space-between',clear:'both' }}>
               <span style={{ marginLeft: '', fontSize: "0.85rem", color: "#000", fontWeight: '500'  }}>{model.name}</span>
               <button title="ลบออกจากรายการโปรด" className="remove-bookmark" onClick={() => handleRemoveBookmark(model.id,model.name)}>ลบ</button>
             </div>
+            </div>
            
-          </div>
+            </Col>
         ))}
+        </Row>
+        </Container>
       </div>
-    </div>
   );
 }
 
