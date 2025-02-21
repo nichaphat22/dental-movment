@@ -225,15 +225,16 @@ const ViewRPDSampleCase = () => {
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
         //  <div className="grid-contaioner">
          <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.id} style={{  }}>
-            <div className="modelbtw  h-80">
+            <div className="modelbtw  h-100">
               <div className="modelname">
                 <img
                   className="img-model"
                   src={model.imageUrl}
                   alt={model.name}
                   onClick={() => handleModelClick(model)}
-                  style={{ cursor: 'pointer', width: '100%', height: 'auto' }}
+                  style={{ cursor: 'pointer', width: '100%', height: '18vh' }}
                 />
+                <div className="detail-model h-40" style={{display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
                 <div className="model-container-view" style={{ columnCount: '2', justifyContent: 'space-between' }}>
                   <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500', maxWidth:'80%' }}>
                     {model.name}
@@ -245,8 +246,7 @@ const ViewRPDSampleCase = () => {
                       className="img-bookmark"
                       src={clickedBookmark[model.id] ? '/bookmark.png' : '/bookmark1.png'}
                       alt="bookmark"
-                      width="28"
-                      height="28"
+                      style={{minWidth:'28px',minHeight:'28px',height:'28px',width:'28px'}}
                     />
                   </button>
                 </div>
@@ -263,6 +263,7 @@ const ViewRPDSampleCase = () => {
               >
                 ลบ
               </button>
+              </div>
               </div>
               </div>
               

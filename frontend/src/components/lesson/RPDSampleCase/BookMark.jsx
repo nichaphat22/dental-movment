@@ -114,21 +114,22 @@ function BookMark() {
       <Row >
         {bookmarkedModels.map((model) => (
          
-        <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.name} style={{ maxWidth: '200px', height: 'auto' }}>
-           <div className="modelrow-bookmark  h-80">
+        <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.name} style={{ }}>
+           <div className="modelrow-bookmark  h-100"style={{display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
+          <div className="model-bk2">
             <img
               className="img-bookmark"
               src={model.imageUrl} 
               alt={model.name} 
-              style={{ cursor: 'pointer', maxWidth: '100%',height:'150px' }}
+              style={{ cursor: 'pointer', width: '100%',height:'20vh' }}
               onClick={() => handleModelClick(model.name, model.url, model.patternUrl)}
             />
             <div className="model-container " style={{height:'110px', display:'flex',flexDirection:'column',justifyContent: 'space-between',clear:'both' }}>
-              <span style={{ marginLeft: '', fontSize: "0.85rem", color: "#000", fontWeight: '500'  }}>{model.name}</span>
+              <span style={{ margin: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500' , }}>{model.name}</span>
               <button title="ลบออกจากรายการโปรด" className="remove-bookmark" onClick={() => handleRemoveBookmark(model.id,model.name)}>ลบ</button>
             </div>
             </div>
-           
+            </div>
             </Col>
         ))}
         </Row>
