@@ -224,22 +224,10 @@ const ViewRPDSampleCase = () => {
     <Row >
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
         //  <div className="grid-contaioner">
-         <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.id} style={{  }}>
+         <Col xs={12} sm={6} md={6} lg={3} xl={3} className="mb-4" key={model.id} style={{  }}>
             <div className="modelbtw  h-100">
               <div className="modelname">
-                <img
-                  className="img-model"
-                  src={model.imageUrl}
-                  alt={model.name}
-                  onClick={() => handleModelClick(model)}
-                  style={{ cursor: 'pointer', width: '100%', height: '18vh' }}
-                />
-                <div className="detail-model h-40" style={{display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
-                <div className="model-container-view" style={{ columnCount: '2', justifyContent: 'space-between' }}>
-                  <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500', maxWidth:'80%' }}>
-                    {model.name}
-                  </span>
-                  <button 
+                 <button 
                   title="บันทึกเป็นรายการโปรด"
                   className="bookmark" onClick={() => handleBookmarkClick(user._id, model.id)}>
                     <img
@@ -249,6 +237,22 @@ const ViewRPDSampleCase = () => {
                       style={{minWidth:'28px',minHeight:'28px',height:'28px',width:'28px'}}
                     />
                   </button>
+                <img
+                  className="img-model"
+                  src={model.imageUrl}
+                  alt={model.name}
+                  onClick={() => handleModelClick(model)}
+                  style={{ clear:'both',cursor: 'pointer', width: '100%', height: '18vh',}}
+                />
+                <div className="dd h-100" style={{height:'100px'}}>
+                <div className="detail-model  h-100" style={{display:'flex',justifyContent:'space-between',flexDirection:'column',}}>
+                <div className="model-container-view " style={{ height:'100px', }}>
+                  <span className="modelName-span " style={{ margin: '10px 0 10px 0', fontSize: "0.85rem", color: "#000", fontWeight: '500',wordBreak:'break-all'}}>
+                  
+                  {/* maxWidth:'100%'  */}
+                    {model.name}
+                  </span>
+                 
                 </div>
                 <div className="bt3DModel">
               <button
@@ -263,6 +267,7 @@ const ViewRPDSampleCase = () => {
               >
                 ลบ
               </button>
+              </div>
               </div>
               </div>
               </div>

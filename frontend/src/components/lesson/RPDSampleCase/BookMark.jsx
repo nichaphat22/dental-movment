@@ -7,11 +7,12 @@ import axios from "axios"; // นำเข้า axios
 import { baseUrl } from "../../../utils/services";
 import { AuthContext } from '../../../context/AuthContext';
 import { Card, Button, Row, Col,Container } from 'react-bootstrap';
-
+import { RiDeleteBin6Line } from "react-icons/ri";
 
 function BookMark() {
   const [bookmarkedModels, setBookmarkedModels] = useState([]);
   const navigate = useNavigate();
+    const [clickedBookmark, setClickedBookmark] = useState({});
   const { user } = useContext(AuthContext);
 
   // ฟังก์ชันสำหรับดึงข้อมูลโมเดลที่ถูกบุ๊คมาร์ค
@@ -91,9 +92,44 @@ function BookMark() {
     });
   };
 
+  // const fetchBookmarks = async (userId) => {
+  //   try {
+  //     const response = await axios.get(`${baseUrl}/bookmark/${userId}`);
+  //     setClickedBookmark(response.data || {});
+  //   } catch (error) {
+  //     console.error("Error fetching bookmarks:", error);
+  //   }
+  // };
+
+  // const handleBookmarkClick = async (userId, modelId) => {
+  //   if (!userId) {
+  //     console.error("Invalid userId:", userId);
+  //     return;
+  //   }
+  
+  //   const updatedBookmarks = {
+  //     ...clickedBookmark,
+  //     [modelId]: !clickedBookmark[modelId], // ใช้ id แทนชื่อ
+  //   };
+  
+  //   setClickedBookmark(updatedBookmarks);
+  
+  //   try {
+  //     await axios.post(`${baseUrl}/bookmark/${userId}`, {
+  //       userId,
+  //       bookmarks: updatedBookmarks,
+  //     });
+  //     setBookmarkedModels(prevModels => prevModels.filter(model => model.id !== modelId)); // ใช้ model.id แทน model.name
+  //     fetchBookmarks(userId);
+  //   } catch (error) {
+  //     console.error("Error updating bookmarks:", error);
+  //   }
+  // };
+
+
   const handleRemoveBookmark = async (modelId,modelName) => {
-    const confirmDelete = window.confirm(`ต้องการลบ ${modelName} ออกจากรายการโปรดใช่ไหม?`);
-    if (confirmDelete) {
+    // const confirmDelete = window.confirm(`ต้องการลบ ${modelName} ออกจากรายการโปรดใช่ไหม?`);
+    // if (confirmDelete) {
       try {
         // Send a DELETE request with the correct modelId
         await axios.delete(`${baseUrl}/bookmark/remove-bookmark/${user._id}/${modelId}`);
@@ -103,8 +139,9 @@ function BookMark() {
       } catch (error) {
         console.error("Error removing bookmark:", error);
       }
-    }
+    // }
   };
+
   
   return (
     <div className="Content" style={{ backgroundColor: "#fff" }}>
@@ -115,8 +152,20 @@ function BookMark() {
         {bookmarkedModels.map((model) => (
          
         <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={model.name} style={{ }}>
-           <div className="modelrow-bookmark  h-100"style={{display:'flex',flexDirection:'column',justifyContent:'space-between'}}>
+           <div className="modelrow-bookmark  h-100"style={{}}>
           <div className="model-bk2">
+          <button 
+                  title="บันทึกเป็นรายการโปรด"
+                  className="bookmark" onClick={() => handleRemoveBookmark(model.id, model.name)}>
+                  <img 
+  className="img-bookmark"
+  src="/bookmark.png"
+  alt="bookmark"
+  style={{ minWidth: "28px", minHeight: "28px", height: "28px", width: "28px" }}
+/>
+
+                  </button>
+          {/* <button title="ลบออกจากรายการโปรด" className="remove-bookmark" onClick={() => handleRemoveBookmark(model.id,model.name)}><RiDeleteBin6Line/></button> */}
             <img
               className="img-bookmark"
               src={model.imageUrl} 
@@ -124,9 +173,9 @@ function BookMark() {
               style={{ cursor: 'pointer', width: '100%',height:'20vh' }}
               onClick={() => handleModelClick(model.name, model.url, model.patternUrl)}
             />
-            <div className="model-container " style={{height:'110px', display:'flex',flexDirection:'column',justifyContent: 'space-between',clear:'both' }}>
-              <span style={{ margin: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500' , }}>{model.name}</span>
-              <button title="ลบออกจากรายการโปรด" className="remove-bookmark" onClick={() => handleRemoveBookmark(model.id,model.name)}>ลบ</button>
+            <div className="model-container h-100" style={{height:'70px', display:'flex',}}>
+              <span className="modelName-span" style={{ margin: '10px 0 10px 0', fontSize: "0.85rem", color: "#000", fontWeight: '500' , wordBreak:'break-all'}}>{model.name}</span>
+           
             </div>
             </div>
             </div>
