@@ -1,10 +1,11 @@
-const Frame = ( {children}) => {
+const Frame = ( {children,style}) => {
     return ( 
         <div
         className="frame"
         style={{
             display: "table-cell",
             width: "80vw",
+            // height:"50vw",
             minHeight: "70vw",
             padding: "8px",
             flexDirection: "column",
@@ -16,7 +17,9 @@ const Frame = ( {children}) => {
             borderRight: "1px solid #eee",
             borderBottom: "none",
              boxShadow: '0 0 100px 0px rgba(0, 0, 0, 0.02)',
-            overflow: "hidden"
+            overflow: "hidden",
+            background:'#fff',
+            ...style
         }}
     >
          {children}

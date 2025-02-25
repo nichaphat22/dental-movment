@@ -31,7 +31,15 @@ import { TbPlayerPauseFilled } from "react-icons/tb";
 // import * as fabric from 'fabric';
 import { fabric } from 'fabric'
 import 'fabric-history'
-
+import { GrRedo } from "react-icons/gr";
+import { GrUndo } from "react-icons/gr";
+import { FaEye } from "react-icons/fa6";
+import { MdDraw } from "react-icons/md";
+import { BsTypeBold } from "react-icons/bs";
+import { VscBold } from "react-icons/vsc";
+import { BsEraser } from "react-icons/bs";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { AiOutlineDelete } from "react-icons/ai";
 
 const ViewModel = () => {
   const location = useLocation();
@@ -50,14 +58,14 @@ const ViewModel = () => {
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isRotating, setIsRotating] = useState(true);
   const [startPoint, setStartPoint] = useState(null);
-  const [lineWidth, setLineWidth] = useState(3);
-  const [currentColor, setCurrentColor] = useState('#000000');
+  const [lineWidth, setLineWidth] = useState(2);
+  const [currentColor, setCurrentColor] = useState('#0064ff');
   const [isErasing, setIsErasing] = useState(false); // State for erase mode
 
   const [fabricCanvas, setFabricCanvas] = useState(null);
   const [isTextMode, setIsTextMode] = useState(false); // State for text mode
   const [textColor, setTextColor] = useState('#000000'); // Text color
-  const [fontSize, setFontSize] = useState(20); // Text size
+  const [fontSize, setFontSize] = useState(10); // Text size
 
   // const [isModelActive, setIsModelActive] = useState(false); 
   const [animationStopped, setAnimationStopped] = useState(false);
@@ -69,6 +77,10 @@ const ViewModel = () => {
   const [isUnderline, setIsUnderline] = useState(false);
   const [textAlign, setTextAlign] = useState('left');
   const [activeButton, setActiveButton] = useState('left');
+  const [showOptions, setShowOptions] = useState(false); // ควบคุมการแสดงปุ่มเพิ่มเติม
+  const [isClicked, setIsClicked] = useState(false);
+  const buttonRef = useRef(null);
+  const [isChecked, setIsChecked] = useState(isDrawingMode || isTextMode);
 
   const [showCanvas, setShowCanvas] = useState(false);
   const [isActive, setIsActive] = useState({
@@ -87,9 +99,13 @@ const ViewModel = () => {
     const loader = new GLTFLoader();
     // const renderer = new THREE.WebGLRenderer({ antialias: true });
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(790, 450);
-    // renderer.domElement.style.width = "100%";
-    // renderer.domElement.style.height = "100%";
+    renderer.setPixelRatio(window.devicePixelRatio); // ป้องกันภาพแตก
+    // renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.domElement.style.width = "100%";
+    renderer.domElement.style.height = "100%";
+
+
+
     renderer.setClearColor(0xffffff, 1);
     rendererRef.current = renderer;
 
@@ -103,6 +119,7 @@ const ViewModel = () => {
     controlsRef.current = controls;
     controls.enableDamping = true;
     controls.screenSpacePanning = true; // เพิ่มการสนับสนุนสำหรับการเลื่อนโมเดล
+
 
     // ใช้ Pointer Events
     renderer.domElement.addEventListener("pointerdown", (e) => {
@@ -122,23 +139,23 @@ const ViewModel = () => {
       controls.enabled = true; // ให้สามารถหมุนโมเดลได้หลังจากสัมผัสเสร็จ
     });
 
-      // ปรับการจัดการสัมผัสให้รองรับอุปกรณ์
-  renderer.domElement.addEventListener("touchstart", (e) => {
-    if (e.touches.length === 1) {
-      controls.enabled = true; // ให้ใช้ OrbitControls ขณะสัมผัส
-    }
-  });
+    // ปรับการจัดการสัมผัสให้รองรับอุปกรณ์
+    renderer.domElement.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) {
+        controls.enabled = true; // ให้ใช้ OrbitControls ขณะสัมผัส
+      }
+    });
 
-  renderer.domElement.addEventListener("touchmove", (e) => {
-    if (e.touches.length === 1) {
-      e.preventDefault(); // ป้องกันการเลื่อนหน้าจอ
-      controls.update(); // ใช้การอัพเดตจาก OrbitControls
-    }
-  });
+    renderer.domElement.addEventListener("touchmove", (e) => {
+      if (e.touches.length === 1) {
+        e.preventDefault(); // ป้องกันการเลื่อนหน้าจอ
+        controls.update(); // ใช้การอัพเดตจาก OrbitControls
+      }
+    });
 
-  renderer.domElement.addEventListener("touchend", () => {
-    controls.enabled = true; // ปล่อยการควบคุมเมื่อสัมผัสเสร็จ
-  });
+    renderer.domElement.addEventListener("touchend", () => {
+      controls.enabled = true; // ปล่อยการควบคุมเมื่อสัมผัสเสร็จ
+    });
 
     const container = containerRef.current;
     container.appendChild(renderer.domElement);
@@ -219,92 +236,91 @@ const ViewModel = () => {
   };
 
 
-  
-// เพิ่มฟังก์ชัน Undo 
-// เพิ่มฟังก์ชัน Redo
-// import { fabric } from 'fabric';
 
-useEffect(() => {
-  if (showCanvas) {
-    if (!fabricCanvas) {
-      console.log("Canvas is now visible, initializing fabric canvas...");
-      const newCanvas = new fabric.Canvas(canvasRef.current, {
-        width: 790,
-        height: 450,
-        isDrawingMode: false,
-      });
-      const undoStack = [];
-      const redoStack = [];
-      
-      let isUndoRedoAction = false;
+  // เพิ่มฟังก์ชัน Undo 
+  // เพิ่มฟังก์ชัน Redo
+  // import { fabric } from 'fabric';
 
-      const undo = () => {
-        if (undoStack.length > 1) {
-          isUndoRedoAction = true; // เริ่ม Undo Action
-          redoStack.push(undoStack.pop());
-          const currentState = undoStack[undoStack.length - 1];
-          newCanvas.loadFromJSON(currentState, () => {
-            newCanvas.renderAll();
-            isUndoRedoAction = false; // จบ Undo Action
-          });
-        } else if (undoStack.length === 1) {
-          newCanvas.clear();
-          undoStack.length = 0;
-          redoStack.length = 0;
-          console.log('Canvas has been reset to empty.');
-        }
-      };
-      
-      const redo = () => {
-        if (redoStack.length > 0) {
-          isUndoRedoAction = true; // เริ่ม Redo Action
-          const redoState = redoStack.pop();
-          undoStack.push(redoState);
-          newCanvas.loadFromJSON(redoState, () => {
-            newCanvas.renderAll();
-            isUndoRedoAction = false; // จบ Redo Action
-          });
-        }
-      };
-      
-      const addHistory = () => {
-        if (!isUndoRedoAction) { // ถ้าไม่ได้อยู่ใน Undo/Redo Action
-          const currentState = newCanvas.toJSON();
-          if (undoStack.length === 0 || JSON.stringify(undoStack[undoStack.length - 1]) !== JSON.stringify(currentState)) {
-            undoStack.push(currentState);
-            redoStack.length = 0; // Clear redoStack เมื่อมีการเปลี่ยนแปลงใหม่
-            console.log('Added history:', currentState);
+  useEffect(() => {
+    if (showCanvas) {
+      if (!fabricCanvas) {
+        console.log("Canvas is now visible, initializing fabric canvas...");
+        const newCanvas = new fabric.Canvas(canvasRef.current, {
+          // width: '100%',
+          isDrawingMode: false,
+        });
+        const undoStack = [];
+        const redoStack = [];
+
+        let isUndoRedoAction = false;
+
+        const undo = () => {
+          if (undoStack.length > 1) {
+            isUndoRedoAction = true; // เริ่ม Undo Action
+            redoStack.push(undoStack.pop());
+            const currentState = undoStack[undoStack.length - 1];
+            newCanvas.loadFromJSON(currentState, () => {
+              newCanvas.renderAll();
+              isUndoRedoAction = false; // จบ Undo Action
+            });
+          } else if (undoStack.length === 1) {
+            newCanvas.clear();
+            undoStack.length = 0;
+            redoStack.length = 0;
+            console.log('Canvas has been reset to empty.');
           }
-        }
-      };
-      
-    
-      
-      newCanvas.on('object:modified', addHistory);
-      newCanvas.on('object:added', addHistory);
-      newCanvas.on('object:removed', addHistory);
-      
-      // Add initial state
-      undoStack.push(newCanvas.toJSON());
-      
-            
-            setFabricCanvas(newCanvas);
-      
-            // ตัวอย่างการใช้งาน undo และ redo
-            document.getElementById("undoButton").addEventListener("click", undo);
-            document.getElementById("redoButton").addEventListener("click", redo);
-      
-            // Cleanup function to off the events when the component is unmounted or canvas is no longer needed
-         
+        };
+
+        const redo = () => {
+          if (redoStack.length > 0) {
+            isUndoRedoAction = true; // เริ่ม Redo Action
+            const redoState = redoStack.pop();
+            undoStack.push(redoState);
+            newCanvas.loadFromJSON(redoState, () => {
+              newCanvas.renderAll();
+              isUndoRedoAction = false; // จบ Redo Action
+            });
           }
-        } else {
-          if (fabricCanvas) {
-            fabricCanvas.dispose();
-            setFabricCanvas(null);
+        };
+
+        const addHistory = () => {
+          if (!isUndoRedoAction) { // ถ้าไม่ได้อยู่ใน Undo/Redo Action
+            const currentState = newCanvas.toJSON();
+            if (undoStack.length === 0 || JSON.stringify(undoStack[undoStack.length - 1]) !== JSON.stringify(currentState)) {
+              undoStack.push(currentState);
+              redoStack.length = 0; // Clear redoStack เมื่อมีการเปลี่ยนแปลงใหม่
+              console.log('Added history:', currentState);
+            }
           }
-        }
-      }, [showCanvas]);
-      
+        };
+
+
+
+        newCanvas.on('object:modified', addHistory);
+        newCanvas.on('object:added', addHistory);
+        newCanvas.on('object:removed', addHistory);
+
+        // Add initial state
+        undoStack.push(newCanvas.toJSON());
+
+
+        setFabricCanvas(newCanvas);
+
+        // ตัวอย่างการใช้งาน undo และ redo
+        document.getElementById("undoButton").addEventListener("click", undo);
+        document.getElementById("redoButton").addEventListener("click", redo);
+
+        // Cleanup function to off the events when the component is unmounted or canvas is no longer needed
+
+      }
+    } else {
+      if (fabricCanvas) {
+        fabricCanvas.dispose();
+        setFabricCanvas(null);
+      }
+    }
+  }, [showCanvas]);
+
 
 
   useEffect(() => {
@@ -334,27 +350,27 @@ useEffect(() => {
     setShowCanvas(false);
     setIsDrawingMode(false);
     setIsTextMode(false);
-    
+
     // เคลียร์ canvas เมื่อสลับกลับไปที่โหมด 3D Model
     if (fabricCanvas) {
       fabricCanvas.dispose(); // Clear the fabric canvas
       setFabricCanvas(null);  // Reset the fabricCanvas state
     }
     // รีเซ็ตสถานะของปุ่มที่เกี่ยวข้อง (เช่นการรีเซ็ต isActive)
-  setIsActive((prev) => ({
-    ...prev,
-    pen: false,  // สถานะของปุ่ม Pen
-    eraser: false, // สถานะของปุ่ม 1
-    bold: false, // สถานะของปุ่ม 2
-    italic: false,
-    underline: false,
-    textAlignLeft: false,
-    textAlignCenter: false,
-    textAlignRight: false,
-  }));
-  setIsBold(false);
-  setIsItalic(false);
-  setIsUnderline(false);
+    setIsActive((prev) => ({
+      ...prev,
+      pen: false,  // สถานะของปุ่ม Pen
+      eraser: false, // สถานะของปุ่ม 1
+      bold: false, // สถานะของปุ่ม 2
+      italic: false,
+      underline: false,
+      textAlignLeft: false,
+      textAlignCenter: false,
+      textAlignRight: false,
+    }));
+    setIsBold(false);
+    setIsItalic(false);
+    setIsUnderline(false);
   };
 
   // Add this useEffect to handle changes in the currentColor state
@@ -366,7 +382,7 @@ useEffect(() => {
   // ฟังก์ชันสำหรับสลับโหมดการวาด
 
   const toggleDrawingMode = (button) => {
-    
+
     if (fabricCanvas) {
       setIsDrawingMode((prev) => {
         const newMode = !prev;
@@ -376,7 +392,7 @@ useEffect(() => {
 
       // สลับสถานะการวาด
       fabricCanvas.isDrawingMode = !fabricCanvas.isDrawingMode;
-    
+
 
       if (fabricCanvas.isDrawingMode) {
 
@@ -388,50 +404,50 @@ useEffect(() => {
         fabricCanvas.freeDrawingBrush.width = lineWidth;
 
       }
-       // สลับสถานะ isActive (สำหรับ UI)
-       setIsActive((prev) => ({
+      // สลับสถานะ isActive (สำหรับ UI)
+      setIsActive((prev) => ({
         ...prev,
         [button]: !prev[button],  // สลับสถานะของปุ่มที่ถูกคลิก
       }));
 
-        // ปิดสถานะการวาด
-    setIsActive((prev) => ({
-      ...prev,
-      eraser: false,  // ปิดสถานะปุ่มปากกาเมื่อปิดโหมดการวาด
-    }));
-    setIsEraserMode(false);
-    // fabricCanvas.isEraserMode = false;
-  
+      // ปิดสถานะการวาด
+      setIsActive((prev) => ({
+        ...prev,
+        eraser: false,  // ปิดสถานะปุ่มปากกาเมื่อปิดโหมดการวาด
+      }));
+      setIsEraserMode(false);
+      // fabricCanvas.isEraserMode = false;
+
     }
   };
 
 
 
-// ฟังก์ชันสลับ Eraser Mode
-const toggleEraserMode = (button) => {
-  if (fabricCanvas) {
-    // สลับ Eraser Mode
-    setIsEraserMode((prev) => {
-      const newMode = !prev;
-      fabricCanvas.selection = !newMode; // ปิด/เปิดการเลือกวัตถุ
-      return newMode;
-    });
+  // ฟังก์ชันสลับ Eraser Mode
+  const toggleEraserMode = (button) => {
+    if (fabricCanvas) {
+      // สลับ Eraser Mode
+      setIsEraserMode((prev) => {
+        const newMode = !prev;
+        fabricCanvas.selection = !newMode; // ปิด/เปิดการเลือกวัตถุ
+        return newMode;
+      });
 
-// สลับสถานะ isActive (สำหรับ UI)
-setIsActive((prev) => ({
-  ...prev,
-  [button]: !prev[button],  // สลับสถานะของปุ่มที่ถูกคลิก
-}));
+      // สลับสถานะ isActive (สำหรับ UI)
+      setIsActive((prev) => ({
+        ...prev,
+        [button]: !prev[button],  // สลับสถานะของปุ่มที่ถูกคลิก
+      }));
 
-    // ปิดสถานะการวาด
-    setIsActive((prev) => ({
-      ...prev,
-      pen: false,  // ปิดสถานะปุ่มปากกาเมื่อปิดโหมดการวาด
-    }));
-    setIsDrawingMode(false);
-    fabricCanvas.isDrawingMode = false;
-  }
-};
+      // ปิดสถานะการวาด
+      setIsActive((prev) => ({
+        ...prev,
+        pen: false,  // ปิดสถานะปุ่มปากกาเมื่อปิดโหมดการวาด
+      }));
+      setIsDrawingMode(false);
+      fabricCanvas.isDrawingMode = false;
+    }
+  };
 
   const handleLineWidthChange = (newWidth) => {
     setLineWidth(newWidth); // อัปเดต state lineWidth
@@ -440,44 +456,44 @@ setIsActive((prev) => ({
     }
   };
 
-// ฟังก์ชันเลือกวัตถุเมื่อคลิก
-// ฟังก์ชันลบวัตถุที่เลือกใน Eraser Mode
-useEffect(() => {
-  if (fabricCanvas) {
-    const handleMouseDown = (e) => {
-      if (e.target) {
-        setSelectedObject(e.target); // ตั้งค่า selectedObject เป็นวัตถุที่ถูกคลิก
-      } else {
-        setSelectedObject(null); // ถ้าไม่ได้คลิกที่วัตถุใด ให้รีเซ็ต selectedObject
-      }
+  // ฟังก์ชันเลือกวัตถุเมื่อคลิก
+  // ฟังก์ชันลบวัตถุที่เลือกใน Eraser Mode
+  useEffect(() => {
+    if (fabricCanvas) {
+      const handleMouseDown = (e) => {
+        if (e.target) {
+          setSelectedObject(e.target); // ตั้งค่า selectedObject เป็นวัตถุที่ถูกคลิก
+        } else {
+          setSelectedObject(null); // ถ้าไม่ได้คลิกที่วัตถุใด ให้รีเซ็ต selectedObject
+        }
 
-      // ถ้าอยู่ในโหมด Eraser ให้ลบวัตถุที่เลือก
-      if (isEraserMode && e.target) {
-        // เพิ่มการลบวัตถุลงใน history เพื่อสามารถ undo ได้
+        // ถ้าอยู่ในโหมด Eraser ให้ลบวัตถุที่เลือก
+        if (isEraserMode && e.target) {
+          // เพิ่มการลบวัตถุลงใน history เพื่อสามารถ undo ได้
 
-        fabricCanvas.remove(e.target); // ลบวัตถุที่เลือก
-        fabricCanvas.renderAll(); // อัพเดต canvas
-        setSelectedObject(null); // รีเซ็ตการเลือก
-      }
-    };
+          fabricCanvas.remove(e.target); // ลบวัตถุที่เลือก
+          fabricCanvas.renderAll(); // อัพเดต canvas
+          setSelectedObject(null); // รีเซ็ตการเลือก
+        }
+      };
 
-    fabricCanvas.on('mouse:down', handleMouseDown);
+      fabricCanvas.on('mouse:down', handleMouseDown);
 
-    return () => {
-      fabricCanvas.off('mouse:down', handleMouseDown); // ลบ listener เมื่อ component ถูกลบ
-    };
-  }
-}, [fabricCanvas, isEraserMode]);
+      return () => {
+        fabricCanvas.off('mouse:down', handleMouseDown); // ลบ listener เมื่อ component ถูกลบ
+      };
+    }
+  }, [fabricCanvas, isEraserMode]);
 
-// ฟังก์ชันสำหรับการ Clear Canvas
-const clearCanvas = () => {
-  if (fabricCanvas) {
-    // ล้าง canvas
-    fabricCanvas.clear();
-    fabricCanvas.renderAll();
-  }
-};
- 
+  // ฟังก์ชันสำหรับการ Clear Canvas
+  const clearCanvas = () => {
+    if (fabricCanvas) {
+      // ล้าง canvas
+      fabricCanvas.clear();
+      fabricCanvas.renderAll();
+    }
+  };
+
 
   const addText = () => {
     if (fabricCanvas && isTextMode) {  // ตรวจสอบว่าอยู่ในโหมดเพิ่มข้อความ
@@ -485,7 +501,7 @@ const clearCanvas = () => {
         left: 100,
         top: 100,
         fontSize: fontSize,
-        fill: textColor,
+        fill: currentColor,
         selectable: true,
         fontWeight: isBold ? 'bold' : 'normal',
         fontStyle: isItalic ? 'italic' : 'normal',
@@ -568,10 +584,26 @@ const clearCanvas = () => {
         fabricCanvas.renderAll(); // อัพเดทการแสดงผลของ canvas
         setTextAlign(alignment); // อัพเดทสถานะของ textAlign
         setActiveButton(alignment); // อัพเดทสถานะของปุ่มที่กด
+        setShowOptions(false);
+        // setIsClicked(false);
       }
     }
   };
-  
+
+  // เลือกไอคอนตาม activeButton
+  const getIcon = () => {
+    switch (activeButton) {
+      case 'center':
+        return <GrTextAlignCenter size="18" />;
+      case 'right':
+        return <GrTextAlignRight size="18" />;
+      default:
+        return <GrTextAlignLeft size="18" />;
+    }
+  };
+
+
+
   const saveDrawing = async () => {
     if (
       !drawingCanvasRef.current &&
@@ -602,8 +634,8 @@ const clearCanvas = () => {
     const height = Math.max(rendererCanvas.height, userCanvas.height, textCanvas.height);
 
     const combinedCanvas = document.createElement("canvas");
-combinedCanvas.width = 790; // กำหนดความกว้างตามที่ต้องการ
-combinedCanvas.height = 450; // กำหนดความสูงตามที่ต้องการ
+    combinedCanvas.width = 790; // กำหนดความกว้างตามที่ต้องการ
+    combinedCanvas.height = 450; // กำหนดความสูงตามที่ต้องการ
 
 
     const context = combinedCanvas.getContext("2d");
@@ -617,7 +649,7 @@ combinedCanvas.height = 450; // กำหนดความสูงตามท
     if (textCanvas.width > 0 && textCanvas.height > 0) {
       context.drawImage(textCanvas, 0, 0, 790, 450);
     }
-    
+
 
     const dataURL = combinedCanvas.toDataURL("image/png", 1);
 
@@ -636,337 +668,394 @@ combinedCanvas.height = 450; // กำหนดความสูงตามท
     }
   };
 
-
+  const handleToggle = () => {
+    setIsChecked(!isChecked);
+    if (isChecked) {
+      switchToModelView(); // ไปยังโหมดดูโมเดล
+    } else {
+      switchToDrawingMode(); // ไปยังโหมดวาดเขียน
+    }
+  };
   ///////////////////////////////////////////////////////////////////////////////
   return (
     <div className="container-ar" style={{ position: 'relative' }}>
 
 
 
-      <div className="model-container" style={{ zIndex: 5, marginTop: '0', }}>
-        <div className="draw" style={{ display: 'flex-block', zIndex: 5, marginBottom: '10px', background: '#fff' }}>
+      <div className="model-container" style={{ zIndex: 5, marginTop: '0', paddingTop: '0px' ,}}>
+        <div className="draw" style={{display: 'flex', gap:15,marginTop:'20px', marginLeft:'10px',
+    flexDirection: 'column',  height: '', width: '8%', zIndex: 5, background: '', float: 'left',border:'1px solid #fff',padding:'10px',
+    alignItems:'center',borderRadius:'15px' }}>
 
-          <div className="line-one" style={{ margin: '1rem', width: '70%', display: 'flex', textAlign: 'center', justifyContent: 'space-between' }}>
+          
+          {/* <div className="line-one" style={{ gap:'10px',float: 'left', margin: '', textAlign: 'center', justifyContent: 'space-between' }}> */}
+
             {/* Button to toggle rotation and drawing */}
+            
             <button
-            className='bt-drawing'
+              className='bt-drawing'
               title="คลิกเพื่อวาด"
-              onClick={() => toggleDrawingMode('pen')} 
+              onClick={() => toggleDrawingMode('pen')}
               // disabled={!isDrawingMode}
               style={{
+
                 zIndex: 5,
-                // padding: '5px',
-                margin: '0.3rem',
-                color: '#000',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                color: 'rgb(102, 3, 196)',
                 cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                backgroundColor: isActive.pen ? '#E8EAE6' : '#fff',
-                border:'0.05rem solid #000'
-               }
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
+                backgroundColor: isActive.pen ? '#E8EAE6' : '#f1f1f1',
+                border: isActive.pen ? '1px solid #ddd' : 'none',
+                justifyItems: 'center'
+              }
               }
             >
-              <FaPen size="1.3vw" />
+              <FaPen size="20" />
             </button>
-            <ul className="options"
+
+            <button
+              className='bt-addText'
+              onClick={addText}
+              title="เพิ่มข้อความ"
               style={{
-                display: 'flex',
+                justifyItems: 'center',
+                zIndex: 5,
+                marginLeft: '0rem',
+                backgroundColor: '#f1f1f1',
+                color: 'rgb(102, 3, 196)',
+                // margin: '5px',
+                // cursor: 'pointer',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
+                cursor: 'pointer',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+              }}
+              disabled={!switchToDrawingMode} // ปิดปุ่มจนกว่าอยู่ในโหมดการวาด
+            >
+              <RxText size="20" />
+            </button>
+            {/* <ul className="options"
+              style={{
+                // display: 'flex',
                 zIndex: 5,
                 // margin: '5px',
+
                 padding: 0,
                 margin: 0,
                 cursor: 'pointer',
               }}>
               {presetColors.map((color, index) => (
-                <li key={index} className={`option tool color ${currentColor === color ? 'active' : ''}`} style={{
-                  backgroundColor: color, listStyle: 'none',         width: '2.7vw',
-                  height: '2.7vw',  border:'0.05rem solid #000', margin: ' 0.3rem '
-                }} onClick={() => handleColorChange(color)}></li>
+                <li key={index} className={`option tool color ${currentColor === color ? 'active' : ''}`}
+                  style={{
+                    backgroundColor: color,
+                    listStyle: 'none',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50px',
+                    border: '1px solid #000',
+                    margin: '5px '
+                  }} onClick={() => handleColorChange(color)}></li>
               ))}
 
-            </ul>
+            </ul> */}
 
             <input
-            title="สีเพิ่มเติม"
-            className='ip-color'
+              title="สีเพิ่มเติม"
+              className='ip-color'
               type="color"
               value={currentColor}
-              onChange={(e) => setCurrentColor(e.target.value)}
+              onChange={(e) => {
+                setCurrentColor(e.target.value); setTextColor(e.target.value);
+                changeTextColor(e.target.value);
+              }}
               style={{
                 zIndex: 5,
-                padding: '0.3rem',
-                margin: '0.3rem',
-                width: '2.7vw',
-                height: '2.7vw', 
+                padding: '0',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
                 cursor: 'pointer',
-                border:'0.05rem solid #000'
+                border: '2px solid #ddd',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
               }}
             />
-            <input
-            title="ขนาดเส้นวาด"
-            className='ip-lineWidth'
-              type="range"
-              min="5"
-              max="20"
-              value={lineWidth}
-              onChange={(e) => handleLineWidthChange(parseInt(e.target.value))}
-              style={{
-                zIndex: 5,
-                // margin: '0.3rem',
-                width: '50%',  // Adjust width as percentage of the parent container
-                maxWidth: '8vw',  // Add a max-width for larger screens
-                border: '0.05rem solid #000',
-                cursor: 'pointer',
-              }}
-            />
+
             <button
-            className='bt-eraser'
+              className='bt-bold'
+              onClick={toggleBold}
+              title="ตัวหนา"
+              style={{
+                justifyItems: 'center',
+                backgroundColor: isBold ? '#E8EAE6' : '#f1f1f1',
+                zIndex: 5,
+                color: 'rgb(102, 3, 196)',
+                // margin: '5px',
+                cursor: 'pointer',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                border: isBold ? '1px solid #ddd' : 'none',
+              }}>
+              {/* <FaBold size="1.3vw" />
+               */}
+               <VscBold   size="25" />
+            </button>
+            <button
+              className='bt-italic'
+              onClick={toggleItalic}
+              title="ตัวเอียง"
+              style={{
+                justifyItems: 'center',
+                backgroundColor: isItalic ? '#E8EAE6' : '#f1f1f1',
+                zIndex: 5,
+                color: 'rgb(102, 3, 196)',
+                // margin: '5px',
+                cursor: 'pointer',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center',
+                border: isItalic ? '1px solid #ddd' : 'none',
+              }}>
+              <FiItalic size="1.3vw" />
+            </button>
+            <button
+              className='bt-underline'
+              onClick={toggleUnderline}
+              title="ขีดเส้นใต้"
+              style={{
+                backgroundColor: isUnderline ? '#E8EAE6' : '#f1f1f1',
+                zIndex: 5,
+                color: 'rgb(102, 3, 196)',
+                // margin: '5px',
+                cursor: 'pointer',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center',
+                border: isUnderline ? '1px solid #ddd' : 'none',
+              }}>
+              <BsTypeUnderline size="22" />
+            </button>
+
+
+            <button
+        className='text-align'
+        title="การจัดข้อความ"
+        onClick={() => {
+          const nextAlign = activeButton === 'left' ? 'center' : activeButton === 'center' ? 'right' : 'left';
+          changeTextAlign(nextAlign); // เปลี่ยนการจัดตำแหน่งเมื่อคลิก
+        }}
+        style={{
+          zIndex: 5,
+          color: 'rgb(102, 3, 196)',
+          justifyItems: 'center',
+          cursor: 'pointer',
+          width: '47px',
+          height: '47px',
+          borderRadius: '50px',
+          boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+          // border: '1px solid #ddd',
+          backgroundColor: '#f1f1f1',
+        }}
+      >
+        {getIcon()} {/* แสดงไอคอนที่เลือก */}
+      </button>
+            
+            <button
+              className='bt-eraser'
               title="คลิกเพื่อเลือกลบวัตถุ"
-              // variant={isEraserMode ? "danger" : "outline-danger"}
               onClick={() => {
                 toggleEraserMode('eraser');
                 // deleteSelectedObject(); // ลบวัตถุที่เลือก
               }}
               style={{
-                backgroundColor: isActive.eraser ? '#E8EAE6' : '#fff',
+                backgroundColor: isActive.eraser ? '#E8EAE6' : '#f1f1f1',
                 zIndex: 5,
-                // padding: '5px',
-                margin: '0.3rem',
-                width: '2.7vw',
-                height: '2.7vw', 
+                color: 'rgb(102, 3, 196)',
+                // margin: '5px',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
                 cursor: 'pointer',
-                border:'0.05rem solid #000'
-                // backgroundColor:'#fff',
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center',
+                border: isActive.eraser ? '1px solid #ddd' : 'none',
               }}
             >
-              <FaEraser size="1.3vw" />
+              <BsEraser  size="20" />
             </button>
 
 
             <button
-            className='bt-clear'
+              className='bt-clear'
               title="ล้าง"
               onClick={clearCanvas}
               style={{
                 zIndex: 5,
-                // padding: '5px',
+                backgroundColor: '#f1f1f1',
+                color: 'rgb(102, 3, 196)',
                 // margin: '5px',
-                backgroundColor: '#fff',
-                color: '#000',
-                margin: '0.3rem',
-                width: '2.7vw',
-                height: '2.7vw', 
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
                 cursor: 'pointer',
-                border:'0.05rem solid #000'
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center'
               }}
             >
-              <FaTrash size="1.3vw"/>
+              <AiOutlineDelete size="20" />
             </button>
 
-            <button id="undoButton" title="เลิกทำ" style={{ backgroundColor:'#fff',margin: '5px', zIndex: 5, cursor: 'pointer',    width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000' }}><FaUndoAlt size="1.3vw" /></button>
-            <button  id="redoButton" title="ทำซ้ำ" style={{ backgroundColor:'#fff',margin: '5px', zIndex: 5, cursor: 'pointer',    width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000' }}><FaRedoAlt size="1.3vw" /></button>
-
-
-
             <button
-            className='bt-saveImag'
+              className='bt-saveImag'
               title="บันทึกภาพ"
               onClick={saveDrawing}
               style={{
-                backgroundColor: '#fff',
-                color: '#000',
+                backgroundColor: '#f1f1f1',
+                color: 'rgb(102, 3, 196)',
                 zIndex: 5,
-                margin: '0.3rem',
-                width: '2.7vw',
-                height: '2.7vw', 
+                // margin: '5px',
+                width: '47px',
+                height: '47px',
+                borderRadius: '50px',
                 cursor: 'pointer',
-               border:'0.05rem solid #000'
+                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center'
               }}
             >
-              <IoIosSave size="1.3vw" />
+              <IoIosSave size="24" />
             </button>
-          </div>
+          {/* </div> */}
+          {/* <div className="line-two" style={{ float: 'right', margin: '', width: '45%', textAlign: 'center', justifyContent: 'space-between' }}>
+           
+          
+
+
+          </div> */}
 
 
           {/* /////////////////////////////////////////////////////////////// */}
 
-          <div className="line-two" style={{ margin: '1rem', width: '50%', display: 'flex', textAlign: 'center', justifyContent: 'space-between' }}>
-            {/* </div> */}
-            <button 
-            className='bt-addText'
-            onClick={addText}
-              title="เพิ่มข้อความ"
+
+        </div>
+
+
+        <div className="bt-mode" style={{
+          display: 'block', float: 'left', width: '80%', justifyContent: 'center', marginLeft: '50px',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          
+          {/* <div className="background"></div> */}
+          <div className="btplayModel" style={{ display: 'inline-flex', width: '100%', justifyContent: 'center', textAlign: 'center', }}>
+            {/* <button title='เล่นโมเดล' style={{ zIndex: 5, backgroundColor: '#6a0f9e', color: '#fff', borderRadius: '7px 0 0 7px', padding: '5px', marginBottom: '20px' }} onClick={toggleAnimation}>
+              {animationStopped ? <FaPlay size={20} /> : <TbPlayerPauseFilled size={20} />}
+            </button> */}
+            {/* <button title='คลิกเพื่อเปลี่ยนโหมด' style={{ backgroundColor: '#6a0f9e', color: '#fff', borderRadius: '0 7px 7px 0', padding: '5px', marginBottom: '20px' }} onClick={isDrawingMode || isTextMode ? switchToModelView : switchToDrawingMode}>
+              {isDrawingMode || isTextMode ? 'โหมดวาดเขียน' : 'โหมดดูโมเดล'}
+            </button> */}
+<div className="switch-mode" style={{display:'inline-flex',width:'100%',justifyContent: 'center', textAlign: 'center',}}>
+<input
+        type="checkbox"
+        id="animationMode"
+        checked={isChecked} // ผูกกับ state
+        onChange={handleToggle} // อัปเดตค่าเมื่อกด
+      />
+      <label htmlFor="animationMode" className="label-Mode">
+  <FaEye size={20} className="animation-mode" />
+  <MdDraw size={20} className="draw-mode" />
+</label>
+</div>
+            {/* <input type='checkbox' id='animationMode'/>
+          <label htmlFor='animationMode' className='label-Mode'><FaEye className='animation-mode' size={'20'} /><MdDraw className='draw-mode' size={'20'}/></label> */}
+       
+       
+       <div className="bt-undo-redo" style={{  display: 'flex', 
+    marginLeft: 'auto', marginBottom:'15px',clear:'both' }}>
+            <button id="undoButton" title="เลิกทำ"
               style={{
-
-                zIndex: 5,
-                marginLeft: '0rem',
                 backgroundColor: '#fff',
-                color: '#000',
-                margin: '0.3rem',
-                // cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
+                margin: '5px',
+                zIndex: 5,
                 cursor: 'pointer',
-                border:'0.05rem solid #000'
-              }}
-              disabled={!switchToDrawingMode} // ปิดปุ่มจนกว่าอยู่ในโหมดการวาด
-            >
-              <RxText  size="1.3vw"/>
+                width: '40px',
+                height: '40px',
+                borderRadius: '50px',
+                justifyItems: 'center',
+                boxShadow: '0 0 5px 2px rgba(0, 0, 0, 0.1)',
+
+              }}><GrUndo size="17" />
             </button>
-            <div className='span-colorText' title="สีข้อความ" style={{ margin: '0.3rem', height: '10rem', display: 'flex-block', cursor: 'pointer' }}>
-              <div className="" style={{ color: '#000', }}> <RiFontFamily style={{ marginBottom: '-0.5rem' }} size="1.3vw" /></div>
-              <div className=""> 
-                <input
-                className='ip-textColor'
-                style={{
-                  zIndex: 5,
-                  // margintop: '-10rem',
-                  padding: '0rem',
-                  border: 'none',
-                  // margin: '15px 5px',
-                  cursor: 'pointer',
-                  width: '2.7vw',
-                  height: '0.5vw', 
-                // border:'1px solid #000'
-                }}
-                type="color"
-                value={textColor}
-                onChange={(e) => {
-                  setTextColor(e.target.value);
-                  changeTextColor(e.target.value);
-                }}  // อัปเดตสี
-              /></div>
-
-
-            </div>
-
+            <button id="redoButton" title="ทำซ้ำ"
+              style={{
+                backgroundColor: '#fff',
+                margin: '5px',
+                zIndex: 5,
+                cursor: 'pointer',
+                width: '40px',
+                height: '40px',
+                borderRadius: '50px',
+                justifyItems: 'center',
+                boxShadow: '0 0 5px 2px rgba(0, 0, 0, 0.1)',
+              }}><GrRedo size="17" />
+            </button>
+          </div>
+          </div>
+{/* 
+          <div className="line-size" style={{float:'left'}}>
+          <input
+            title="ขนาดเส้นวาด"
+            className='ip-lineWidth'
+            type="range"
+            min="1"
+            max="10"
+            value={lineWidth}
+            onChange={(e) => handleLineWidthChange(parseInt(e.target.value))}
+            style={{
+              zIndex: 5,
+              width: '50%',  // Adjust width as percentage of the parent container
+              maxWidth: '120px',  // Add a max-width for larger screens
+              cursor: 'pointer',
+            }}
+          />
             <input
-            className='ip-fontSize'
+              className='ip-fontSize'
               type="number"
               title="ขนาดตัวอักษร"
               value={fontSize}
               style={{
+                // justifyItems: 'center',
                 zIndex: 5,
-                margin: '0.3rem',
+                // margin: '0.3rem',
                 cursor: 'pointer',
-                width: '7vw',
-                height: '2.7vw', 
-               border:'0.05rem solid #000'
+                width: '50px',
+                height: '50px',
+                color: '#000',
+                boxShadow: '1px 1px 1px 1px rgba(0, 0, 0, 0.2)',
               }}
               onChange={(e) => {
                 setFontSize(e.target.value);
                 changeFontSize(e.target.value);
               }} />
 
-            <button 
-            className='bt-bold'
-            onClick={toggleBold}
-              title="ตัวหนา"
-              style={{
-                backgroundColor: isBold ? '#E8EAE6' : '#fff',
-                zIndex: 5,
-                margin: '0.3rem',
-                cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000'
-              }}>
-              <FaBold size="1.3vw"/>
-            </button>
-            <button 
-            className='bt-italic'
-            onClick={toggleItalic}
-              title="ตัวเอียง"
-              style={{
-                backgroundColor: isItalic ? '#E8EAE6' : '#fff',
-                zIndex: 5,
-                margin: '0.3rem',
-                cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000'
-              }}>
-              <FiItalic size="1.3vw"/>
-            </button>
-            <button 
-            className='bt-underline'
-            onClick={toggleUnderline}
-              title="ขีดเส้นใต้"
-              style={{
-                backgroundColor: isUnderline ? '#E8EAE6' : '#fff',
-                zIndex: 5,
-                margin: '0.3rem',
-                cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000'
-              }}>
-              <BsTypeUnderline size="1.3vw" />
-            </button>
-            <button
-            className='bt-left'
-              title="ชิดซ้าย"
-              onClick={() => changeTextAlign('left')} style={{
-                zIndex: 5,
-                margin: '0.3rem',
-                cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000',
-                backgroundColor: activeButton === 'left' ?'#E8EAE6' : '#fff', // เปลี่ยนสีพื้นหลังเมื่อ active
-              }}><GrTextAlignLeft size="1.3vw"/></button>
-            <button
-            className='bt-center'
-              title="กลึ่งกลาง"
-              onClick={() => changeTextAlign('center')} style={{
-                zIndex: 5,
-                margin: '0.3rem',
-                cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000',
-                backgroundColor: activeButton === 'center' ?'#E8EAE6' : '#fff', 
-              }}><GrTextAlignCenter size="1.3vw" /></button>
-            <button
-            className='bt-right'
-              title="ชิดขวา"
-              onClick={() => changeTextAlign('right')} style={{
-                zIndex: 5,
-                margin: '0.3rem',
-                cursor: 'pointer',
-                width: '2.7vw',
-                height: '2.7vw', 
-                border:'0.05rem solid #000',
-                backgroundColor: activeButton === 'right' ?'#E8EAE6' : '#fff', 
-              }}><GrTextAlignRight size="1.3vw" /></button>
-          </div>
+          </div> */}
+
+          <div className='containerRef' ref={containerRef} style={{ zIndex: 5, width: '100%',border:'1px solid #000', }}>  </div>
+
+          {showCanvas &&
+            <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5, width: '100%' }} />
+          }
         </div>
 
 
-        <div className="bt-mode" style={{display:'flex',  width:'100%', justifyContent: 'center', 
-  alignItems: 'center', 
-  textAlign: 'center'}}>
-       <div className="btplayModel" style={{width:'80%',justifyContent:'center',textAlign:'center'}}> <button title='เล่นโมเดล' style={{ zIndex: 5, backgroundColor: '#6a0f9e', color: '#fff', borderRadius: '7px 0 0 7px', }} onClick={toggleAnimation}>
-          {animationStopped ? <FaPlay size={20} /> : <TbPlayerPauseFilled size={20}/>}
-        </button>
-        <button title='คลิกเพื่อเปลี่ยนโหมด' style={{backgroundColor: '#6a0f9e', color: '#fff', borderRadius:'0 7px 7px 0'}} onClick={isDrawingMode || isTextMode ? switchToModelView : switchToDrawingMode}>
-          {isDrawingMode || isTextMode ? 'โหมดวาดเขียน' : 'โหมดดูโมเดล'}
-        </button></div>
-       
-        
-        </div>
 
-       
-        <div className='containerRef' ref={containerRef} style={{ zIndex: 5,  }}>  </div>
-        {/* เพิ่มรายละเอียดหรือปุ่มต่าง ๆ ของการวาด */}
-        {/* </div> */}
-        {showCanvas &&
-          <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5 }} />
-        }
       </div>
     </div>
   );
