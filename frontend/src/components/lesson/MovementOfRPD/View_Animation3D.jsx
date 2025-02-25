@@ -42,13 +42,13 @@ function View_Animation3D() {
       <div className="ViewAnimation flex flex-wrap justify-center">
           {animation3d && (
               <div className="viewvdo text-center">
-                  <h1 className="AnimationName text-lg font-semibold">{animation3d.Ani3D_name}</h1>
+                  <h1 className="text-base md:text-lg lg:text-2xl  font-bold mt-4 mb-2.5">{animation3d.Ani3D_name}</h1>
                   <video
                       id="animationVideo"
                       ref={videoRef}
                       controls
                       onEnded={handleVideoEnded}
-                      className="w " 
+                      className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl  rounded-lg shadow-sm" 
                   >
                       <source src={animation3d.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.

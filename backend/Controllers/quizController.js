@@ -204,14 +204,14 @@ const createQuestion = async (req, res) => {
 
     //---------------------------------------------------------//
     // ✅ เพิ่มการแจ้งเตือนเมื่อมีการเพิ่มคำถามใหม่
-    // const notification = new Notification({
-    //     message: `มีคำถามใหม่ถูกเพิ่มในแบบทดสอบ: ${quiz.title}`,
-    //     link: `/quiz/${quiz._id}`,
-    //     isRead: false,
-    // });
+    const notification = new Notification({
+        message: `มีคำถามใหม่ถูกเพิ่มในแบบทดสอบ: ${quiz.title}`,
+        link: `/quiz/${quiz._id}`,
+        isRead: false,
+    });
 
-    // await notification.save();
-    // req.io.emit("newNotification", notification); // ส่งแจ้งเตือนไปยัง WebSocket
+    await notification.save();
+    req.io.emit("newNotification", notification); // ส่งแจ้งเตือนไปยัง WebSocket
 
     //---------------------------------------------------------//
 
@@ -304,21 +304,30 @@ const submitResult = async (req, res) => {
   try {
     const { userId, quizId, correctAnswers, totalQuestions } = req.body;
 
-    // ตรวจสอบข้อมูลที่จำเป็น
-    if (!userId || !quizId || correctAnswers === undefined || totalQuestions === undefined) {
+    // ตรวจสอบว่าค่าที่รับมาตรงตามรูปแบบที่ถูกต้อง
+    if (!userId || !quizId || correctAnswers == null || totalQuestions == null) {
       return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
     }
 
-    // สร้างผลลัพธ์ใหม่
+    // ตรวจสอบว่า userId และ quizId เป็น ObjectId ที่ถูกต้อง
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ message: "Invalid userId or quizId" });
+    }
+
+    // แปลง userId และ quizId เป็น ObjectId
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const quizObjectId = new mongoose.Types.ObjectId(quizId);
+
+    // สร้างและบันทึกผลคะแนน
     const result = new Result({
-      user: userId,
-      quiz: quizId,
+      user: userObjectId,
+      quiz: quizObjectId,
       correctAnswers,
       totalQuestions,
     });
 
     await result.save();
-    res.status(200).json({ message: "บันทึกคะแนนสำเร็จ", result });
+    res.status(201).json({ message: "บันทึกคะแนนสำเร็จ", result });
   } catch (error) {
     console.error("Error saving result:", error);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการบันทึกคะแนน" });

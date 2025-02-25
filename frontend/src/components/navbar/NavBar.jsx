@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import {
@@ -9,26 +9,40 @@ import {
 } from "react-icons/hi";
 import GoogleLogin from "../GoogleLoginButton";
 import MenuProfile from "../Profile/MenuProfile";
-// import NotificationBell from "../Notification/NotificationBell";
+import NotificationBell from "../Notification/NotificationBell";
 import "../../tailwind.css";
 
 const NavBar = () => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isLessonDropdownOpen, setIsLessonDropdownOpen] = useState(false);
   const { user, logoutUser, loginWithGoogle } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [openProfile, setOpenProfile] = useState(false);
 
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      navigate(`/?search=${searchTerm}`);
-    }
-  };
+  // // Refs สำหรับการตรวจจับการคลิกข้างนอก
+  // const notificationRef = useRef(null);
+  // const profileRef = useRef(null);
 
-  const toggleNotificationBell = () => {
-    setIsNotificationOpen(!isNotificationOpen);
-  };
+  // // ฟังก์ชันตรวจจับการคลิกข้างนอก
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       notificationRef.current &&
+  //       !notificationRef.current.contains(event.target)
+  //     ) {
+  //       setIsNotificationOpen(false);
+  //     }
+  //     if (profileRef.current && !profileRef.current.contains(event.target)) {
+  //       setOpenProfile(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -43,13 +57,12 @@ const NavBar = () => {
   };
 
   // Menu Profile
-  const [openProfile, setOpenProfile] = useState(false);
 
   return (
     <nav className="bg-white shadow-sm fixed w-full top-0 z-50">
       <div className="container mx-auto flex justify-between items-center py-2 px-6">
         {/* Mobile Menu Icon */}
-        <div className="md:hidden flex items-center space-x-4">
+        <div className="lg:hidden flex items-center space-x-2">
           {/* Menu Toggle Button */}
           <button onClick={toggleMenu}>
             {isOpen ? (
@@ -72,41 +85,13 @@ const NavBar = () => {
         </div>
 
         {/* Manu phon & ipad  */}
-        <div className="md:hidden flex items-center space-x-4">
+        <div className="lg:hidden flex items-center space-x-4">
           {user ? (
             <div className="relative flex items-center">
-              {/* Search Button */}
-              {/* <div className="absolute pointer-events-auto ml-2 text-gray-400">
-              <HiSearch/>
-            </div>     
-            <input
-              type='text'
-              placeholder='Search...'
-              className='border rounded-lg px-6 py-2 mr-6'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            /> */}
+              {/* แจ้งเตือน */}
 
-             
-              {/* <button onClick={handleSearch} className="ml-2 mr-2 text-purple-600">
-              <HiSearch className="text-xl" />
-            </button> */}
+              <NotificationBell />
 
-             {/* แจ้งเตือน */}
-              <div className="relative">
-                <button onClick={toggleNotificationBell} className="relative">
-                  <HiOutlineBell className="text-purple-500 w-6 h-6" />
-                </button>
-
-                {/* ✅ แสดง NotificationBell เมื่อ isNotificationOpen เป็น true */}
-                {/* {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-50">
-                    <NotificationBell />
-                  </div>
-                )} */}
-              </div>
-
-              
               {/* Profile */}
               <button onClick={() => setOpenProfile(!openProfile)}>
                 <img
@@ -131,7 +116,7 @@ const NavBar = () => {
         </div>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex space-x-4 items-center">
+        <div className="hidden lg:flex space-x-4 items-center">
           <Link to="/dashboard">
             <img
               src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
@@ -166,36 +151,13 @@ const NavBar = () => {
           </Link>
           {/* <Link to="/Form" className="text-gray-800 hover:text-purple-600 focus:text-purple-600">เพิ่มรายชื่อนักศึกษา</Link> */}
         </div>
-        <div className="hidden md:flex space-x-4 items-center">
+        <div className="hidden lg:flex space-x-4 items-center">
           {/* Search & User Options */}
           {user && (
-            <div className="hidden md:flex ml-auto justify-end  items-center space-x-4">
-              {/* Search Button  */}
-              {/* <div className="relative flex items-center">
-                <div className="absolute pointer-events-auto  ml-2 text-gray-400">
-                  <HiSearch/>
-                </div>      
-            <input
-              type='text'
-              placeholder='Search...'
-              className='border rounded-lg md:px-6 py-2 mr-6 '
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
-              </div> */}
+            <div className="hidden lg:flex ml-auto justify-end  items-center space-x-4">
               {/* notification */}
-              <div className="relative">
-                <button onClick={toggleNotificationBell} className="relative">
-                  <HiOutlineBell className="text-purple-500 w-6 h-6" />
-                </button>
 
-                {/* ✅ แสดง NotificationBell เมื่อ isNotificationOpen เป็น true */}
-                {/* {isNotificationOpen && (
-                  <div className="absolute right-0 mt-2 w-72 bg-white border rounded-lg shadow-lg z-50">
-                    <NotificationBell />
-                  </div>
-                )} */}
-              </div>
+              <NotificationBell />
 
               {/* <button onClick={logoutUser} className="text-gray-800 hover:text-purple-600">Logout</button> */}
               <button onClick={() => setOpenProfile(!openProfile)}>
@@ -235,12 +197,14 @@ const NavBar = () => {
           <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50">
             <div className="p-4 flex justify-between items-center">
               <span className="text-2xl font-bold text-purple-600">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
-                  alt="Logo"
-                  width="50"
-                  height="50"
-                />
+                <Link to="/dashboard"  onClick={closeMenu}>
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                    alt="Logo"
+                    width="50"
+                    height="50"
+                  />
+                </Link>
               </span>
               <button onClick={toggleMenu}>
                 <HiOutlineX className="text-2xl text-purple-600" />

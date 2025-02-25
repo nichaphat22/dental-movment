@@ -1,8 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
-      // "./index.html",
-      //  "./src/**/*.{js,ts,jsx,tsx}", // ครอบคลุมทุกไฟล์ใน src
+      "./index.html",
+       "./src/**/*.{js,ts,jsx,tsx}", // ครอบคลุมทุกไฟล์ใน src
 
       "./src/components/Quiz/**/*.{js,ts,jsx,tsx}",
       "./src/components/lesson/MovementOfRPD/**/*.{js,ts,jsx,tsx}",
@@ -31,7 +31,7 @@ export default {
       'sm': '640px',
       // => @media (min-width: 640px) { ... }
 
-      'md': '830px',
+      'md': '768px',
       // => @media (min-width: 768px) { ... }
 
       'lg': '1024px',

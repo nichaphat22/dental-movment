@@ -43,11 +43,11 @@ io.on("connection", (socket) => {
   });
 
   //แจ้งเตือนทั่วไป
-  // socket.on("sendNotification", (data) => {
-  //   console.log("sending notification:", data);
-  //   io.emit("newNotification", data);
+  socket.on("sendNotification", (data) => {
+    console.log("sending notification:", data);
+    io.emit("newNotification", data);
     
-  // });
+  });
 
   // Disconnection
   socket.on("disconnect", () => {

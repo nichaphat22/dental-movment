@@ -173,15 +173,15 @@ function Edit_MovementOfRPD() {
 
   return (
     <div className="Content">
-      <h1 className="title-h1">การเคลื่อนที่ของฟันเทียม</h1>
+      <h1 className="text-lg md:text-xl lg:text-3xl text-center font-bold mt-2.5">การเคลื่อนที่ของฟันเทียม</h1>
       <div className=" bg-white m-4  ">
         <div className="mb-6 p-4 border rounded-md bg-gray-100">
-          <h1 className="mb-4">Edit Animation</h1>
+          <h1 className="mb-2 text-sm md:text-base lg:text-lg">Edit Animation</h1>
           <form>
             <div className=" lg:items-center">
               <label
                 htmlFor="Ani3D_name"
-                className=" mr-3 text-sm mb-2 lg:text-base"
+                className=" mr-3 mb-2 text-sm md:text-base"
               >
                 Animation Name:
               </label>
@@ -192,12 +192,12 @@ function Edit_MovementOfRPD() {
                   id="Ani3D_name"
                   value={newAnimationName}
                   onChange={handleAnimationNameChange}
-                  className="text-black w-full border border-gray-300 rounded-md p-2 ml-4 lg:w-11/12"
+                  className="text-xs md:text-sm text-black w-full border border-gray-300 rounded-md p-2  lg:w-11/12"
                 />
               </div>
 
               <br />
-              <label htmlFor="Ani3D_Animation">Choose Animation File: </label>
+              <label htmlFor="Ani3D_Animation" className="text-sm md:text-base">Choose Animation File: </label>
               <br />
 
               {selectedFile && (
@@ -219,10 +219,10 @@ function Edit_MovementOfRPD() {
                 </div>
               )}
               <div className="text-center">
-                <p className="mb-1">ชื่อไฟล์ : {selectedFileName}</p>
+                <p className="mb-1 text-xs md:text-sm lg:text-base">ชื่อไฟล์ : {selectedFileName}</p>
                 <button
                   title="เพิ่มวิดีโอ"
-                  className="bg-purple-600 text-white px-3 py-2 rounded mr-2 hover:bg-purple-500"
+                  className="bg-purple-600 text-xs md:text-sm text-white px-3 py-2 rounded mt-1.5 mr-2 hover:bg-purple-500"
                   onClick={() =>
                     document.getElementById("Ani3D_Animation").click()
                   }
@@ -240,7 +240,7 @@ function Edit_MovementOfRPD() {
                 onChange={handleFileChange}
               />
               <br />
-              <label htmlFor="Ani3D_image">Choose Image File: </label>
+              <label htmlFor="Ani3D_image" className="text-sm md:text-base">Choose Image File: </label>
               <br />
 
               {selectedImage && (
@@ -248,7 +248,7 @@ function Edit_MovementOfRPD() {
                   <img
                     src={URL.createObjectURL(selectedImage)}
                     alt="Selected"
-                    className="w-96 lg:w-2/5 hover:transform-none"
+                    className="w-96 lg:w-2/5 hover:transform-none "
                   />
                 </div>
               )}
@@ -262,10 +262,10 @@ function Edit_MovementOfRPD() {
                 </div>
               )}
               <div className="text-center">
-                <p className="mt-4 mb-1">ชื่อไฟล์ : {selectedImageName}</p>
+                <p className="mt-4 mb-1 text-xs md:text-sm lg:text-base">ชื่อไฟล์ : {selectedImageName}</p>
                 <button
                   title="เพิ่มวิดีโอ"
-                  className="bg-purple-600 text-white px-3 py-2 rounded mr-2 hover:bg-purple-500"
+                  className="bg-purple-600 text-xs md:text-sm text-white px-3 py-2 rounded mt-1.5 mr-2 hover:bg-purple-500"
                   onClick={() =>
                     document.getElementById("Ani3D_image").click()
                   }
@@ -298,7 +298,7 @@ function Edit_MovementOfRPD() {
             onClick={handleCancel}
           /> */}
           <hr />
-            <div className="flex items-center justify-center w-full text-sm mt-5">
+            <div className="flex items-center justify-center w-full text-xs md:text-sm mt-5">
               <button
                 className=" bg-gray-300 text-black px-3 py-2 rounded mr-2 hover:bg-gray-400"
                 onClick={handleCancel}

@@ -261,9 +261,9 @@ const CreateQuiz = () => {
   };
   
   return (
-    <div className="relative border-t-8 border-purple-500 p-10 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
+    <div className="relative border-t-8 border-purple-500 p-4 md:p-10 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
       <ToastContainer />
-      <h1 className="text-4xl font-bold text-purple-500 mb-4 text-center">
+      <h1 className="text-lg md:text-2xl lg:text-3xl  font-bold text-purple-500 mb-4 text-center">
         เพิ่มแบบทดสอบ
       </h1>
       <form onSubmit={handleSubmit}>
@@ -274,7 +274,7 @@ const CreateQuiz = () => {
             variant="static"
             color="blue-gray"
             placeholder="ชื่อแบบทดสอบ..."
-            className="p-1 pt-4 text-xl md:text-2xl font-bold text-black focus:!bg-gray-50 focus:!rounded-t-md "
+            className="p-1 pt-4 text-sm md:text-base font-bold text-black focus:!bg-gray-50 focus:!rounded-t-md "
           />
         </div>
 
@@ -286,7 +286,7 @@ const CreateQuiz = () => {
             onChange={(e) => setDescription(e.target.value)}
             label="คำอธิบาย"
             labelProps={{ className: "font-normal" }}
-            className="text-md sm:text-md md:text-lg text-black h-44"
+            className="text-sm md:text-base text-black h-44"
           />
         </div>
 
@@ -295,32 +295,32 @@ const CreateQuiz = () => {
         <div className="relative ">
           {questions.map((q, index) => (
             <div key={index} ref={(el) => (questionRefs.current[index] = el)}>
-              <div className="flex justify-end mb-1 space-x-2">
+              <div className="flex justify-end mb-1 md:space-x-2">
                 <GoChevronUp
                   onClick={() => handleMoveUp(index)}
                   className="cursor-pointer text-gray-600 rounded-sm transition-all 
-               p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+               p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
                 />
                 <GoChevronDown
                   onClick={() => handleMoveDown(index)}
                   className="cursor-pointer text-gray-600 rounded-sm transition-all 
-               p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+               p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
                 />
                 <GoTrash
                   onClick={() => handleDeleteQuestion(index)}
                   title="ลบคำถาม"
                   className="cursor-pointer text-gray-600 rounded-sm transition-all 
-               p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+               p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
                 />
                 <GoDuplicate
                   onClick={() => handleAddQuestion(index)}
                   title="เพิ่มคำถาม"
                   className="cursor-pointer text-gray-600 rounded-sm transition-all 
-               p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+               p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
                 />
               </div>
               <div className="mb-6 p-4 focus-within:border-l-4 focus-within:border-purple-600 rounded-md bg-white drop-shadow-md relative transition">
-                <h2 className="text-mb font-medium text-black mb-2">
+                <h2 className="text-sm md:text-base font-medium text-black mb-2">
                   คำถามที่ {index + 1}
                 </h2>
 
@@ -335,14 +335,14 @@ const CreateQuiz = () => {
                     onChange={(e) =>
                       handleQuestionChange(index, "question", e.target.value)
                     }
-                    className="p-1 focus:!bg-gray-50 focus:!rounded-t-md text-black"
+                    className="p-1 text-sm md:text-base focus:!bg-gray-50 focus:!rounded-t-md text-black"
                   />
                   {/* เพิ่มรูปภาพคำถาม */}
                   <label
                     htmlFor={`file-uploadImgQ-${index}`}
                     title="เพิ่มรูปภาพ"
                     className="ml-2 cursor-pointer text-gray-300 rounded-full transition-all 
-               p-2 hover:p-4 hover:bg-gray-100"
+               p-2 hover:p-4 md:hover:bg-gray-100"
                   >
                     <RiImageAddLine className="text-gray-600 w-6 h-6" />
                   </label>
@@ -355,7 +355,7 @@ const CreateQuiz = () => {
                       <img
                         src={q.image} // แสดงรูปภาพที่อัปโหลด
                         alt={`Question ${index + 1}`}
-                        className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
+                        className="max-w-60 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
                       />
 
                       <div>
@@ -396,7 +396,7 @@ const CreateQuiz = () => {
                             e.target.value
                           )
                         }
-                        className="p-1  focus:!bg-gray-100 focus:!rounded-t-md "
+                        className="p-1 text-sm md:text-base  focus:!bg-gray-100 focus:!rounded-t-md "
                         // className="border-none border-b-2  p-2 w-full mb-2 text-black text-sm"
                       />
                       <button
@@ -417,14 +417,14 @@ const CreateQuiz = () => {
                       // className="bg-purple-500 hover:bg-purple-400 text-white p-2 rounded "
                       className="bg-gray-50 rounded-full p-2 hover:bg-gray-100"
                     >
-                      <HiPlusSm className="w-6 h-6 text-purple-500" />
+                      <HiPlusSm className="md:w-6 md:h-6 text-purple-500" />
                     </button>
                   </div>
                 </div>
 
                 {/* Correct Answer */}
                 <div className="flex items-center text-sm space-x-2">
-                  <label className="mr-2 whitespace-nowrap">
+                  <label className="mr-2 text-sm md:text-base whitespace-nowrap">
                     เลือกคำตอบที่ถูกต้อง:
                   </label>
 
@@ -439,14 +439,14 @@ const CreateQuiz = () => {
                         );
                         e.target.blur(); // ปิด Dropdown อัตโนมัติเมื่อเลือก
                       }}
-                      className="text-center text-gray-900 text-sm py-2 border border-gray-300 rounded-md w-full
+                      className="text-center text-gray-900 text-xs md:text-sm py-2 border border-gray-300 rounded-md w-full
       hover:border-gray-400  "
                     >
                       {q.choices.map((_, idx) => (
                         <option
                           key={idx}
                           value={idx}
-                          className="text-sm text-center px-3 py-2 bg-transparent focus:outline-none hover:bg-gray-200 focus:bg-gray-300 appearance-none"
+                          className="text-xs md:text-base text-center px-3 py-2 bg-transparent focus:outline-none hover:bg-gray-200 focus:bg-gray-300 appearance-none"
                         >
                           ตัวเลือก {idx + 1}
                         </option>
@@ -456,7 +456,7 @@ const CreateQuiz = () => {
                 </div>
 
                 {/* Answer Explanation */}
-                <label>คำอธิบายคำตอบ:</label>
+                <label className="text-sm md:text-base">คำอธิบายคำตอบ:</label>
                 <br />
                 <textarea
                   value={q.answerExplanation}
@@ -476,7 +476,7 @@ const CreateQuiz = () => {
           ))}
         </div>
 
-        <div className="flex justify-center mt-4 space-x-4">
+        <div className="flex justify-center mt-4 space-x-4 text-xs md:text-base">
           <button
             onClick={handleCancelEdit}
             className="border bg-gray-200 text-purple-600 p-2 mt-4 rounded flex items-center hover:bg-gray-300"

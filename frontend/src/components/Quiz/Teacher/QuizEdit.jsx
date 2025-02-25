@@ -336,32 +336,32 @@ const QuizEdit = () => {
 
   return (
     <div className="relative p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold text-purple-500 mb-12 text-center">
+      <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-purple-500 mb-4 text-center">
         แก้ไขแบบทดสอบ
       </h1>
 
       {/* Edit Quiz Title */}
-      <div className="flex text-xl md:text-2xl mb-4">
-        <span className="flex-auto text-gray-500 font-normal mt-2 w-64 text-end pr-2">
+      <div className="flex text-sm md:text-lg lg:text-xl mb-4">
+        <span className="flex-auto text-gray-500  mt-3.5  w-64 text-end md:pr-2">
           ชื่อแบบทดสอบ:
         </span>
         <Input
           value={quiz.title}
           onChange={(e) => handleFieldChange("title", e.target.value)}
           variant="static"
-          className="border-gray-200 text-black text-xl md:text-2xl pl-4 py-2 pr-2 w-full"
+          className="border-gray-200 text-black text-sm md:text-lg lg:text-xl pl-4 py-2 pr-2 w-full"
         />
       </div>
 
       {/* Edit Quiz Description */}
-      <div className="flex justify-center text-xl md:text-2xl mb-4">
-        <span className="flex-auto text-gray-500 font-normal w-64 text-end pr-2">
+      <div className="flex text-sm md:text-lg lg:text-xl mb-4">
+        <span className="flex-auto text-gray-500 w-40  md:w-64 text-end pr-2">
           คำอธิบาย:
         </span>
         <textarea
           value={quiz.description}
           onChange={(e) => handleFieldChange("description", e.target.value)}
-          className="text-black border-gray-200 border w-full rounded text-sm md:text-md min-h-32 pl-4 py-2 pr-2"
+          className="text-black border-gray-200 border w-full rounded text-sm md:text-lg lg:text-xl min-h-32 pl-4 py-2 pr-2"
         ></textarea>
       </div>
 
@@ -375,30 +375,30 @@ const QuizEdit = () => {
               <GoChevronUp
                 onClick={() => handleMoveUp(qIndex)}
                 className="cursor-pointer text-gray-600 rounded-sm transition-all 
-                             p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
               />
               <GoChevronDown
                 onClick={() => handleMoveDown(qIndex)}
                 className="cursor-pointer text-gray-600 rounded-sm transition-all 
-                             p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
               />
               <GoTrash
                 onClick={() => handleDeleteQuestion(qIndex)}
                 title="ลบคำถาม"
                 className="cursor-pointer text-gray-600 rounded-sm transition-all 
-                             p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
               />
               <GoDuplicate
                 onClick={() => handleAddQuestion(qIndex)}
                 title="เพิ่มคำถาม"
                 className="cursor-pointer text-gray-600 rounded-sm transition-all 
-                             p-1 hover:p-2 hover:bg-gray-200 w-6 h-6"
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
               />
             </div>
             <div className="mb-6 p-4 focus-within:border-l-4 focus-within:border-purple-600 rounded-md bg-slate-50 drop-shadow-md relative transition">
               {/* Question Input */}
               <div className="flex items-center mb-4 mt-2">
-                <span className="pr-4 py-2 mt-3">{qIndex + 1}.</span>
+                <span className="pr-4 py-2 mt-3 text-sm md:text-base ">{qIndex + 1}.</span>
                 <Input
                   variant="static"
                   color="blue-gray"
@@ -407,25 +407,25 @@ const QuizEdit = () => {
                   onChange={(e) =>
                     handleQuestionChange(qIndex, "question", e.target.value)
                   }
-                  className="p-1 text-xl  focus:!bg-gray-50 focus:!rounded-t-md text-black"
+                  className="p-1 text-sm md:text-base  focus:!bg-gray-50 focus:!rounded-t-md text-black"
                 />
                 {/* เพิ่มแก้ไขลบรูปภาพ */}
                 <label
                   htmlFor={`file-imgQ-${qIndex}`}
                   className="ml-2 mt-3 cursor-pointer text-gray-300 rounded-full transition-all 
-                            p-2 hover:p-4 hover:bg-gray-100"
+                            p-2 hover:p-4 md:hover:bg-gray-100"
                 >
-                  <RiImageAddLine className="text-gray-600 w-6 h-6" />
+                  <RiImageAddLine className="text-gray-600 w-5 h-5 md:w-6 md:h-6" />
                 </label>
               </div>
 
-              <div className="relative text-center flex justify-center mt-2 mb-4">
+              <div className="relative text-center flex justify-center mt-2 mb-2">
                 {question.image ? (
                   <>
                     <img
                       src={question.image} // แสดงรูปภาพที่อัปโหลด
                       alt={`Question ${qIndex + 1}`}
-                      className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
+                      className="max-w-75 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
                     />
 
                     <div>
@@ -458,7 +458,7 @@ const QuizEdit = () => {
               {question.choices.map((choice, oIndex) => (
                 <div key={oIndex}>
                   <label className="flex mb-2">
-                    <span className="pr-4 pl-8 py-2 ">{oIndex + 1}.</span>
+                    <span className="pr-4 pl-4 md:pl-8 py-2 text-sm md:text-base ">{oIndex + 1}.</span>
                     <textarea
                       value={choice}
                       onChange={(e) => {
@@ -466,7 +466,7 @@ const QuizEdit = () => {
                         updatedChoices[oIndex] = e.target.value;
                         handleQuestionChange(qIndex, "choices", updatedChoices);
                       }}
-                      className="w-full text-black text-sm md:text-lg border border-none py-1 pl-4 pr-2
+                      className="w-full text-black text-xs md:text-base border border-none py-1 pl-4 pr-2
                                 rounded resize-none min-h-[40px] break-words whitespace-normal"
                     />
                     <div>
@@ -475,7 +475,7 @@ const QuizEdit = () => {
                         onClick={() => handleDeleteChoice(qIndex, oIndex)}
                         className="ml-4 text-red-500 p-1 hover:p-2 hover:bg-gray-200 rounded-full"
                       >
-                        <HiOutlineX className="text-red-500 w-4 h-4" />
+                        <HiOutlineX className="text-red-500 w-3 h-3 md:w-4 md:h-4" />
                       </button>
                     </div>
                   </label>
@@ -490,12 +490,12 @@ const QuizEdit = () => {
                   // className="bg-purple-500 hover:bg-purple-400 text-white p-2 rounded "
                   className="bg-gray-200 rounded-full p-2 hover:bg-gray-300"
                 >
-                  <HiPlus className="w-6 h-6 text-purple-500" />
+                  <HiPlus className="md:w-6 md:h-6 text-purple-500" />
                 </button>
               </div>
               {/* Correct Answer */}
               <label>
-                <span>เลือกคำตอบที่ถูกต้อง:</span>
+                <span className="text-sm md:text-base ">เลือกคำตอบที่ถูกต้อง:</span>
                 <select
                   value={question.correctAnswer}
                   onChange={(e) =>
@@ -505,7 +505,7 @@ const QuizEdit = () => {
                       e.target.value
                     )
                   }
-                  className="ml-2 border p-2 rounded mb-4 text-black text-sm md:text-lg"
+                  className="ml-2 border p-2 rounded mb-4 text-black text-xs md:text-sm "
                 >
                   {question.choices.map((_, idx) => (
                     <option key={idx} value={idx}>
@@ -517,7 +517,7 @@ const QuizEdit = () => {
               <br />
               {/* Answer Explanation */}
               <label>
-                <span>คำอธิบายคำตอบ:</span>
+                <span className="text-sm md:text-base ">คำอธิบายคำตอบ:</span>
               </label>
               <br />
               <textarea
@@ -529,7 +529,7 @@ const QuizEdit = () => {
                     e.target.value
                   )
                 }
-                className="resize h-32 border-gray-200 border p-2 w-full rounded text-sm text-black"
+                className="resize h-32 border-gray-200 border p-2 w-full rounded text-xs md:text-sm text-black"
               ></textarea>
             </div>
           </div>
@@ -547,12 +547,12 @@ const QuizEdit = () => {
       </div> */}
 
       {/* Save and Cancel Buttons */}
-      <div className="flex justify-center space-x-4 mt-6">
+      <div className="flex justify-center space-x-4 mt-6 text-sm md:text-base">
         <button
           onClick={handleCancelEdit}
           className="border bg-gray-200 text-purple-600 p-2 mt-4 rounded flex items-center hover:bg-gray-300"
         >
-          <HiOutlineX className="w-4 h-4 mr-2" />
+          <HiOutlineX className="w-3 h-3 md:w-4 md:h-4 mr-2" />
           ยกเลิก
         </button>
 
@@ -560,7 +560,7 @@ const QuizEdit = () => {
           onClick={handleSave}
           className="bg-purple-500 text-white p-2 mt-4 rounded flex items-center hover:bg-purple-600"
         >
-          <HiPlus className="w-5 h-5 mr-2" />
+          <HiPlus className="w-3 h-3 md:w-4 md:h-4 mr-2" />
           บันทึก
         </button>
       </div>

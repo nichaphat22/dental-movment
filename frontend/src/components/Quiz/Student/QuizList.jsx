@@ -50,32 +50,32 @@ const QuizList = () => {
   };
 
   return (
-    <div className="relative grid grid-cols-1 gap-6 mt-4 m-10 md:m-60 cursor-pointer">
+    <div className="relative grid grid-cols-1 gap-6 mt-4 lg:mx-40 cursor-pointer">
       {quizzes.length > 0 ? (
         quizzes.map((quiz) => (
           <div
             key={quiz._id}
             onClick={() => handleQuizClick(quiz._id)}
-            className="relative p-4 bg-white hover:border-b-4 hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl "
+            className="relative p-2 md:p-4 bg-white lg:hover:border-b-4 lg:hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl transition hover:-translate cursor-pointer duration-300 ease-in-out transform hover:scale-x-105"
           >
             <div className="flex items-center">
-              <div className="flex flex-col justify-between w-full md:px-4">
+              <div className="flex flex-col justify-center w-full  px-2 lg:px-4">
                 <div>
-                  <div className="flex items-center space-x-6 ">
-                    <PiClipboardTextDuotone className="text-3xl md:text-4xl text-purple-600 mt-2 flex-shrink-0" />
-                    <h3 className="text-2xl md:text-3xl font-bold text-gray-700 cursor-pointer break-words whitespace-normal">
+                  <div className="flex items-center m-2 space-x-2 md:space-x-6 ">
+                    <PiClipboardTextDuotone className="text-xl md:text-3xl  lg:text-4xl text-purple-600 mt-2 flex-shrink-0" />
+                    <h3 className="text-sm md:text-lg lg:text-xl font-bold text-gray-700 cursor-pointer break-words whitespace-normal">
                       {quiz.title}
                     </h3>
                   </div>
 
-                  <p className="text-sm text-gray-600 ml-14 md:ml-16 mt-2 mb-2">
+                  <p className="text-xs text-gray-600 ml-9 md:ml-16 mb-2">
                     จำนวนข้อ: {quiz.questions?.length || 0}
                   </p>
                 </div>
 
-                <div className="mt-4 px-4 w-full">
-                  <div className="mb-2 flex items-center justify-end gap-4">
-                    <Typography color="blue-gray" className="text-sm font-medium">
+                <div className="px-2 w-full">
+                  <div className="mb-1 flex items-center justify-end gap-4">
+                    <Typography color="blue-gray" className="text-xs font-medium">
                       {quizScores[quiz._id]
                         ? `${quizScores[quiz._id]}/${quiz.questions.length}`
                         : "ยังไม่ได้ทำ"}
@@ -99,7 +99,7 @@ const QuizList = () => {
                   />
                 </div>
 
-                <div className="mt-4 text-sm text-gray-600 text-end">
+                <div className="mt-4 md:mt-4 text-xs  mb-2 text-gray-600 text-end">
                   วันที่สร้าง:{" "}
                   {new Date(quiz?.createdAt || Date.now()).toLocaleDateString(
                     "en-US",

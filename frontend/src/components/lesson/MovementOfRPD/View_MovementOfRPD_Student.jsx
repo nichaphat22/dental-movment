@@ -69,8 +69,8 @@ function View_MovementOfRPD_Student() {
 
   return (
     <div className="cont">
-    <h1 className="mx-4 my-2 text-xl font-semibold">การเคลื่อนที่ของฟันเทียม</h1>
-    <div className="grid grid-cols-1 hover:shadow-lg translate-x-4 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center mx-4">
+    <h1 className="mx-4 my-2  text-base md:text-lg lg:text-2xl font-semibold">การเคลื่อนที่ของฟันเทียม</h1>
+    <div className="grid grid-cols-1 hover:shadow-lg translate-x-4 lg:grid-cols-3 gap-6 justify-center md:mx-10 lg:mx-4">
       {animation3d.map((animation) => (
         <div
           className="cursor-pointer bg-white shadow-sm rounded-lg p-4 object-cover"
@@ -84,7 +84,7 @@ function View_MovementOfRPD_Student() {
             alt={animation.name}
             className="cursor-pointer mb-4 w-full rounded"
           />
-          <h3 className="text-lg font-bold mb-2 text-center break-words">
+          <h3 className="md:text-base lg:text-lg font-bold mb-2 text-center break-words">
             {animation.name}
           </h3>
           

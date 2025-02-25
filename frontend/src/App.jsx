@@ -49,17 +49,19 @@ import QuizList from './page/pageQuiz/TeacherQuiz/QuizList';
 import CreateQuizT from './page/pageQuiz/TeacherQuiz/CreateQuizT';
 import DetailQ from './page/pageQuiz/TeacherQuiz/DetailQ';
 import EditQuiz from './page/pageQuiz/TeacherQuiz/EditQuiz';
-
+import Result from './page/pageQuiz/StudentQuiz/Result';
 //Notification
 // import NotificationBell from './components/Notification/NotificationBell';
 
+// Dashboard
+import DashboardStudent from './page/home/homeStudent/DashboardStudent';
+import DashboardTeacher from './page/home/homeTeacher/DashboardTeacher';
 
 
 // import HomeS from "./page/home/homeStudent/homeS";
 import Success from "./page/loginSuccess/success";
 // import Dashboard from './page/home/homeStudent/Dashboard';
-import DashboardStudent from './page/home/homeStudent/DashboardStudent';
-import DashboardTeacher from './page/home/homeTeacher/DashboardTeacher';
+
 // import Edit_MovementOfRPD from "./components/lesson/MovementOfRPD/Edit_MovementOfRPD"
 import Form from "./page/Form"
 import PageNotFound from './page/PageNotFound';
@@ -127,6 +129,8 @@ function App () {
               <Route path="/lesson" element={user ? <HomeStudent />: <Login />} />
               <Route path="/ListQuiz" element={user ? <ListQuiz/>: <Login />}/>
               <Route path='/Quiz/:id/start' element={user ? <QuizStart/> : <Login/>}/>
+              <Route path='/quiz/:id/result' element={user? <Result/>: <Login/>}/> 
+
               <Route path='/Quiz/:id' element={user ? <QuizDetail/> : <Login/>}/>
               <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
               <Route path="/Model/:name/view" element={user ? <Model /> : <Login />} />

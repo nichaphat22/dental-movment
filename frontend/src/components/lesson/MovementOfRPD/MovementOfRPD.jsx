@@ -192,102 +192,112 @@ function MovementOfRPD() {
   };
 
   return (
-    <div className="Content">
-      <h1 className="title-h1">การเคลื่อนที่ของฟันเทียม</h1>
-      <div className="Content" style={{ marginLeft: "20px" }}>
-        <h1>Add New Animation</h1>
-        <form>
-          <label htmlFor="newAnimationName">
-            Animation Name: <span className="text-red-600"> *</span>
-          </label>
-          <br />
-          <input
-            type="text"
-            id="newAnimationName"
-            value={newAnimationName}
-            onChange={handleAnimation3DNameChange}
-            className="w-4/5 ml-8 p-2"
-          />
+    <div className="">
+      <h1 className="ml-4 text-xl md:text-2xl">การเคลื่อนที่ของฟันเทียม</h1>
+      <div className="flex justify-center">
+      <div className="border mt-3 rounded-md bg-gray-100 p-6 max-w-6xl w-full mx-auto">
 
-          <br />
+          <h1 className="text-base md:text-lg">Add New Animation</h1>
 
-          <label htmlFor="Ani3D_animation" className="mt-4 mb-2">
-            Choose Animation File:<span className="text-red-600">*</span>
-          </label>
-          {/* video */}
-          <div className="relative text-center flex justify-center">
-            {selectedFile && selectedFile instanceof File ? (
-              <video
-                controls
-                src={URL.createObjectURL(selectedFile)}
-                width="250"
+          <form>
+            <label htmlFor="newAnimationName" className="mt-2 mb-1.5">
+              Animation Name: <span className="text-red-600"> *</span>
+            </label>
+            <br />
+            <input
+              type="text"
+              id="newAnimationName"
+              value={newAnimationName}
+              onChange={handleAnimation3DNameChange}
+              className="w-11/12 p-2 border rounded-md"
+            />
+
+            {/* Video Preview */}
+            <div className="relative text-center flex justify-center mb-2  mt-4">
+              {selectedFile && selectedFile instanceof File ? (
+                <video
+                  controls
+                  src={URL.createObjectURL(selectedFile)}
+                  className="w-full max-w-md aspect-video rounded-lg shadow-md"
+                />
+              ) : (
+                <div className="w-full max-w-md h-48 flex items-center justify-center border border-dashed text-gray-500 rounded-lg">
+                  <FiVideo className="w-12 h-12" />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-center">
+              <input
+                type="file"
+                name="Ani3D_animation"
+                id="Ani3D_animation"
+                accept="video/*"
+                onChange={handleFileChange}
+                className="hidden"
               />
-            ) : (
-              <div className="w-60 h-40 flex items-center justify-center border border-dashed text-gray-500">
-                <FiVideo className="w-10 h-10" />
-              </div>
-            )}
-          </div>
-          <input
-            type="file"
-            name="Ani3D_animation"
-            className="choose-file"
-            id="Ani3D_animation"
-            accept="video/*"
-            onChange={handleFileChange}
-          />
-          <br />
-          <label htmlFor="Ani3D_image">
-            Choose Image File: <span className="text-red-600">*</span>
-          </label>
-          <br />
+              <label
+                htmlFor="Ani3D_animation"
+                className="md:w-40 lg:w-72 block bg-purple-600 text-white text-sm lg:text-base text-center py-2 px-4 rounded-lg cursor-pointer hover:bg-blue-600"
+              >
+                เลือกไฟล์วิดีโอ
+              </label>
+            </div>
 
-          {/* image */}
-          <div className="relative text-center flex justify-center">
-            {selectedImage && selectedImage instanceof File ? (
-              <img
-                src={URL.createObjectURL(selectedImage)}
-                alt="Preview"
-                width="250"
+            {/* Image Preview */}
+            <div className="relative text-center flex justify-center mt-14">
+              {selectedImage && selectedImage instanceof File ? (
+                <img
+                  src={URL.createObjectURL(selectedImage)}
+                  alt="Preview"
+                  className=" max-w-md h-52 object-contain rounded-lg  hover:transform-none shadow-none"
+                />
+              ) : (
+                <div className="w-full max-w-md h-48 flex items-center justify-center border border-dashed text-gray-500 rounded-lg ">
+                  <FiImage className="w-12 h-12" />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-center">
+              <input
+                type="file"
+                name="Ani3D_image"
+                id="Ani3D_image"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
               />
-            ) : (
-              <div className="w-60 h-40 flex items-center justify-center border border-dashed text-gray-500">
-                <FiImage className="w-10 h-10" />
-              </div>
-            )}
-          </div>
-          <input
-            type="file"
-            name="Ani3D_image"
-            className="choose-file"
-            id="Ani3D_image"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
-          <br />
-          <div className="flex items-center justify-center mt-8">
-            <button
-              className=" bg-gray-300 text-black px-3 py-2 rounded mr-2 hover:bg-gray-400"
-              onClick={handleCancel}
-            >
-              ยกเลิก
-            </button>
-            <button
+              <label
+                htmlFor="Ani3D_image"
+                className="md:w-40 lg:w-72 mt-4 block bg-purple-600 text-white text-sm lg:text-base text-center py-2 px-4 rounded-lg cursor-pointer hover:bg-green-600"
+              >
+                เลือกไฟล์รูปภาพ
+              </label>
+            </div>
+
+            <br />
+            <div className="flex items-center justify-center mt-8 text-sm">
+              <button
+                className=" bg-gray-300 text-black px-3 py-2 rounded mr-2 hover:bg-gray-400"
+                onClick={handleCancel}
+              >
+                ยกเลิก
+              </button>
+              <button
                 className=" bg-green-500 text-white px-3 py-2 rounded  hover:bg-green-600"
                 onClick={handleAddAnimation3D}
               >
                 บันทึก
               </button>
-            
-          </div>
-        </form>
-        {uploading && (
-          <div>
-            <p>Uploading: {uploadProgress.toFixed(2)}%</p>
-            <progress value={uploadProgress} max="100"></progress>
-          </div>
-        )}
-        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+            </div>
+          </form>
+          {uploading && (
+            <div>
+              <p>Uploading: {uploadProgress.toFixed(2)}%</p>
+              <progress value={uploadProgress} max="100"></progress>
+            </div>
+          )}
+          {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
+        </div>
       </div>
     </div>
   );

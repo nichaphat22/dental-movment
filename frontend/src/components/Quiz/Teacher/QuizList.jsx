@@ -18,17 +18,17 @@ const QuizList = () => {
 
   useEffect(() => {
     if (location.state && location.state.success) {
-      toast.success(location.state.message || 'Quiz created successfully!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
-      });
+      // toast.success(location.state.message || 'Quiz created successfully!', {
+      //   position: "top-right",
+      //   autoClose: 3000,
+      //   hideProgressBar: false,
+      //   closeOnClick: false,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      //   theme: "light",
+      //   transition: Flip,
+      // });
     }
   }, [location.state]); // เพิ่ม dependency array เพื่อให้ run เมื่อ state เปลี่ยนแปลงเท่านั้น
   
@@ -97,13 +97,13 @@ const QuizList = () => {
   };
 
   return (
-    <div className="relative grid grid-cols-1 gap-6 mt-4 m-10 md:m-60">
-      <ToastContainer  />             
+    <div className="relative grid grid-cols-1 gap-6 mt-4 sm:m-4 md:m-10 lg:m-60 cursor-pointer">
+      {/* <ToastContainer  />              */}
       {quizzes.length > 0 ? (
         quizzes.map((quiz) => (
           <div
             key={quiz._id}
-            className="relative p-4 bg-white hover:border-b-2 hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl transition hover:-translate cursor-pointer duration-300 ease-in-out transform hover:scale-x-105"
+            className="relative p-2 md:p-4 bg-white md:hover:border-b-4 md:hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl transition hover:-translate cursor-pointer duration-300 ease-in-out transform hover:scale-x-105"
           >
             <div className="mb-2">
               {/* ปุ่มแก้ไขและลบ */}
@@ -112,32 +112,32 @@ const QuizList = () => {
                     e.stopPropagation();
                     handleDeleteQuiz(quiz._id);
                   }}
-                  className="absolute top-4 right-4 text-xl cursor-pointer text-gray-500 hover:text-red-500"
+                  className="absolute top-4 right-4 text-sm md:text-xl cursor-pointer text-gray-500 hover:text-red-500"
                 />
                 <CiEdit
                   onClick={(e) => {
                     e.stopPropagation();
                     handleEditQuiz(quiz._id);
                   }}
-                  className="absolute top-4 right-10 text-xl cursor-pointer text-gray-500 hover:text-blue-500"
+                  className="absolute top-4 right-9 md:right-10 sm md:text-xl cursor-pointer text-gray-500 hover:text-blue-500"
                 />
             </div>
             
             {/* คอนเทนต์หลัก */}
             <div className="flex" onClick={() => handleQuizClick(quiz._id)}>
              
-              <div className=" flex flex-col justify-between w-full md:px-4">
+              <div className=" flex flex-col justify-between w-full px-2 lg:px-4">
                 <div>
                   {/* ชื่อแบบทดสอบ */}
-                  <div className="flex items-center space-x-6 ">
-                  <PiClipboardTextDuotone className="text-3xl md:text-4xl text-purple-600 mt-2 flex-shrink-0"/>
-                  <h3 className="text-2xl md:text-3xl font-bold text-gray-700 cursor-pointer break-words whitespace-normal">
+                  <div className="flex items-center m-2 space-x-2 md:space-x-6 ">
+                  <PiClipboardTextDuotone className="text-xl md:text-3xl  lg:text-4xl text-purple-600 mt-2 flex-shrink-0"/>
+                  <h3 className="text-sm md:text-xl lg:text-2xl font-bold text-gray-700 cursor-pointer break-words whitespace-normal">
                     {quiz.title}
                   </h3>
                   </div>
                   
 
-                  <p className="text-sm text-gray-600 ml-14 md:ml-16 mt-2 mb-2">
+                  <p className="text-xs text-gray-600 lg:pl-2 ml-9 mb:ml-14 lg:ml-16 md:mt-2 mb-2">
                     จำนวนข้อ: {quiz.questions?.length || 0}
                   </p>
                 </div>
@@ -145,7 +145,7 @@ const QuizList = () => {
               
 
                 {/* วันที่สร้าง */}
-                <div className="mt-4 text-sm text-gray-600 text-end">
+                <div className="mt-2 md:mt-4 text-xs md:text-sm mb-2 text-gray-600 text-end">
                   วันที่สร้าง:{" "}
                   {new Date(quiz.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
