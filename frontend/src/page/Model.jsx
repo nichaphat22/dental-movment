@@ -24,9 +24,9 @@ const Model = () => {
         </div>
   
         {/* Main Content Area */}
-        <div className="main-content">
+        <div className="main-content" >
         {/* style={{ borderRadius: "0",background:'', maxHeight: "10vw",borderTop:'none'}} */}
-          <Frame>
+          <Frame style={{borderRadius: "0",borderTop:'none'}}>
             <ViewModel />
           </Frame>
   

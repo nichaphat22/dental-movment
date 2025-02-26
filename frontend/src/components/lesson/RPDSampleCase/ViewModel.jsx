@@ -40,7 +40,8 @@ import { VscBold } from "react-icons/vsc";
 import { BsEraser } from "react-icons/bs";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineDelete } from "react-icons/ai";
-
+import { IoHandRightSharp } from "react-icons/io5";
+import { IoHandRightOutline } from "react-icons/io5";
 const ViewModel = () => {
   const location = useLocation();
   const containerRef = useRef(null);
@@ -59,7 +60,7 @@ const ViewModel = () => {
   const [isRotating, setIsRotating] = useState(true);
   const [startPoint, setStartPoint] = useState(null);
   const [lineWidth, setLineWidth] = useState(2);
-  const [currentColor, setCurrentColor] = useState('#0064ff');
+  const [currentColor, setCurrentColor] = useState('#b142ff');
   const [isErasing, setIsErasing] = useState(false); // State for erase mode
 
   const [fabricCanvas, setFabricCanvas] = useState(null);
@@ -575,6 +576,38 @@ const ViewModel = () => {
     }
   };
 
+  useEffect(() => {
+    if (fabricCanvas) {
+      fabricCanvas.on('selection:created', updateTextStyles);
+      fabricCanvas.on('selection:updated', updateTextStyles);
+      fabricCanvas.on('selection:cleared', clearTextStyles);
+    }
+  
+    return () => {
+      if (fabricCanvas) {
+        fabricCanvas.off('selection:created', updateTextStyles);
+        fabricCanvas.off('selection:updated', updateTextStyles);
+        fabricCanvas.off('selection:cleared', clearTextStyles);
+      }
+    };
+  }, [fabricCanvas]);
+  
+  const updateTextStyles = () => {
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject && activeObject.type === 'textbox') {
+      setIsBold(activeObject.fontWeight === 'bold');
+      setIsItalic(activeObject.fontStyle === 'italic');
+      setIsUnderline(activeObject.underline);
+    }
+  };
+  
+  const clearTextStyles = () => {
+    setIsBold(false);
+    setIsItalic(false);
+    setIsUnderline(false);
+  };
+  
+
   const changeTextAlign = (alignment) => {
     if (fabricCanvas) {
       const activeObject = fabricCanvas.getActiveObject();
@@ -594,11 +627,11 @@ const ViewModel = () => {
   const getIcon = () => {
     switch (activeButton) {
       case 'center':
-        return <GrTextAlignCenter size="18" />;
+        return <GrTextAlignCenter size="15" />;
       case 'right':
-        return <GrTextAlignRight size="18" />;
+        return <GrTextAlignRight size="15" />;
       default:
-        return <GrTextAlignLeft size="18" />;
+        return <GrTextAlignLeft size="15" />;
     }
   };
 
@@ -682,16 +715,34 @@ const ViewModel = () => {
 
 
 
-      <div className="model-container" style={{ zIndex: 5, marginTop: '0', paddingTop: '0px' ,}}>
-        <div className="draw" style={{display: 'flex', gap:15,marginTop:'20px', marginLeft:'10px',
-    flexDirection: 'column',  height: '', width: '8%', zIndex: 5, background: '', float: 'left',border:'1px solid #fff',padding:'10px',
-    alignItems:'center',borderRadius:'15px' }}>
+      <div className="model-container" style={{ zIndex: 10, marginTop: '0', paddingTop: '0px' ,width:'100%'}}>
+      <div className="switch-mode" style={{marginTop:'20px'}}>
+      {/* display:'inline-flex' */}
 
-          
-          {/* <div className="line-one" style={{ gap:'10px',float: 'left', margin: '', textAlign: 'center', justifyContent: 'space-between' }}> */}
 
-            {/* Button to toggle rotation and drawing */}
-            
+        <div className="draw" style={{display: 'inline-flex', gap:3,marginTop:'30px', marginLeft:'',margin: 'auto',
+      height: '', width: '', zIndex: 5, background: '#fff',padding:'10px',justifyContent:'space-between',marginBottom:'10px',
+    height:'80px',alignContent:'center',alignItems:'center',borderRadius:'15px',boxShadow: '0 0 10px 1px rgba(0, 0, 0, 0.1)' }}>
+
+<div className="Mode" style={{display: 'inline-flex'}}>
+  <input
+        type="checkbox"
+        id="animationMode"
+        checked={isChecked} // ผูกกับ state
+        onChange={handleToggle} // อัปเดตค่าเมื่อกด
+      />
+      <label htmlFor="animationMode" className="label-Mode">
+  {/* <FaEye size={20} className="animation-mode" /> */}
+  <FaEye  size={20} className="animation-mode" />
+  <MdDraw size={20} className="draw-mode" />
+</label>
+</div>
+<div className="" style={{border:'1px solid #ddd',height:'30px'}}></div>
+<button className='bt-play' title='เล่นโมเดล' style={{ minWidth: '40px',
+                minHeight: '40px', zIndex: 5, justifyItems: 'center',backgroundColor: '#fff', color: '#000',}} onClick={toggleAnimation}>
+            {animationStopped ? <FaPlay size={20} /> : <TbPlayerPauseFilled size={20} />}
+          </button>
+          {/* backgroundColor: animationStopped ? "#fff" : "rgb(100, 0, 193)"  */}
             <button
               className='bt-drawing'
               title="คลิกเพื่อวาด"
@@ -700,19 +751,24 @@ const ViewModel = () => {
               style={{
 
                 zIndex: 5,
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                color: 'rgb(102, 3, 196)',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                color: isActive.pen ? 'rgb(0, 0, 0) ': '#000',
                 cursor: 'pointer',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                backgroundColor: isActive.pen ? '#E8EAE6' : '#f1f1f1',
+                minWidth: '40px',
+                minHeight: '40px',
+                backgroundColor: isActive.pen ? 'rgb(241, 241, 241)' : '#fff',
+                // borderRadius: '50px',
+                // backgroundImage: isActive.pen 
+                // ? "linear-gradient(180deg, rgba(175, 90, 255, 0.44), rgb(152, 33, 243))" 
+                // : "none", // ใช้ none แทน เพื่อรีเซ็ต
+              // backgroundColor: isActive.pen ? "transparent" : "#fff" ,
                 border: isActive.pen ? '1px solid #ddd' : 'none',
+                borderRadius: isActive.pen ? '10px' : 'none',
                 justifyItems: 'center'
               }
               }
             >
-              <FaPen size="20" />
+              <FaPen size="16" />
             </button>
 
             <button
@@ -723,21 +779,267 @@ const ViewModel = () => {
                 justifyItems: 'center',
                 zIndex: 5,
                 marginLeft: '0rem',
-                backgroundColor: '#f1f1f1',
-                color: 'rgb(102, 3, 196)',
+                backgroundColor: '#fff',
+                color: '#000',
                 // margin: '5px',
                 // cursor: 'pointer',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
                 cursor: 'pointer',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
               }}
               disabled={!switchToDrawingMode} // ปิดปุ่มจนกว่าอยู่ในโหมดการวาด
             >
-              <RxText size="20" />
+              <RxText size="18" />
             </button>
-            {/* <ul className="options"
+          
+            <input
+              title="สีเพิ่มเติม"
+              className='ip-color'
+              type="color"
+              value={currentColor}
+              onChange={(e) => {
+                setCurrentColor(e.target.value); setTextColor(e.target.value);
+                changeTextColor(e.target.value);
+              }}
+              style={{
+                zIndex: 5,
+                padding: '0',
+                minWidth: '30px',
+                minHeight: '30px',
+                width: '30px',
+                height: '30px',
+                borderRadius: '50px',
+                cursor: 'pointer',
+                border: 'none',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+              }}
+            />
+
+            <button
+              className='bt-bold'
+              onClick={toggleBold}
+              title="ตัวหนา"
+              style={{
+                justifyItems: 'center',
+                backgroundColor: isBold ? 'rgb(241, 241, 241)' : '#fff',
+
+              //   backgroundImage: isBold 
+              //   ? "linear-gradient(180deg, rgba(175, 90, 255, 0.44), rgb(152, 33, 243))" 
+              //   : "none", // ใช้ none แทน เพื่อรีเซ็ต
+              // backgroundColor: isBold ? "transparent" : "#fff" ,
+                // backgroundColor: isBold ? 'rgb(102, 3, 196)' : '#fff',
+                zIndex: 5,
+                color: isBold ? '#000': '#000',
+                cursor: 'pointer',
+                minWidth: '40px',
+                minHeight: '40px',
+                borderRadius: isBold ? '10px' : 'none',
+                // borderRadius: '50px',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                border: isBold ? '1px solid #ddd' : 'none',
+              }}>
+              {/* <FaBold size="1.3vw" />
+               */}
+               <VscBold   size="20" />
+            </button>
+            <button
+              className='bt-italic'
+              onClick={toggleItalic}
+              title="ตัวเอียง"
+              style={{
+                justifyItems: 'center',
+                backgroundColor: isItalic ? 'rgb(241, 241, 241)' : '#fff',
+              //   backgroundImage: isItalic
+              //   ? "linear-gradient(180deg, rgba(175, 90, 255, 0.44), rgb(152, 33, 243))" 
+              //   : "none", // ใช้ none แทน เพื่อรีเซ็ต
+              // backgroundColor: isItalic ? "transparent" : "#fff" ,
+              borderRadius: isItalic ? '10px' : 'none',
+                // backgroundColor: isItalic ? 'rgb(102, 3, 196)' : '#fff',
+                zIndex: 5,
+                color: isItalic ? '#000 ': '#000',
+                // margin: '5px',
+                cursor: 'pointer',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center',
+                border: isItalic ? '1px solid #ddd' : 'none',
+              }}>
+              <FiItalic size="16" />
+            </button>
+            <button
+              className='bt-underline'
+              onClick={toggleUnderline}
+              title="ขีดเส้นใต้"
+              style={{
+                backgroundColor: isUnderline ? 'rgb(241, 241, 241)' : '#fff',
+                // backgroundImage: isUnderline
+              //   ? "linear-gradient(180deg, rgba(175, 90, 255, 0.44), rgb(152, 33, 243))" 
+              //   : "none", // ใช้ none แทน เพื่อรีเซ็ต
+              // backgroundColor: isUnderline ? "transparent" : "#fff" ,
+              borderRadius: isUnderline ? '10px' : 'none',
+                // backgroundColor: isUnderline ? 'linear-gradient(180deg,rgba(175, 90, 255, 0.44),rgb(152, 33, 243))' : '#fff',
+                zIndex: 5,
+                color: isUnderline  ? '#000 ': '#000',
+                // margin: '5px',
+                cursor: 'pointer',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center',
+                border: isUnderline ? '1px solid #ddd' : 'none',
+              }}>
+              <BsTypeUnderline size="18" />
+            </button>
+
+
+            <button
+        className='text-align'
+        title="การจัดข้อความ"
+        onClick={() => {
+          const nextAlign = activeButton === 'left' ? 'center' : activeButton === 'center' ? 'right' : 'left';
+          changeTextAlign(nextAlign); // เปลี่ยนการจัดตำแหน่งเมื่อคลิก
+        }}
+        style={{
+          zIndex: 5,
+          color: '#000',
+          justifyItems: 'center',
+          cursor: 'pointer',
+          minWidth: '40px',
+          minHeight: '40px',
+          // borderRadius: '50px',
+          // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+          // border: '1px solid #ddd',
+          backgroundColor: '#fff',
+        }}
+      >
+        {getIcon()} {/* แสดงไอคอนที่เลือก */}
+      </button>
+            
+            <button
+              className='bt-eraser'
+              title="คลิกเพื่อเลือกลบวัตถุ"
+              onClick={() => {
+                toggleEraserMode('eraser');
+                // deleteSelectedObject(); // ลบวัตถุที่เลือก
+              }}
+              style={{
+                backgroundColor: isActive.eraser ? 'rgb(241, 241, 241)' : '#fff',
+              //   backgroundImage: isActive.eraser
+              //   ? "linear-gradient(180deg, rgba(175, 90, 255, 0.44), rgb(152, 33, 243))" 
+              //   : "none", // ใช้ none แทน เพื่อรีเซ็ต
+              // backgroundColor: isActive.eraser ? "transparent" : "#fff" ,
+              borderRadius: isActive.eraser ? '10px' : 'none',
+                // backgroundColor: isActive.eraser ? 'rgb(102, 3, 196)' : '#fff',
+                zIndex: 5,
+                color: isActive.eraser ? '#000 ': '#000',
+                // margin: '5px',
+                minWidth: '40px',
+                minHeight: '40px',
+                // width: '40px',
+                // height: '40px',
+                // borderRadius: '50px',
+                cursor: 'pointer',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center',
+                border: isActive.eraser ? '1px solid #ddd' : 'none',
+              }}
+            >
+              <BsEraser  size="18" />
+            </button>
+
+
+            <button
+              className='bt-clear'
+              title="ล้าง"
+              onClick={clearCanvas}
+              style={{
+                zIndex: 5,
+                // backgroundColor: '#f1f1f1',
+                // color: 'rgb(102, 3, 196)',
+                color: '#000',
+                // margin: '5px',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
+                cursor: 'pointer',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center'
+              }}
+            >
+              <AiOutlineDelete size="18" />
+            </button>
+
+            <button
+              className='bt-saveImag'
+              title="บันทึกภาพ"
+              onClick={saveDrawing}
+              style={{
+                // backgroundColor: '#f1f1f1',
+                color: '#000',
+                zIndex: 5,
+                // margin: '5px',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
+                cursor: 'pointer',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+                justifyItems: 'center'
+              }}
+            >
+              <IoIosSave size="20" />
+            </button>
+            <button id="undoButton" title="เลิกทำ"
+              style={{
+                backgroundColor: '#fff',
+                // margin: '5px',
+                zIndex: 5,
+                cursor: 'pointer',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
+                justifyItems: 'center',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+
+              }}><GrUndo size="17" />
+            </button>
+            <button id="redoButton" title="ทำซ้ำ"
+              style={{
+                backgroundColor: '#fff',
+                // margin: '5px',
+                zIndex: 5,
+                cursor: 'pointer',
+                maxWidth: '40px',
+                maxHeight: '40px',
+                minWidth: '40px',
+                minHeight: '40px',
+                // borderRadius: '50px',
+                justifyItems: 'center',
+                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
+              }}><GrRedo size="17" />
+            </button>
+          {/* </div> */}
+          {/* <div className="line-two" style={{ float: 'right', margin: '', width: '45%', textAlign: 'center', justifyContent: 'space-between' }}>
+           
+          
+
+
+          </div> */}
+
+
+          {/* /////////////////////////////////////////////////////////////// */}
+          </div>
+
+        </div>
+
+
+        <div className="line-size" style={{borderRadius:'10px',zIndex: 10,position:'absolute', height:'450px',boxShadow: '0 0 10px 1px rgba(0, 0, 0, 0.1)',background:'#fff',width:'200px'}}>
+        
+          {/* <ul className="options"
               style={{
                 // display: 'flex',
                 zIndex: 5,
@@ -762,254 +1064,6 @@ const ViewModel = () => {
 
             </ul> */}
 
-            <input
-              title="สีเพิ่มเติม"
-              className='ip-color'
-              type="color"
-              value={currentColor}
-              onChange={(e) => {
-                setCurrentColor(e.target.value); setTextColor(e.target.value);
-                changeTextColor(e.target.value);
-              }}
-              style={{
-                zIndex: 5,
-                padding: '0',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                border: '2px solid #ddd',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-              }}
-            />
-
-            <button
-              className='bt-bold'
-              onClick={toggleBold}
-              title="ตัวหนา"
-              style={{
-                justifyItems: 'center',
-                backgroundColor: isBold ? '#E8EAE6' : '#f1f1f1',
-                zIndex: 5,
-                color: 'rgb(102, 3, 196)',
-                // margin: '5px',
-                cursor: 'pointer',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                border: isBold ? '1px solid #ddd' : 'none',
-              }}>
-              {/* <FaBold size="1.3vw" />
-               */}
-               <VscBold   size="25" />
-            </button>
-            <button
-              className='bt-italic'
-              onClick={toggleItalic}
-              title="ตัวเอียง"
-              style={{
-                justifyItems: 'center',
-                backgroundColor: isItalic ? '#E8EAE6' : '#f1f1f1',
-                zIndex: 5,
-                color: 'rgb(102, 3, 196)',
-                // margin: '5px',
-                cursor: 'pointer',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                justifyItems: 'center',
-                border: isItalic ? '1px solid #ddd' : 'none',
-              }}>
-              <FiItalic size="1.3vw" />
-            </button>
-            <button
-              className='bt-underline'
-              onClick={toggleUnderline}
-              title="ขีดเส้นใต้"
-              style={{
-                backgroundColor: isUnderline ? '#E8EAE6' : '#f1f1f1',
-                zIndex: 5,
-                color: 'rgb(102, 3, 196)',
-                // margin: '5px',
-                cursor: 'pointer',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                justifyItems: 'center',
-                border: isUnderline ? '1px solid #ddd' : 'none',
-              }}>
-              <BsTypeUnderline size="22" />
-            </button>
-
-
-            <button
-        className='text-align'
-        title="การจัดข้อความ"
-        onClick={() => {
-          const nextAlign = activeButton === 'left' ? 'center' : activeButton === 'center' ? 'right' : 'left';
-          changeTextAlign(nextAlign); // เปลี่ยนการจัดตำแหน่งเมื่อคลิก
-        }}
-        style={{
-          zIndex: 5,
-          color: 'rgb(102, 3, 196)',
-          justifyItems: 'center',
-          cursor: 'pointer',
-          width: '47px',
-          height: '47px',
-          borderRadius: '50px',
-          boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-          // border: '1px solid #ddd',
-          backgroundColor: '#f1f1f1',
-        }}
-      >
-        {getIcon()} {/* แสดงไอคอนที่เลือก */}
-      </button>
-            
-            <button
-              className='bt-eraser'
-              title="คลิกเพื่อเลือกลบวัตถุ"
-              onClick={() => {
-                toggleEraserMode('eraser');
-                // deleteSelectedObject(); // ลบวัตถุที่เลือก
-              }}
-              style={{
-                backgroundColor: isActive.eraser ? '#E8EAE6' : '#f1f1f1',
-                zIndex: 5,
-                color: 'rgb(102, 3, 196)',
-                // margin: '5px',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                justifyItems: 'center',
-                border: isActive.eraser ? '1px solid #ddd' : 'none',
-              }}
-            >
-              <BsEraser  size="20" />
-            </button>
-
-
-            <button
-              className='bt-clear'
-              title="ล้าง"
-              onClick={clearCanvas}
-              style={{
-                zIndex: 5,
-                backgroundColor: '#f1f1f1',
-                color: 'rgb(102, 3, 196)',
-                // margin: '5px',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                justifyItems: 'center'
-              }}
-            >
-              <AiOutlineDelete size="20" />
-            </button>
-
-            <button
-              className='bt-saveImag'
-              title="บันทึกภาพ"
-              onClick={saveDrawing}
-              style={{
-                backgroundColor: '#f1f1f1',
-                color: 'rgb(102, 3, 196)',
-                zIndex: 5,
-                // margin: '5px',
-                width: '47px',
-                height: '47px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                justifyItems: 'center'
-              }}
-            >
-              <IoIosSave size="24" />
-            </button>
-          {/* </div> */}
-          {/* <div className="line-two" style={{ float: 'right', margin: '', width: '45%', textAlign: 'center', justifyContent: 'space-between' }}>
-           
-          
-
-
-          </div> */}
-
-
-          {/* /////////////////////////////////////////////////////////////// */}
-
-
-        </div>
-
-
-        <div className="bt-mode" style={{
-          display: 'block', float: 'left', width: '80%', justifyContent: 'center', marginLeft: '50px',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          
-          {/* <div className="background"></div> */}
-          <div className="btplayModel" style={{ display: 'inline-flex', width: '100%', justifyContent: 'center', textAlign: 'center', }}>
-            {/* <button title='เล่นโมเดล' style={{ zIndex: 5, backgroundColor: '#6a0f9e', color: '#fff', borderRadius: '7px 0 0 7px', padding: '5px', marginBottom: '20px' }} onClick={toggleAnimation}>
-              {animationStopped ? <FaPlay size={20} /> : <TbPlayerPauseFilled size={20} />}
-            </button> */}
-            {/* <button title='คลิกเพื่อเปลี่ยนโหมด' style={{ backgroundColor: '#6a0f9e', color: '#fff', borderRadius: '0 7px 7px 0', padding: '5px', marginBottom: '20px' }} onClick={isDrawingMode || isTextMode ? switchToModelView : switchToDrawingMode}>
-              {isDrawingMode || isTextMode ? 'โหมดวาดเขียน' : 'โหมดดูโมเดล'}
-            </button> */}
-<div className="switch-mode" style={{display:'inline-flex',width:'100%',justifyContent: 'center', textAlign: 'center',}}>
-<input
-        type="checkbox"
-        id="animationMode"
-        checked={isChecked} // ผูกกับ state
-        onChange={handleToggle} // อัปเดตค่าเมื่อกด
-      />
-      <label htmlFor="animationMode" className="label-Mode">
-  <FaEye size={20} className="animation-mode" />
-  <MdDraw size={20} className="draw-mode" />
-</label>
-</div>
-            {/* <input type='checkbox' id='animationMode'/>
-          <label htmlFor='animationMode' className='label-Mode'><FaEye className='animation-mode' size={'20'} /><MdDraw className='draw-mode' size={'20'}/></label> */}
-       
-       
-       <div className="bt-undo-redo" style={{  display: 'flex', 
-    marginLeft: 'auto', marginBottom:'15px',clear:'both' }}>
-            <button id="undoButton" title="เลิกทำ"
-              style={{
-                backgroundColor: '#fff',
-                margin: '5px',
-                zIndex: 5,
-                cursor: 'pointer',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50px',
-                justifyItems: 'center',
-                boxShadow: '0 0 5px 2px rgba(0, 0, 0, 0.1)',
-
-              }}><GrUndo size="17" />
-            </button>
-            <button id="redoButton" title="ทำซ้ำ"
-              style={{
-                backgroundColor: '#fff',
-                margin: '5px',
-                zIndex: 5,
-                cursor: 'pointer',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50px',
-                justifyItems: 'center',
-                boxShadow: '0 0 5px 2px rgba(0, 0, 0, 0.1)',
-              }}><GrRedo size="17" />
-            </button>
-          </div>
-          </div>
-{/* 
-          <div className="line-size" style={{float:'left'}}>
           <input
             title="ขนาดเส้นวาด"
             className='ip-lineWidth'
@@ -1045,16 +1099,22 @@ const ViewModel = () => {
                 changeFontSize(e.target.value);
               }} />
 
-          </div> */}
+          </div> 
 
-          <div className='containerRef' ref={containerRef} style={{ zIndex: 5, width: '100%',border:'1px solid #000', }}>  </div>
+      
+        <div className="bt-mode" style={{
+        }}>
+          
+     
+  
+          <div className='containerRef' ref={containerRef} style={{ zIndex: 5, width: '100%', }}>  </div>
 
           {showCanvas &&
             <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5, width: '100%' }} />
           }
+        {/* </div> */}
+
         </div>
-
-
 
       </div>
     </div>

@@ -442,11 +442,12 @@ div.canvas-container{
 canvas.lower-canvas {
   position:static !important;
   /* z-index: 5 !important;  */
-  width:85% !important;
+  width:100% !important;
   height:auto!important;
   position: absolute !important;
-  top: 2% !important;
-  left: 15% !important;
+  top: 10% !important;
+  /* top: 2% !important;
+  left: 15% !important; */
   /* transform: translate(-50%, -50%) !important; */
 }
 
@@ -489,30 +490,10 @@ form.d-flex.search-form{
   
   
   }
-  .search-icon {
-    /* position: absolute; */
-    /* left: 170px;  */
-    /* cursor: pointer; */
-    /* width: 1vw;
-    height: 1vw; */
-    /* top: 17%; */
-    }
- /* .search-icon:hover {
-    width: 25px;
-    height: 25px;
-    } */
-/* input.form-control.rounded{
-  width:30% !important;
-} */
+
  div.input-group{
   display:flex;
   justify-content:flex-end;
-  /* width:25%; */
- 
-  /* float:right; */
-  
-  /* display:flex;
-  justify-content:flex-end; */
  }
 
  button.btn.btn-primary{
@@ -540,20 +521,21 @@ button.btn.btn-primary:active{
   border:1px solid #dee2e6;
 }
 
-.bt-right,
-.bt-center,
-.bt-left,
-.bt-bold,
-.bt-underline,
-.bt-italic,
-.bt-addText,
-.bt-drawing,
-.bt-eraser,
-.bt-clear,
-.text-align,
-.bt-saveImag{
-  transition: transform 0.1s ease;
-}
+/* .bt-right:active,
+.bt-center:active,
+.bt-left:active,
+.bt-bold:active,
+.bt-underline:active,
+.bt-italic:active,
+.bt-addText:active,
+.bt-drawing:active,
+.bt-eraser:active,
+.bt-clear:active,
+.text-align:active,
+.bt-saveImag:active,
+.bt-play:active{
+  border-radius:20px !important;
+} */
 
 .bt-right:hover,
 .bt-center:hover,
@@ -566,20 +548,22 @@ button.btn.btn-primary:active{
 .bt-eraser:hover,
 .bt-clear:hover,
 .text-align:hover,
-.bt-saveImag:hover{
-  transform: scale(1.15);
-  color:#fff !important;
-  background:rgb(100, 0, 193) !important;
+.bt-saveImag:hover,
+.bt-play:hover{
+  /* transform: scale(1.15); */
+  color:#000 !important;
+  background:rgb(241, 241, 241) !important;
+  border-radius: 10px !important;
 }
 
 .label-Mode{
-  width:120px;
+  width:100px;
   height:40px;
   position:relative;
   display:block;
   background:#fff;
   border-radius: 200px;
-  box-shadow: inset 0px 5px 15px rgba(226, 217, 234, 0.4), inset 0 -5px 15px  rgba(167, 131, 191, 0.4);
+  box-shadow: inset 0px 5px 15px rgba(221, 213, 229, 0.4), inset 0 -5px 15px  rgba(220, 211, 226, 0.4);
   cursor:pointer;
   transition: 0.3s;
 }
@@ -589,11 +573,11 @@ button.btn.btn-primary:active{
   top:2px;
   left:2px;
   /* right:2px;/ */
-  width:60px;
+  width:50px;
   height:35px;
   position:absolute;
   display:block;
-  background: linear-gradient(180deg,rgb(171, 81, 255),rgb(100, 0, 193));
+  background: linear-gradient(180deg,rgba(167, 76, 252, 0.44),rgb(127, 11, 215));
   border-radius: 180px;
   box-shadow: 0px 5px 10px rgba(0,0,0,0.2);
   transition: 0.3s;
@@ -610,9 +594,9 @@ button.btn.btn-primary:active{
 }
 
 #animationMode:checked + .label-Mode:after{
-  left:120px;
+  left:98px;
   transform:translateX(-100%);
-  background: linear-gradient(180deg,rgb(171, 81, 255),rgb(100, 0, 193));
+  background: linear-gradient(180deg,rgba(167, 76, 252, 0.44),rgb(127, 11, 215));
 }
 .label-Mode:active:after{
   /* width:70px; */
@@ -622,22 +606,24 @@ button.btn.btn-primary:active{
   position:absolute;
   width: 40px;
   top:8px;
-  z-index: 100;
+  z-index: 10;
 }
 .animation-mode{
-  left:10px;
-  fill:#fff;
+  left:7px;
+  color:#fff;
   transition: 0.3s;
 }
 .draw-mode{
-  left:70px;
-  fill:rgb(102, 3, 196);
+  left:54px;
+  /* fill:rgb(102, 3, 196); */
+  color:#e8e8e8;
   transition: 0.3s;
 }
 
 #animationMode:checked + .label-Mode .animation-mode{
-  fill:rgb(102, 3, 196);
+  /* fill:rgb(102, 3, 196); */
+  color:#e8e8e8;
 }
 #animationMode:checked + .label-Mode .draw-mode{
-  fill:#fff;
+  color:#fff;
 }
