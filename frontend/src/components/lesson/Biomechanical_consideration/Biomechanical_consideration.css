@@ -52,7 +52,7 @@ h3 .Ani_name {
     /* text-align:start;/ */
 }
 .lebel-bio{
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     color:#000;
     font-weight:450;
 }
@@ -154,11 +154,11 @@ video {
 } */
 .add-button{
     color: rgb(255, 255, 255);
-  background-color: rgb(9, 162, 22);
+  background-color: rgb(145, 54, 205);
   /* border-color: rgb(9, 162, 22); */
   padding: 7px 15px;
   margin-top: 20px;
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3); 
   border: none;
 }
@@ -168,7 +168,7 @@ video {
     /* border-color: #dbdbdb; */
     padding: 7px 15px;
     margin-top: 20px;
-    border-radius: 8px;
+    border-radius: 5px;
     margin-right:20px;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3); 
     border: none;

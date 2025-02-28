@@ -42,6 +42,9 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineDelete } from "react-icons/ai";
 import { IoHandRightSharp } from "react-icons/io5";
 import { IoHandRightOutline } from "react-icons/io5";
+import { RxBorderWidth } from "react-icons/rx";
+import InputNumber from 'rc-input-number';
+
 const ViewModel = () => {
   const location = useLocation();
   const containerRef = useRef(null);
@@ -60,7 +63,7 @@ const ViewModel = () => {
   const [isRotating, setIsRotating] = useState(true);
   const [startPoint, setStartPoint] = useState(null);
   const [lineWidth, setLineWidth] = useState(2);
-  const [currentColor, setCurrentColor] = useState('#b142ff');
+  const [currentColor, setCurrentColor] = useState('#3884ff');
   const [isErasing, setIsErasing] = useState(false); // State for erase mode
 
   const [fabricCanvas, setFabricCanvas] = useState(null);
@@ -82,6 +85,10 @@ const ViewModel = () => {
   const [isClicked, setIsClicked] = useState(false);
   const buttonRef = useRef(null);
   const [isChecked, setIsChecked] = useState(isDrawingMode || isTextMode);
+  const lineWidthRef = useRef(null);
+  const [showLineWidth, setShowLineWidth] = useState(false);
+  // const [fontSize, setFontSize] = useState(14); // ค่าเริ่มต้นเป็น 14px
+
 
   const [showCanvas, setShowCanvas] = useState(false);
   const [isActive, setIsActive] = useState({
@@ -383,6 +390,8 @@ const ViewModel = () => {
   // ฟังก์ชันสำหรับสลับโหมดการวาด
 
   const toggleDrawingMode = (button) => {
+    // setIsActive({ pen:  });
+    // setShowLineWidth(!showLineWidth); // สลับการแสดง/ซ่อนของ input
 
     if (fabricCanvas) {
       setIsDrawingMode((prev) => {
@@ -581,6 +590,7 @@ const ViewModel = () => {
       fabricCanvas.on('selection:created', updateTextStyles);
       fabricCanvas.on('selection:updated', updateTextStyles);
       fabricCanvas.on('selection:cleared', clearTextStyles);
+      fabricCanvas.on('selection:cleared', () => setFontSize(14)); // เคลียร์เมื่อไม่ได้เลือก
     }
   
     return () => {
@@ -588,18 +598,28 @@ const ViewModel = () => {
         fabricCanvas.off('selection:created', updateTextStyles);
         fabricCanvas.off('selection:updated', updateTextStyles);
         fabricCanvas.off('selection:cleared', clearTextStyles);
+        fabricCanvas.off('selection:cleared', () => setFontSize(14));
       }
     };
   }, [fabricCanvas]);
   
   const updateTextStyles = () => {
-    const activeObject = fabricCanvas.getActiveObject();
+    const activeObject = fabricCanvas?.getActiveObject();
     if (activeObject && activeObject.type === 'textbox') {
+      console.log("Selected Object:", activeObject);
+      console.log("Font Size:", activeObject.fontSize);
+      console.log("Text Color:", activeObject.fill); // ✅ ตรวจสอบค่า fill
+      
+      setFontSize(activeObject.fontSize || 14);
+      setCurrentColor(activeObject.fill || "#000000"); // ✅ อัปเดตสีปัจจุบัน
       setIsBold(activeObject.fontWeight === 'bold');
       setIsItalic(activeObject.fontStyle === 'italic');
       setIsUnderline(activeObject.underline);
     }
   };
+  
+  
+  
   
   const clearTextStyles = () => {
     setIsBold(false);
@@ -709,6 +729,12 @@ const ViewModel = () => {
       switchToDrawingMode(); // ไปยังโหมดวาดเขียน
     }
   };
+
+    // ฟังก์ชันสำหรับเปิด/ปิดแสดง input ขนาดเส้น
+    const toggleLineWidth = () => {
+      setShowLineWidth(!showLineWidth);
+    };
+  
   ///////////////////////////////////////////////////////////////////////////////
   return (
     <div className="container-ar" style={{ position: 'relative' }}>
@@ -722,7 +748,7 @@ const ViewModel = () => {
 
         <div className="draw" style={{display: 'inline-flex', gap:3,marginTop:'30px', marginLeft:'',margin: 'auto',
       height: '', width: '', zIndex: 5, background: '#fff',padding:'10px',justifyContent:'space-between',marginBottom:'10px',
-    height:'80px',alignContent:'center',alignItems:'center',borderRadius:'15px',boxShadow: '0 0 10px 1px rgba(0, 0, 0, 0.1)' }}>
+    height:'85px',alignContent:'center',alignItems:'center',borderRadius:'15px',boxShadow: 'rgba(149, 149, 149, 0.67) 0px 1px 2px 0px, rgba(151, 151, 151, 0.15) 0px 1px 3px 1px'}}>
 
 <div className="Mode" style={{display: 'inline-flex'}}>
   <input
@@ -743,34 +769,73 @@ const ViewModel = () => {
             {animationStopped ? <FaPlay size={20} /> : <TbPlayerPauseFilled size={20} />}
           </button>
           {/* backgroundColor: animationStopped ? "#fff" : "rgb(100, 0, 193)"  */}
-            <button
-              className='bt-drawing'
-              title="คลิกเพื่อวาด"
-              onClick={() => toggleDrawingMode('pen')}
-              // disabled={!isDrawingMode}
-              style={{
+          {/*  */}
+      {/* ปุ่มเลือกปากกา */}
+      <button 
+        className='bt-drawing'
+        title="คลิกเพื่อวาด"
+        onClick={() => toggleDrawingMode('pen')}
 
-                zIndex: 5,
-                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-                color: isActive.pen ? 'rgb(0, 0, 0) ': '#000',
-                cursor: 'pointer',
-                minWidth: '40px',
-                minHeight: '40px',
-                backgroundColor: isActive.pen ? 'rgb(241, 241, 241)' : '#fff',
-                // borderRadius: '50px',
-                // backgroundImage: isActive.pen 
-                // ? "linear-gradient(180deg, rgba(175, 90, 255, 0.44), rgb(152, 33, 243))" 
-                // : "none", // ใช้ none แทน เพื่อรีเซ็ต
-              // backgroundColor: isActive.pen ? "transparent" : "#fff" ,
-                border: isActive.pen ? '1px solid #ddd' : 'none',
-                borderRadius: isActive.pen ? '10px' : 'none',
-                justifyItems: 'center'
-              }
-              }
-            >
-              <FaPen size="16" />
-            </button>
-
+        style={{
+          zIndex: 5,
+          color: isActive.pen ? 'rgb(0, 0, 0) ': '#000',
+          cursor: 'pointer',
+          minWidth: '40px',
+          minHeight: '40px',
+          backgroundColor: isActive.pen ? 'rgb(241, 241, 241)' : '#fff',
+          border: isActive.pen ? '1px solid #ddd' : 'none',
+          borderRadius: isActive.pen ? '10px' : 'none',
+          justifyItems: 'center'
+        }}
+      >
+        <FaPen size="16" />
+      </button>
+      <button className='bt-border' onClick={toggleLineWidth} style={{minWidth: '40px',
+          minHeight: '40px',justifyItems: 'center'}}>
+        <RxBorderWidth size="18" color='#000'/>
+      </button>
+      <div style={{ 
+  position: 'relative', 
+  display: 'inline-block', 
+  zIndex: 10, 
+  top: '-30px',  
+  left: '0px'
+}}>
+      {/* แสดง Input ขนาดเส้นเมื่อ showLineWidth เป็น true */}
+      {showLineWidth && (
+        
+        <div
+        
+          ref={lineWidthRef}  // ใช้ ref สำหรับตรวจจับการคลิกภายนอก
+          style={{  
+            position: 'absolute',  
+            width: '120px',
+            height: '30px',
+            background:'#fff',
+            boxShadow: 'rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px',
+            display: 'flex',
+            justifyContent: 'center',  // จัดกลางแนวนอน
+            alignItems: 'center',      // จัดกลางแนวตั้ง
+            top: '45px',
+            left: '-30px',
+          }}
+        >
+          <input
+            title="ขนาดเส้นวาด"
+            type="range"
+            min="1"
+            max="10"
+            value={lineWidth}
+            onChange={(e) => handleLineWidthChange(parseInt(e.target.value))}
+            style={{
+              width: '100px',
+              cursor: 'pointer',
+              background:'#fff',
+            }}
+          />
+        </div>
+      )}
+      </div>
             <button
               className='bt-addText'
               onClick={addText}
@@ -781,8 +846,6 @@ const ViewModel = () => {
                 marginLeft: '0rem',
                 backgroundColor: '#fff',
                 color: '#000',
-                // margin: '5px',
-                // cursor: 'pointer',
                 minWidth: '40px',
                 minHeight: '40px',
                 // borderRadius: '50px',
@@ -793,8 +856,69 @@ const ViewModel = () => {
             >
               <RxText size="18" />
             </button>
-          
-            <input
+            {/* <input
+              className='ip-fontSize'
+              type="number"
+              title="ขนาดตัวอักษร"
+              value={fontSize}
+              style={{
+                // justifyItems: 'center',
+                zIndex: 5,
+                cursor: 'pointer',
+                fontSize:'14px',
+                width: '50px',
+                height: '40px',
+                color: '#000',
+              }}
+              onChange={(e) => {
+                setFontSize(e.target.value);
+                changeFontSize(e.target.value);
+              }} 
+              inputMode="numeric"  // ใช้สำหรับให้คีย์บอร์ดแสดงตัวเลข
+              />  */}
+
+<InputNumber
+  min={1}
+  max={120}
+  // ❌ defaultValue ใช้เพียงค่าเริ่มต้น แต่ไม่อัปเดตตาม state
+  defaultValue={14} 
+  // ✅ ต้องใช้ value แทน เพื่อให้ React อัปเดตค่าตาม `setFontSize`
+  value={fontSize} 
+  onChange={(value) => {
+    setFontSize(value);
+    changeFontSize(value);
+  }}
+  style={{
+    fontSize: '16px',
+  }}
+/>
+
+          {/* <ul className="options"
+              style={{
+                // display: 'flex',
+                zIndex: 5,
+                // margin: '5px',
+
+                padding: 0,
+                margin: 0,
+                cursor: 'pointer',
+              }}>
+              {presetColors.map((color, index) => (
+                <li key={index} className={`option tool color ${currentColor === color ? 'active' : ''}`}
+                  style={{
+                    backgroundColor: color,
+                    listStyle: 'none',
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50px',
+                    border: '1px solid #000',
+                    margin: '5px '
+                  }} onClick={() => handleColorChange(color)}></li>
+              ))}
+
+            </ul> */}
+
+            {/* <input
               title="สีเพิ่มเติม"
               className='ip-color'
               type="color"
@@ -806,16 +930,45 @@ const ViewModel = () => {
               style={{
                 zIndex: 5,
                 padding: '0',
-                minWidth: '30px',
-                minHeight: '30px',
-                width: '30px',
-                height: '30px',
+                minWidth: '28px',
+                minHeight: '28px',
+                width: '28px',
+                height: '28px',
                 borderRadius: '50px',
                 cursor: 'pointer',
                 border: 'none',
+                outline: 'none',
+                appearance: 'none'
                 // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
               }}
-            />
+            /> */}
+            <div 
+  style={{
+    width: '28px',
+    height: '28px',
+    borderRadius: '50px',
+    backgroundColor: currentColor,
+    cursor: 'pointer',
+    border: '1px solid #ccc', // เพิ่มเส้นขอบให้ดูเหมือนปุ่ม
+  }}
+  onClick={() => document.getElementById('color-picker').click()} // คลิกแล้วเปิด input สี
+>
+  <input
+    id="color-picker"
+    type="color"
+    value={currentColor}
+    onChange={(e) => {
+      setCurrentColor(e.target.value);
+      setTextColor(e.target.value);
+      changeTextColor(e.target.value);
+    }}
+    style={{
+      visibility: 'hidden', // ซ่อน input จริง
+      position: 'absolute',
+    }}
+  />
+</div>
+
 
             <button
               className='bt-bold'
@@ -1037,69 +1190,13 @@ const ViewModel = () => {
         </div>
 
 
-        <div className="line-size" style={{borderRadius:'10px',zIndex: 10,position:'absolute', height:'450px',boxShadow: '0 0 10px 1px rgba(0, 0, 0, 0.1)',background:'#fff',width:'200px'}}>
+        {/* <div className="line-size" style={{borderRadius:'10px',zIndex: 10,position:'absolute', height:'450px',boxShadow: '0 0 10px 1px rgba(0, 0, 0, 0.1)',background:'#fff',width:'200px'}}> */}
         
-          {/* <ul className="options"
-              style={{
-                // display: 'flex',
-                zIndex: 5,
-                // margin: '5px',
+          
+       
+         
 
-                padding: 0,
-                margin: 0,
-                cursor: 'pointer',
-              }}>
-              {presetColors.map((color, index) => (
-                <li key={index} className={`option tool color ${currentColor === color ? 'active' : ''}`}
-                  style={{
-                    backgroundColor: color,
-                    listStyle: 'none',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50px',
-                    border: '1px solid #000',
-                    margin: '5px '
-                  }} onClick={() => handleColorChange(color)}></li>
-              ))}
-
-            </ul> */}
-
-          <input
-            title="ขนาดเส้นวาด"
-            className='ip-lineWidth'
-            type="range"
-            min="1"
-            max="10"
-            value={lineWidth}
-            onChange={(e) => handleLineWidthChange(parseInt(e.target.value))}
-            style={{
-              zIndex: 5,
-              width: '50%',  // Adjust width as percentage of the parent container
-              maxWidth: '120px',  // Add a max-width for larger screens
-              cursor: 'pointer',
-            }}
-          />
-            <input
-              className='ip-fontSize'
-              type="number"
-              title="ขนาดตัวอักษร"
-              value={fontSize}
-              style={{
-                // justifyItems: 'center',
-                zIndex: 5,
-                // margin: '0.3rem',
-                cursor: 'pointer',
-                width: '50px',
-                height: '50px',
-                color: '#000',
-                boxShadow: '1px 1px 1px 1px rgba(0, 0, 0, 0.2)',
-              }}
-              onChange={(e) => {
-                setFontSize(e.target.value);
-                changeFontSize(e.target.value);
-              }} />
-
-          </div> 
+          {/* </div>  */}
 
       
         <div className="bt-mode" style={{

@@ -26,7 +26,7 @@ const LeverTeacher = () => {
   
         {/* Main Content Area */}
         <div className="main-content">
-          <Frame>
+          <Frame style={{top:50}}>
             <View_LeverTeacher />
           </Frame>
   

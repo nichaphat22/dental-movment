@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import LectureModal from './LectureModal';
 import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
-
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { RxCross2 } from "react-icons/rx";
 const LectureHistory = () => {
   // Hook สำหรับการนำทาง
   const navigate = useNavigate();
@@ -65,24 +66,42 @@ const LectureHistory = () => {
   };
 
   return (
-    <div className="lecture-history">
+    <div className="lecture-history" style={{position:'relative',top:'70px'}}>
       <h1 className="title-h1">Lecture History</h1>
       <div className="lecture-thumbnails" style={{ display: 'flex', flexWrap: 'wrap', textAlign: 'center', justifyContent: 'center' }}>
+        
+        
         {lectures.map((lecture) => (
+          
           <div 
             key={lecture._id} 
             className="thumbnail-container" 
             style={{ 
               border: '1px solid #f3f3f3', 
-              boxShadow: '0 0 50px 2px rgba(0, 0, 0, 0.05)', 
-              borderRadius: '20px', 
-              padding: '20px', 
-              margin: '10px', 
+              boxShadow: 'hsla(221, 10.40%, 30.20%, 0.25) 0px 1px 1px, rgba(213, 218, 226, 0.13) 0px 0px 1px 1px',
+              borderRadius: '0', 
+              padding: '0 15px', 
+              margin: '20px', 
               marginBottom: '20px', 
               justifyContent: 'center', 
-              textAlign: 'center' 
+              textAlign: 'center', 
             }}
           >
+             <button 
+              onClick={() => handleDeleteClick(lecture._id)} 
+              style={{ 
+                // backgroundColor: 'none', 
+                color: '#aaaaaa', 
+                borderRadius: '5px', 
+                marginTop: '2px', 
+                border: 'none' ,
+                padding:'0 0',
+                float:'right'
+              }}
+            >
+              <RxCross2  size={18}/>
+            </button>
+            <br />
             {lecture.img ? (
               <img 
                 src={lecture.img} 
@@ -95,18 +114,7 @@ const LectureHistory = () => {
               <p>No image available</p> // ข้อความเมื่อไม่มีภาพ
             )}
             <br />
-            <button 
-              onClick={() => handleDeleteClick(lecture._id)} 
-              style={{ 
-                backgroundColor: 'red', 
-                color: '#fff', 
-                borderRadius: '5px', 
-                marginTop: '5px', 
-                border: 'none' 
-              }}
-            >
-              Remove
-            </button>
+           
           </div>
         ))}
       </div>

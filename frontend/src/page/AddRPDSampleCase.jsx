@@ -7,7 +7,7 @@ import './sidebar-mobile.css';
 const AddRPDSampleCase = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <div style={{ marginTop: "100px" }} >
+    <div style={{ marginTop: "65px" }} >
       {/* Sidebar for mobile */}
       <div
         className={`sidebar-mobile ${
@@ -24,7 +24,7 @@ const AddRPDSampleCase = () => {
 
       {/* Main Content Area */}
       <div className="main-content">
-        <Frame>
+        <Frame  style={{padding:'0',margin:'0', backgroundColor: '#f5f5f5',}}>
           <Add_RPD />
         </Frame>
 
