@@ -3,12 +3,15 @@ import { ref as dbRef, set } from 'firebase/database';
 import { uploadBytesResumable, ref as storageRef, getDownloadURL, deleteObject } from 'firebase/storage';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { database, storage } from '../../../config/firebase';
-// import {
-//   FileUploadDropzone,
-//   FileUploadList,
-//   FileUploadRoot,
-// } from "@/components/ui/file-upload";
-// import { Progress } from "@/components/ui/progress";
+import { Button } from "@chakra-ui/react"
+import {
+  FileUploadList,
+  FileUploadRoot,
+  FileUploadTrigger,
+} from "@/components/ui/file-upload"
+import { HiUpload } from "react-icons/hi"
+
+
 
 const Edit_RPD = () => {
   const [name, setName] = useState("");
@@ -126,7 +129,7 @@ const Edit_RPD = () => {
   return (
     <div className="Content" style={{ backgroundColor: '#fff', color: "#000" }}>
       <div style={{ margin: '20px' }}>
-        <h3 style={{ margin: '0', fontSize: '1.5rem', marginBottom: '15px' }}>แก้ไขโมเดล</h3>
+        <h3 style={{ margin: '0', fontSize: '1.5rem', marginBottom: '15px' }}>แก้ไขสื่อการสอน RPD sample case</h3>
         {/* <i><span>หมายเหตุ : </span><span>สร้างไฟล์ Pattern และดาวน์โหลดรูปภาพ Marker ได้ที่</span><a href="https://jeromeetienne.github.io/AR.js/three.js/examples/marker-training/examples/generator.html"> สร้างไฟล์ Pattern</a></i> */}
         <form encType="multipart/form-data" onSubmit={handleSaveModel} style={{ marginTop: '15px' }}>
           <div className="modelName-display" style={{ borderRadius: '5px', padding: '10px 20px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px' }}>
@@ -156,7 +159,7 @@ const Edit_RPD = () => {
               required
             />
           </div>
-          <br />
+          {/* <br /> */}
           <div className="fileModel-display" style={{ borderRadius: '5px', padding: '10px 20px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px' }}>
             <label htmlFor="fileModel" className="lebel-bio">ไฟล์โมเดล :</label><br />
             <input type="file" name="fileModel" id="fileModel" onChange={(e) => handleFileChange(e, setFileModel)} />
@@ -166,7 +169,18 @@ const Edit_RPD = () => {
               </div>
             )}
           </div>
-          <br />
+
+  <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+            <label htmlFor="" className="lebel-bio">ไฟล์โมเดล: </label>
+            <FileUploadRoot maxFiles={1}  onChange={(e) => handleFileChange(e, setFileModel)} required>
+              <FileUploadTrigger asChild>
+                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset' }}>   <HiUpload /> อัปโหลดไฟล์
+                </Button>
+              </FileUploadTrigger>
+              <FileUploadList  showSize clearable />
+            </FileUploadRoot>
+
+          </div>
 
           <div className="filepattern-display" style={{ borderRadius: '5px', padding: '10px 20px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px' }}>
             <label htmlFor="filePattern" className="lebel-bio">ไฟล์ Pattern : <span style={{ color: 'red' }}>* </span><span style={{ color: 'red', fontWeight: '400', fontSize: '0.85rem' }}><i>นามสกุลไฟล์ .patt</i></span></label><br />

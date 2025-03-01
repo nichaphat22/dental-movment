@@ -54,7 +54,8 @@ h3 .Ani_name {
 .lebel-bio{
     font-size: 1.02rem;
     color:#000;
-    font-weight:450;
+    font-weight:400;
+    margin-bottom:7px;
 }
 .choose-file{
     font-size:0.8rem;

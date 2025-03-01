@@ -48,7 +48,7 @@ function Add_RPD() {
   //   const files = Array.from(event.target.files);
   //   setter(files);
   // };
-  
+
 
   const uploadFile = async (file, folder, contentType) => {
     const fileRef = storageRef(storage, `${folder}/${file.name}`);
@@ -104,7 +104,7 @@ function Add_RPD() {
       setUploading(false);
       setUploadProgress(0);
       alert("เพิ่มโมเดลสำเร็จ!");
-      navigate('/Possible-Movement-Of-RPD'); 
+      navigate('/Possible-Movement-Of-RPD');
     } catch (error) {
       console.error("ไม่สามารถบันทึกโมเดลได้", error);
       setUploading(false);
@@ -116,85 +116,87 @@ function Add_RPD() {
   };
 
   return (
-    <div className="Content" style={{ backgroundColor: '#f9f9f9', color: "#000" ,margin:'0'}}>
-      <div className="" style={{height:'80px',borderBottom:'1px solid #eee',background:'none', boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 10px 1px, rgba(204, 203, 203, 0.5) 0px 1px 15px 1px' ,background: '#fff'}}>
-      <h3 style={{ padding:'25px', fontSize: '1.5rem', margin: '0',marginBottom:'', }}>เพิ่มโมเดล</h3>
+    <div className="Content" style={{ backgroundColor: '#fff', color: "#000", margin: '0' }}>
+      {/* boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 5px 1px, rgba(204, 203, 203, 0.5) 0px 1px 10px 1px' , */}
+      {/* <div className="" style={{background:'none',background: '#fff' }}>
 
-      </div>
-      <div style={{ margin: '0px 20px' }}>
-      
+      </div> */}
+      <div style={{ margin: '20px' }}>
+        <h3 style={{ fontSize: '1.5rem', margin: '0', marginBottom: '', }}>เพิ่มสื่อการสอน RPD sample case</h3>
+
         <form encType="multipart/form-data" onSubmit={handleSaveModel} style={{ marginTop: '15px' }}>
-        <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 3px 1px, rgba(209, 209, 209, 0.5) 0px 1px 3px 1px' ,background: '#fff',marginBottom:'20px'}}>
-          <label htmlFor="modelName" className="lebel-bio">
-            ชื่อโมเดล: <span style={{ color: 'red' }}>*</span>
-          </label>
-          <textarea
-            style={{
-              // margin:'10px 20px 10px 20px',
-              width: '100%',
-              padding: '10px',
-              // marginBottom: '20px',
-              // border: '1px solid #d0d0d0',
-              border:'1px solid rgb(255, 255, 255)',
-              borderRadius: '5px',
-              height: '45px',
-              resize: 'none',
-              overflow: 'hidden',
-               background: 'rgb(237, 237, 237)',
-               boxSizing: 'border-box'
-               
-            }}
-            wrap="soft"
-            value={modelName}
-            onChange={(e) => {
-              setModelName(e.target.value);
-              e.target.style.height = 'auto';
-              e.target.style.height = `${e.target.scrollHeight}px`;
-            }}
-            required
-          />
+          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+            <label htmlFor="modelName" className="lebel-bio">
+              ชื่อโมเดล: <span style={{ color: 'red' }}>*</span>
+            </label>
+            <textarea
+              style={{
+                // margin:'10px 20px 10px 20px',
+                width: '100%',
+                padding: '10px',
+                // marginBottom: '20px',
+                // border: '1px solid #d0d0d0',
+                border: '1px solid rgb(255, 255, 255)',
+                borderRadius: '5px',
+                height: '45px',
+                resize: 'none',
+                overflow: 'hidden',
+                background: '#f5f5f5',
+                boxSizing: 'border-box'
+
+              }}
+              wrap="soft"
+              value={modelName}
+              onChange={(e) => {
+                setModelName(e.target.value);
+                e.target.style.height = 'auto';
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              required
+            />
           </div>
           {/* <br /> */}
 
 
-          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 3px 1px, rgba(209, 209, 209, 0.5) 0px 1px 3px 1px' ,background: '#fff',marginBottom:'20px'}}>
-         <label htmlFor="" className="lebel-bio">ไฟล์โมเดล: <span style={{ color: 'red' }}>*</span></label>
-          <FileUploadRoot maxFiles={1}  onChange={(e) => handleFileChange(e, setFileModel)} required>
-      <FileUploadTrigger asChild>
-      <Button variant="outline" size="sm" style={{fontSize:'14px',borderRadius:'5px',padding:'10px',background:'rgb(145, 54, 205)',color:'#fff',boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset'}}>   <HiUpload /> อัปโหลดไฟล์
-        </Button>
-      </FileUploadTrigger>
-      <FileUploadList showSize clearable />
-    </FileUploadRoot>
-  
-</div>
+          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+            <label htmlFor="" className="lebel-bio">ไฟล์โมเดล: <span style={{ color: 'red' }}>*</span></label>
+            <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFileModel)} required>
+              <FileUploadTrigger asChild>
+                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset' }}>   <HiUpload /> อัปโหลดไฟล์
+                </Button>
+              </FileUploadTrigger>
+              <FileUploadList showSize clearable />
+            </FileUploadRoot>
+
+          </div>
           {/* <br /> */}
-          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 3px 1px, rgba(209, 209, 209, 0.5) 0px 1px 3px 1px' ,background: '#fff',marginBottom:'20px'}}>
-          <label htmlFor=""  className="lebel-bio">ไฟล์ Pattern: <span style={{ color: 'red' }}>*</span></label>
-          <FileUploadRoot maxFiles={1}onChange={(e) => handleFileChange(e, setFilePattern)} required >
-      <FileUploadTrigger asChild>
-      <Button variant="outline" size="sm" style={{fontSize:'14px',borderRadius:'5px',padding:'10px',background:'rgb(145, 54, 205)',color:'#fff',boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset',}}> 
-      <HiUpload /> อัปโหลดไฟล์
-        </Button>
-      </FileUploadTrigger>
-      <FileUploadList showSize clearable />
-    </FileUploadRoot>
- 
-</div>
+          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+            <label htmlFor="" className="lebel-bio">ไฟล์ Pattern: <span style={{ color: 'red' }}>*</span></label>
+            <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFilePattern)} required >
+              <FileUploadTrigger asChild>
+                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset', }}>
+                  <HiUpload /> อัปโหลดไฟล์
+                </Button>
+              </FileUploadTrigger>
+              <FileUploadList showSize clearable />
+            </FileUploadRoot>
+
+          </div>
           {/* <br /> */}
-          <div className="filepattern-display" style={{ borderRadius: '5px',padding: '20px 30px', boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 3px 1px, rgba(209, 209, 209, 0.5) 0px 1px 3px 1px',background: '#fff' ,marginBottom:'20px'}}>
-          <label htmlFor=""  className="lebel-bio">ไฟล์รูปภาพโมเดล: <span style={{ color: 'red' }}>*</span></label>
-          <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFileImage)} required>
-      <FileUploadTrigger asChild>
-      <Button variant="outline" size="sm" style={{fontSize:'14px',borderRadius:'5px',padding:'10px',background:'rgb(145, 54, 205)',color:'#fff',boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset'}}>   <HiUpload /> อัปโหลดไฟล์
-        </Button>
-      </FileUploadTrigger>
-      <FileUploadList showSize clearable />
-    </FileUploadRoot>
-      </div>
-      <div className="" style={{marginBottom:'40px'}}>
-          <button type="button" className="cancel-button" onClick={handleCancel}>ยกเลิก</button>
-          <button type="submit" className="add-button">บันทึก</button>
+          {/* boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px'  */}
+          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+            <label htmlFor="" className="lebel-bio">ไฟล์รูปภาพโมเดล: <span style={{ color: 'red' }}>*</span></label>
+            <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFileImage)} required>
+              <FileUploadTrigger asChild>
+                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset' }}>   <HiUpload /> อัปโหลดไฟล์
+                </Button>
+              </FileUploadTrigger>
+              <FileUploadList showSize clearable />
+            </FileUploadRoot>
+          </div>
+          <div className="" style={{ marginBottom: '40px' }}>
+            <button type="button" className="cancel-button" onClick={handleCancel}>ยกเลิก</button>
+            <button type="submit" className="add-button">บันทึก</button>
           </div>
         </form>
 
