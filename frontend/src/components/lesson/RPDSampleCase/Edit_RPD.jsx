@@ -170,17 +170,17 @@ const Edit_RPD = () => {
             )}
           </div>
 
-  <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+  {/* <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
             <label htmlFor="" className="lebel-bio">ไฟล์โมเดล: </label>
             <FileUploadRoot maxFiles={1}  onChange={(e) => handleFileChange(e, setFileModel)} required>
               <FileUploadTrigger asChild>
                 <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset' }}>   <HiUpload /> อัปโหลดไฟล์
                 </Button>
               </FileUploadTrigger>
-              <FileUploadList  showSize clearable />
+              <FileUploadList showSize clearable />
             </FileUploadRoot>
 
-          </div>
+          </div> */}
 
           <div className="filepattern-display" style={{ borderRadius: '5px', padding: '10px 20px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px' }}>
             <label htmlFor="filePattern" className="lebel-bio">ไฟล์ Pattern : <span style={{ color: 'red' }}>* </span><span style={{ color: 'red', fontWeight: '400', fontSize: '0.85rem' }}><i>นามสกุลไฟล์ .patt</i></span></label><br />
