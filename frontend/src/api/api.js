@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const api  = axios.create({
-    baseURL: 'http://localhost:8080/auth/'
-});
-
-export const googleAuth = (code) => api.get(`/google/callback`, { params: { code } });
+export const API = axios.create({
+    baseURL: 'http://localhost:8080',
+    withCredentials: true,
+})

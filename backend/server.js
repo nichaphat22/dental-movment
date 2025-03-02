@@ -1,7 +1,7 @@
+require('dotenv').config();
 const express = require("express");
 const cors = require('cors');
 const mongoose = require("mongoose");
-const passport = require("passport")
 const session = require('express-session');
 const userRoute = require("./Routes/userRoute");
 const chatRoute = require("./Routes/chatRoute");
@@ -11,10 +11,12 @@ const animation3DRoute = require("./Routes/animation3DRoute");
 const lectureRoute = require("./Routes/lectureRoute");
 const quizRoute = require("./Routes/quizRoute");
 const notificationRoute = require("./Routes/notificationRoute");
+const authRoute = require("./Routes/authRoute");
 const bodyParser = require('body-parser');
+const passport = require('./config/passport');
 
 
-require('dotenv').config();
+
 
 console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
@@ -25,39 +27,44 @@ const app = express();
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+// app.use(express.json());
 
 
-// app.use(bodyParser.json({ limit: '10mb' }));
-// app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
-
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: false }));
 
 // Express session
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  }));
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true } // ตั้งเป็น false ใน development
+}));
+
 
 app.use(passport.initialize());
 app.use(passport.session());
 
 
-
 // ใช้ express.json() และ cors
-app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+  origin: ['http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// เพิ่ม Header สำหรับทุกเส้นทาง
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  next();
+});
 
 //Router
 app.get("/", (req, res) => {
   res.send("Welcome to the chat app API...");
 });
 app.use("/api/users", userRoute);
+app.use("/api/auth", authRoute);
 app.use("/api/chats", chatRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/animation", animationRoute);

@@ -18,7 +18,7 @@ const studentSchema = new mongoose.Schema(
     },
     quizResult: {
         type : mongoose.Schema.Types.ObjectId,
-        ref: 'QuizResult'
+        ref: 'Result'
     },
 }, {
     timestamps: true

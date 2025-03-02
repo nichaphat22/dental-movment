@@ -1,26 +1,20 @@
 const mongoose = require("mongoose");
 
-const resultSchema = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+const resultSchema = new mongoose.Schema(
+  {
+    student: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Student" 
     },
     quiz: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Quiz",
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Quiz",
     },
-    correctAnswers: {
-        type: Number,
-        required: true
-    },
-    totalQuestion: {
-        type: Number,
-        required: true
-    }
-
-}, {timeseries: true});
+    score: { type: Number, required: true }, // คะแนนที่ได้
+    createdAt: { type: Date, default: Date.now }
+  },
+  { timeseries: true }
+);
 
 const Result = mongoose.model("Result", resultSchema);
 module.exports = Result;

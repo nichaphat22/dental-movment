@@ -1,5 +1,8 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { API } from '../../api/api';
+import { logoutUser } from "../../redux/authSlice";
 import { AuthContext } from "../../context/AuthContext";
 import {
   HiOutlineMenu,
@@ -16,6 +19,8 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLessonDropdownOpen, setIsLessonDropdownOpen] = useState(false);
   const { user, logoutUser, loginWithGoogle } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  
   const navigate = useNavigate();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
@@ -43,6 +48,7 @@ const NavBar = () => {
   //     document.removeEventListener("mousedown", handleClickOutside);
   //   };
   // }, []);
+
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);

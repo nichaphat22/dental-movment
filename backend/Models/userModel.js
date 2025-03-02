@@ -5,15 +5,22 @@ const userSchema = new mongoose.Schema(
         googleId: {
             type: String,
             unique: true,
-            required: true,
+            sparse: true, // อนุญาตให้มีค่า null ได้
         },
         email: {
             type: String,
             unique: true,
             required: [true, 'Please provide email'],
         },
+        password: {
+            type: String,
+            required: function() {
+                return !this.googleId; // ถ้าใช้ Google Login ไม่ต้องใช้รหัสผ่าน
+            },
+        },
         name: {
             type: String,
+            required: true,
         },
         img: {
             type: String,
@@ -24,13 +31,9 @@ const userSchema = new mongoose.Schema(
             required: true,
             default: 'student',
         },
-        teacher: {
+        roleData: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Teacher',
-        },
-        student: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Student',
+            ref: 'role',
         },
         deleted_at: {
             type: Date,

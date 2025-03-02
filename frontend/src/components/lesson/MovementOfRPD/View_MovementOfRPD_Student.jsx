@@ -73,7 +73,7 @@ function View_MovementOfRPD_Student() {
     <div className="grid grid-cols-1 hover:shadow-lg translate-x-4 lg:grid-cols-3 gap-6 justify-center md:mx-10 lg:mx-4">
       {animation3d.map((animation) => (
         <div
-          className="cursor-pointer bg-white shadow-sm rounded-lg p-4 object-cover"
+          className="cursor-pointer bg-white shadow-sm rounded-lg p-4 lg:transform lg:transition lg:duration-300 lg:hover:scale-105 lg:hover:shadow-md"
           key={animation.name}
           onClick={() =>
             handleImageClick(animation.name, animation.url, animation.aniImageUrl, animation.description)
@@ -82,7 +82,7 @@ function View_MovementOfRPD_Student() {
           <img
             src={animation.aniImageUrl}
             alt={animation.name}
-            className="cursor-pointer mb-4 w-full rounded"
+            className="cursor-pointer mb-4 w-full rounded hover:transform-none shadow-none"
           />
           <h3 className="md:text-base lg:text-lg font-bold mb-2 text-center break-words">
             {animation.name}
