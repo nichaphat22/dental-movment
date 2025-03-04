@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { set, push, ref as dbRef, get } from 'firebase/database';
-import { uploadBytesResumable, ref as storageRef, getDownloadURL } from 'firebase/storage';
+import { uploadBytesResumable, ref as storageRef, getDownloadURL,listAll } from 'firebase/storage';
 import { useNavigate } from 'react-router-dom';
 import { database, storage } from '../../../config/firebase'; // Ensure this path is correct
-import { Button } from "@chakra-ui/react"
-import {
-  FileUploadList,
-  FileUploadRoot,
-  FileUploadTrigger,
-} from "@/components/ui/file-upload"
 import { HiUpload } from "react-icons/hi"
+import { TbFile } from "react-icons/tb";
+
+import { BsBadge3D } from "react-icons/bs";
+import { Button, Input, } from '@chakra-ui/react';
+import { CiFileOn } from "react-icons/ci";
+// import { HiUpload } from 'react-icons/hi';
+import { RxCross2 } from "react-icons/rx";
 
 
 
@@ -48,73 +49,171 @@ function Add_RPD() {
   //   const files = Array.from(event.target.files);
   //   setter(files);
   // };
+  const getUniqueFileName = async (originalFileName, folder) => {
+    const fileExtension = originalFileName.split('.').pop();
+    const baseName = originalFileName.slice(0, originalFileName.lastIndexOf('.'));
+    let newFileName = originalFileName;
+    let counter = 1;
 
+    const folderRef = storageRef(storage,  `${folder}/`);
 
-  const uploadFile = async (file, folder, contentType) => {
-    const fileRef = storageRef(storage, `${folder}/${file.name}`);
-    const uploadTask = uploadBytesResumable(fileRef, file, { contentType });
+    try {
+      console.log("Folder Reference:", folderRef);
+
+      // ดึงรายการไฟล์ในโฟลเดอร์
+      const fileList = await listAll(folderRef);
+      console.log("File List:", fileList); // ตรวจสอบโครงสร้างข้อมูล
+      
+      const existingFiles = fileList.items.map(item => item.name); 
+      console.log("Existing Files:", existingFiles);
+
+      // ตรวจสอบว่ามีไฟล์ชื่อเดียวกันอยู่แล้วหรือไม่
+      while (existingFiles.includes(newFileName)) {
+          newFileName = `${baseName}_${counter}.${fileExtension}`;
+          console.log(`File exists, changing name to: ${newFileName}`);
+          counter++;
+      }
+  } catch (error) {
+      console.error("Error listing files:", error);
+  }
+
+  return newFileName;
+};
+
+const uploadFile = async (file, folder, contentType) => {
+  try {
+    // ตรวจสอบชื่อไฟล์ใหม่
+    const newFileName = await getUniqueFileName(file.name, folder);  
+    const fileRef = storageRef(storage, `${folder}/${newFileName}`);
+
+    // กำหนด contentType ตามประเภทไฟล์
+    let metadata = { contentType };
+    if (!contentType) {
+      switch (folder) {
+        case 'models':
+          contentType = file.name.endsWith('.gltf') ? 'model/gltf+json' : 'model/gltf-binary';
+          break;
+        case 'patterns':
+          contentType = 'application/octet-stream';
+          break;
+        case 'images':
+          contentType = file.type || 'image/jpeg';
+          break;
+        default:
+          contentType = file.type || 'application/octet-stream';
+      }
+      metadata = { contentType }; // กำหนด metadata ใหม่หลังจากเช็ค contentType
+    }
+
+    console.log("fileRef:", fileRef);
+    const uploadTask = uploadBytesResumable(fileRef, file, metadata);
 
     return new Promise((resolve, reject) => {
       uploadTask.on(
         'state_changed',
         (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
+          console.log("Transferred:", snapshot.bytesTransferred, "of", snapshot.totalBytes);
         },
-        (error) => {
-          reject(error);
-        },
+        (error) => reject(error),
         async () => {
+          // ได้ URL ที่มี token ต่อท้าย
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          resolve(downloadURL);
+          console.log("Upload complete:", downloadURL);  // แสดง URL ที่ถูกต้องพร้อมกับ token
+          resolve(downloadURL);  // ส่งกลับ URL ที่ถูกต้อง
         }
       );
     });
-  };
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    return null;
+  }
+};
 
-  const handleSaveModel = async (event) => {
-    event.preventDefault();
+const handleSaveModel = async (event) => {
+  event.preventDefault();
 
-    const existingModel = models.find((model) => model.name === modelName);
-    if (existingModel) {
-      console.error("มีชื่อโมเดลนี้แล้ว");
-      return;
-    }
+  // ตรวจสอบว่าไฟล์ทั้งหมดถูกเลือก
+  if (!modelName) {
+    alert("กรุณาเพิ่มชื่อไฟล์");
+    return; // หยุดการส่งข้อมูล
+  }
 
-    setUploading(true);
+  if (!fileImage) {
+    alert("กรุณาเลือกไฟล์ภาพ");
+    return; // หยุดการส่งข้อมูล
+  }
 
-    try {
-      const modelContentType = 'model/gltf-binary';
-      const patternContentType = 'application/octet-stream';
-      const imageContentType = 'image/jpeg';
+  if (!filePattern) {
+    alert("กรุณาเลือกไฟล์แพทเทิร์น");
+    return;
+  }
 
-      const modelUrl = await uploadFile(fileModel, 'models', modelContentType);
-      const patternUrl = await uploadFile(filePattern, 'patterns', patternContentType);
-      const imageUrl = await uploadFile(fileImage, 'images', imageContentType);
+  if (!fileModel) {
+    alert("กรุณาเลือกไฟล์โมเดล");
+    return;
+  }
 
-      // **สร้าง ID อัตโนมัติใน Firebase**
-      const newModelRef = push(dbRef(database, 'models/'));
-      const modelId = newModelRef.key; // ดึง ID ที่ Firebase สร้างให้
+  // ตรวจสอบว่าไฟล์ทั้งหมดถูกเลือก
+  if (!fileImage || !filePattern || !fileModel) {
+    alert("กรุณาเลือกไฟล์ทั้งหมด");
+    return; // หยุดการส่งข้อมูล
+  }
+  
+  const existingModel = models.find((model) => model.name === modelName);
+  if (existingModel) {
+    alert("ชื่อโมเดลนี้ถูกใช้ไปแล้ว");
+    return;
+  }
 
-      // **บันทึกข้อมูลโมเดลพร้อม ID**
-      const newModel = { id: modelId, name: modelName, url: modelUrl, patternUrl, imageUrl };
-      await set(newModelRef, newModel);
+  setUploading(true);
 
-      setModels([...models, newModel]);
-      setUploading(false);
-      setUploadProgress(0);
-      alert("เพิ่มโมเดลสำเร็จ!");
-      navigate('/Possible-Movement-Of-RPD');
-    } catch (error) {
-      console.error("ไม่สามารถบันทึกโมเดลได้", error);
-      setUploading(false);
-    }
-  };
+  try {
+    // กำหนด contentType ตามประเภทไฟล์
+    const modelContentType = 'model/gltf-binary';
+    const patternContentType = 'application/octet-stream';
+    const imageContentType = 'image/jpeg';
+
+    // อัปโหลดไฟล์ทั้ง 3
+    const modelUrl = await uploadFile(fileModel, 'models', modelContentType);
+    const patternUrl = await uploadFile(filePattern, 'patterns', patternContentType);
+    const imageUrl = await uploadFile(fileImage, 'images', imageContentType);
+
+    // **สร้าง ID อัตโนมัติใน Firebase**
+    const newModelRef = push(dbRef(database, 'models/'));
+    const modelId = newModelRef.key; // ดึง ID ที่ Firebase สร้างให้
+
+    // **บันทึกข้อมูลโมเดลพร้อม ID**
+    const newModel = { id: modelId, name: modelName, url: modelUrl, patternUrl, imageUrl };
+    await set(newModelRef, newModel);
+
+    setModels([...models, newModel]);
+    setUploading(false);
+    setUploadProgress(0);
+    alert("เพิ่มโมเดลสำเร็จ!");
+    navigate('/Possible-Movement-Of-RPD');
+  } catch (error) {
+    console.error("ไม่สามารถบันทึกโมเดลได้", error);
+    setUploading(false);
+  }
+};
+
 
   const handleCancel = () => {
-    navigate('/');
+    navigate('/Possible-Movement-Of-RPD');
   };
+  
+      // ฟังก์ชันในการลบไฟล์
+      const handleDeleteFile = (fileType) => {
+        if (fileType === 'model') {
+          setFileModel(null);
+        } else if (fileType === 'pattern') {
+          setFilePattern(null);
+        } else if (fileType === 'image') {
+          setFileImage(null);
+        }
+      };
 
+    
   return (
     <div className="Content" style={{ backgroundColor: '#fff', color: "#000", margin: '0' }}>
       {/* boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 5px 1px, rgba(204, 203, 203, 0.5) 0px 1px 10px 1px' , */}
@@ -152,48 +251,186 @@ function Add_RPD() {
                 e.target.style.height = 'auto';
                 e.target.style.height = `${e.target.scrollHeight}px`;
               }}
-              required
+              // required
             />
           </div>
           {/* <br /> */}
 
+        <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+  <label htmlFor="" className="lebel-bio">ไฟล์โมเดล :  <span style={{ color: 'red' }}>*</span></label>
+  <div>
+    <Input
+      type="file"
+      id="model-file"
+      onChange={(e) => handleFileChange(e, setFileModel)} 
+      accept=".obj,.gltf,.glb" // กำหนดชนิดไฟล์ที่รองรับ
+      display="none" // ซ่อน input
+      name="model-file" 
+      required
+    />
+    <Button
+      variant="outline"
+      size="sm"
+      style={{
+        marginBottom:'5px',
+        fontSize: '14px',
+        borderRadius: '5px',
+        padding: '10px',
+        background: 'rgb(145, 54, 205)',
+        color: '#fff',
+        boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset'
+      }}
+      onClick={() => document.querySelector('#model-file').click()} // คลิก input เมื่อคลิกปุ่ม
+    >
+      <HiUpload /> อัปโหลดไฟล์
+    </Button>
 
-          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
-            <label htmlFor="" className="lebel-bio">ไฟล์โมเดล: <span style={{ color: 'red' }}>*</span></label>
-            <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFileModel)} required>
-              <FileUploadTrigger asChild>
-                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset' }}>   <HiUpload /> อัปโหลดไฟล์
-                </Button>
-              </FileUploadTrigger>
-              <FileUploadList showSize clearable />
-            </FileUploadRoot>
+    {fileModel && (
+      <div style={{ marginTop: '10px', padding: '10px 20px', borderRadius: '5px', background: 'rgb(237, 237, 237)', width: '100%', display: 'flex', alignItems: 'center', boxShadow: 'rgba(70, 71, 75, 0.31) 0px 0px 0.2em, rgba(100, 100, 100, 0.05) 0px 0.2em 1em' }}>
+        <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
+          <TbFile size={22} style={{ marginRight: '10px', color: '#52525b' }} />
+          <div>
+            <div style={{ display:'flex',flexDirection:'column',textOverflow:'ellipsis',fontWeight: '450',overflow:'hidden',whiteSpace:'nowrap',fontSize:'14px' }}>{fileModel.name}</div>
+            {/* <div style={{ fontSize: '12px', color: '#444444' }}>{fileModel.size}</div> */}
+          </div>
+        </div>
+        {/* ปุ่มลบไฟล์ */}
+        <Button
+          variant="outline"
+          size="sm"
+          colorScheme="red"
+          style={{
+            marginTop: '10px',
+            fontSize: '12px',
+            borderRadius: '5px',
+            padding: '5px 10px',
+            marginLeft: 'auto' // ช่วยให้ปุ่มไปที่ขวาสุด
+          }}
+          onClick={() => handleDeleteFile('model')}
+        >
+          <RxCross2 color='#52525b'/>
+        </Button>
+      </div>
+    )}
+  </div>
+</div>
+         
 
-          </div>
-          {/* <br /> */}
-          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
-            <label htmlFor="" className="lebel-bio">ไฟล์ Pattern: <span style={{ color: 'red' }}>*</span></label>
-            <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFilePattern)} required >
-              <FileUploadTrigger asChild>
-                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset', }}>
-                  <HiUpload /> อัปโหลดไฟล์
-                </Button>
-              </FileUploadTrigger>
-              <FileUploadList showSize clearable />
-            </FileUploadRoot>
+<div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+  <label htmlFor="" className="lebel-bio">ไฟล์ Pattern :  <span style={{ color: 'red' }}>*</span></label>
+  <div>
+    <Input
+      type="file"
+      id="pattern-file"
+      name="pattern-file" 
+      onChange={(e) => handleFileChange(e, setFilePattern)} required 
+      accept=".patt" // กำหนดชนิดไฟล์ที่รองรับ
+      display="none" // ซ่อน input
+    />
+    <Button
+      variant="outline"
+      size="sm"
+      style={{
+        marginBottom:'5px',
+        fontSize: '14px',
+        borderRadius: '5px',
+        padding: '10px',
+        background: 'rgb(145, 54, 205)',
+        color: '#fff',
+        boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset'
+      }}
+      onClick={() => document.querySelector('#pattern-file').click()} // คลิก input เมื่อคลิกปุ่ม
+    >
+      <HiUpload /> อัปโหลดไฟล์
+    </Button>
 
+    {filePattern && (
+      <div style={{ marginTop: '10px', padding: '10px 20px', borderRadius: '5px', background: 'rgb(237, 237, 237)', width: '100%', display: 'flex', alignItems: 'center', boxShadow: 'rgba(70, 71, 75, 0.31) 0px 0px 0.2em, rgba(100, 100, 100, 0.05) 0px 0.2em 1em' }}>
+        <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
+          <TbFile size={22} style={{ marginRight: '10px', color: '#52525b' }} />
+          <div>
+            <div style={{ display:'flex',flexDirection:'column',textOverflow:'ellipsis',fontWeight: '450',overflow:'hidden',whiteSpace:'nowrap',fontSize:'14px' }}>{filePattern.name}</div>
+            {/* <div style={{ fontSize: '12px', color: '#444444' }}>{filePattern.size}</div> */}
           </div>
-          {/* <br /> */}
-          {/* boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px'  */}
-          <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
-            <label htmlFor="" className="lebel-bio">ไฟล์รูปภาพโมเดล: <span style={{ color: 'red' }}>*</span></label>
-            <FileUploadRoot maxFiles={1} onChange={(e) => handleFileChange(e, setFileImage)} required>
-              <FileUploadTrigger asChild>
-                <Button variant="outline" size="sm" style={{ fontSize: '14px', borderRadius: '5px', padding: '10px', background: 'rgb(145, 54, 205)', color: '#fff', boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset' }}>   <HiUpload /> อัปโหลดไฟล์
-                </Button>
-              </FileUploadTrigger>
-              <FileUploadList showSize clearable />
-            </FileUploadRoot>
+        </div>
+        {/* ปุ่มลบไฟล์ */}
+        <Button
+          variant="outline"
+          size="sm"
+          colorScheme="red"
+          style={{
+            marginTop: '10px',
+            fontSize: '12px',
+            borderRadius: '5px',
+            padding: '5px 10px',
+            marginLeft: 'auto' // ช่วยให้ปุ่มไปที่ขวาสุด
+          }}
+          onClick={() => handleDeleteFile('pattern')}
+        >
+          <RxCross2 color='#52525b'/>
+        </Button>
+      </div>
+    )}
+  </div>
+</div>
+
+<div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
+  <label htmlFor="" className="lebel-bio">ไฟล์รูปภาพ :  <span style={{ color: 'red' }}>*</span></label>
+  <div>
+    <Input
+      type="file"
+      id="image-file"
+      onChange={(e) => handleFileChange(e, setFileImage)} required
+      accept=".jpg,.jpeg,.png,.svg" // กำหนดชนิดไฟล์ที่รองรับ
+      display="none" // ซ่อน input
+      name="image-file" 
+    />
+    <Button
+      variant="outline"
+      size="sm"
+      style={{
+        marginBottom:'5px',
+        fontSize: '14px',
+        borderRadius: '5px',
+        padding: '10px',
+        background: 'rgb(145, 54, 205)',
+        color: '#fff',
+        boxShadow: 'rgba(175, 175, 175, 0.74) 0px 2px 2px, rgba(227, 227, 227, 0.82) 0px 2px 10px 1px, rgba(71, 24, 95, 0.23) 0px -3px 0px inset'
+      }}
+      onClick={() => document.querySelector('#image-file').click()} // คลิก input เมื่อคลิกปุ่ม
+    >
+      <HiUpload /> อัปโหลดไฟล์
+    </Button>
+
+    {fileImage && (
+      <div style={{ marginTop: '10px', padding: '10px 20px', borderRadius: '5px', background: 'rgb(237, 237, 237)', width: '100%', display: 'flex', alignItems: 'center', boxShadow: 'rgba(70, 71, 75, 0.31) 0px 0px 0.2em, rgba(100, 100, 100, 0.05) 0px 0.2em 1em' }}>
+        <div style={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
+          <TbFile size={22} style={{ marginRight: '10px', color: '#52525b' }} />
+          <div>
+          <div style={{ display:'flex',flexDirection:'column',textOverflow:'ellipsis',fontWeight: '450',overflow:'hidden',whiteSpace:'nowrap',fontSize:'14px' }}>{fileImage.name}</div>
+            {/* <div style={{ fontSize: '12px', color: '#444444' }}>{fileImage.size}</div> */}
           </div>
+        </div>
+        {/* ปุ่มลบไฟล์ */}
+        <Button
+          variant="outline"
+          size="sm"
+          colorScheme="red"
+          style={{
+            marginTop: '10px',
+            fontSize: '12px',
+            borderRadius: '5px',
+            padding: '5px 10px',
+            marginLeft: 'auto' // ช่วยให้ปุ่มไปที่ขวาสุด
+          }}
+          onClick={() => handleDeleteFile('image')}
+        >
+          <RxCross2 color='#52525b'/>
+        </Button>
+      </div>
+    )}
+  </div>
+</div>
           <div className="" style={{ marginBottom: '40px' }}>
             <button type="button" className="cancel-button" onClick={handleCancel}>ยกเลิก</button>
             <button type="submit" className="add-button">บันทึก</button>

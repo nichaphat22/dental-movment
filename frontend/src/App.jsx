@@ -95,7 +95,7 @@ function App () {
             <>
               <Route path='/teacher-dashboard' element={<DashboardTeacher/>}/>
               <Route path="/lesson" element={user ?<HomeTeacher /> : <Login />}/>
-              <Route path="/Edit-RPD/:name/edit" element={user ? <EditRPDSampleCase /> : <Login />} />
+              <Route path="/Edit-RPD/:id/edit" element={user ? <EditRPDSampleCase /> : <Login />} />
               <Route path="/Add-RPD" element={user ? <AddRPDSampleCase /> : <Login />} />
               <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
               <Route path="/Model/:name/view" element={user ? <Model /> : <Login />} />

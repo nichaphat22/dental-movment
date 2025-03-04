@@ -15,10 +15,12 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>  
       <Provider store={store}>
         <AuthContextProvider>
+        {/* <div > */}
           {/* ใช้ ChakraProvider พร้อมกับค่า value */}
-          <ChakraProvider value={system}> 
+          <ChakraProvider value={system} style={{ position: 'relative', zIndex: 0 }}>
             <App />
           </ChakraProvider>
+          {/* </div> */}
         </AuthContextProvider>
       </Provider>
     </BrowserRouter>

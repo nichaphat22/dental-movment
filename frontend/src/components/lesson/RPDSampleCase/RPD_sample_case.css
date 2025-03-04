@@ -791,3 +791,67 @@ border-radius:5px;
   width:14px;
   height:14px;
 }
+.camera-container {
+  z-index: 9999;
+}
+#arjs-video {
+  z-index: 1 !important;
+  margin: auto !important;
+  width: 100vw !important;      /* กำหนดความกว้างให้เต็มหน้าจอ */
+  height: 100vh !important;     /* กำหนดความสูงให้เต็มหน้าจอ */
+  object-fit: cover !important; /* รักษาอัตราส่วนของภาพ */
+  position: absolute;           /* ให้ภาพอยู่ในตำแหน่ง absolute */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.ar-Scene canvas{
+ 
+}
+
+
+/* From Uiverse.io by Yaya12085 */ 
+.custum-file-upload {
+  height: 200px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: space-between;
+  gap: 20px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cacaca;
+  background-color: rgba(255, 255, 255, 1);
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 48px 35px -48px rgba(0,0,0,0.1);
+}
+
+.custum-file-upload .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custum-file-upload .icon svg {
+  height: 80px;
+  fill: rgba(75, 85, 99, 1);
+}
+
+.custum-file-upload .text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custum-file-upload .text span {
+  font-weight: 400;
+  color: rgba(75, 85, 99, 1);
+}
+
+.custum-file-upload input {
+  display: none;
+}

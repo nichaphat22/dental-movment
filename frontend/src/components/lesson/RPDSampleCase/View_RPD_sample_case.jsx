@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react"; 
 import { ref, get, remove } from "firebase/database"; 
-import { getDownloadURL, ref as storageRef, deleteObject } from "firebase/storage"; 
+import { getDownloadURL, ref as storageRef, deleteObject,listAll } from "firebase/storage"; 
 import { database, storage } from "../../../config/firebase";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
@@ -21,7 +21,8 @@ const ViewRPDSampleCase = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-
+  // const storage = getStorage(); // Firebase Storage instance
+  // const database = getDatabase(); // Firebase Database instance
   useEffect(() => {
     const fetchModels = async () => {
       try {
@@ -118,27 +119,23 @@ const ViewRPDSampleCase = () => {
     }
   };
 
-  const deleteFolderContents = async (folderPath) => {
-    const folderRef = storageRef(storage, folderPath);
-    
+  const deleteFileFromStorage = async (fileUrl) => {
+    // แก้ไข URL ที่ encode เกินไป
+    const decodedUrl = decodeURIComponent(fileUrl);  // ใช้ decodeURIComponent เพื่อแก้ไข URL ที่ถูก encode เกิน
+  
+    const fileRef = storageRef(storage, decodedUrl);
     try {
-      // ดึงรายการไฟล์ทั้งหมดในโฟลเดอร์
-      const folderContents = await listAll(folderRef);
-      
-      // ลบไฟล์แต่ละไฟล์ในโฟลเดอร์
-      const deletePromises = folderContents.items.map(itemRef => deleteObject(itemRef));
-      await Promise.all(deletePromises);
-      
-      console.log(`All files in ${folderPath} deleted successfully`);
+      await deleteObject(fileRef); // ลบไฟล์
+      console.log(`File ${decodedUrl} deleted successfully`);
     } catch (error) {
-      console.error("Error deleting folder contents:", error);
+      console.error(`Error deleting file from storage:`, error);
     }
   };
   
   const removeModel = async (modelId) => {
     if (window.confirm(`ต้องการที่จะลบโมเดลนี้ ใช่ไหม?`)) {
       try {
-        const modelRef = ref(database, `models/${modelId}`); // ใช้ id แทนชื่อ
+        const modelRef = ref(database, `models/${modelId}`);
         const modelToDelete = models.find((model) => model.id === modelId);
   
         if (!modelToDelete) {
@@ -146,29 +143,24 @@ const ViewRPDSampleCase = () => {
         }
   
         // ลบไฟล์ใน folder image
-        await deleteFolderContents(`models/${modelId}/image`);
+        await deleteFileFromStorage(`images/${modelToDelete.imageUrl.split('/').pop().split('?')[0]}`);
         console.log(`Image files for ${modelId} deleted successfully`);
   
         // ลบไฟล์ใน folder pattern
-        await deleteFolderContents(`models/${modelId}/pattern`);
+        await deleteFileFromStorage(`patterns/${modelToDelete.patternUrl.split('/').pop().split('?')[0]}`);
         console.log(`Pattern files for ${modelId} deleted successfully`);
   
         // ลบไฟล์ใน folder model
-        await deleteFolderContents(`models/${modelId}/model`);
+        await deleteFileFromStorage(`models/${modelToDelete.url.split('/').pop().split('?')[0]}`);
         console.log(`Model files for ${modelId} deleted successfully`);
   
         // ลบข้อมูลจาก Realtime Database
         await remove(modelRef);
         console.log(`Model ${modelId} deleted from database`);
   
-        // อัปเดต state ใน UI เพื่อแสดงข้อมูลที่ถูกลบ
+        // อัปเดต state ใน UI
         const updatedModels = models.filter((model) => model.id !== modelId);
         setModels(updatedModels);
-  
-        // อัปเดต bookmarks (หากมี)
-        const updatedBookmarks = { ...clickedBookmark };
-        delete updatedBookmarks[modelId];
-        setClickedBookmark(updatedBookmarks);
   
       } catch (error) {
         console.error("Error deleting model:", error);
@@ -179,7 +171,9 @@ const ViewRPDSampleCase = () => {
   };
   
   
+  
   const goToEditPage = (model) => {
+    console.log(model.id)
     navigate(`/Edit-RPD/${model.id}/edit`, { state: model });
   };
 
