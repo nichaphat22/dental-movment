@@ -25,6 +25,7 @@ function ARScene() {
               patternUrl: model.patternUrl,
               modelUrl: model.url,
             }));
+            
           setPatterns(modelsArray);
         } else {
           console.log('No data available');
@@ -36,7 +37,7 @@ function ARScene() {
 
     fetchModelData();
   }, []); // ไม่ต้องใช้ useMemo อีกต่อไป
-
+  console.log("pattern",patterns);
   const handleClose = () => {
     setIsARActive(false); // ปิด AR ก่อน
 
@@ -95,7 +96,11 @@ function ARScene() {
           onCreated={({ gl }) => {
             gl.setSize(window.innerWidth, window.innerHeight);
             gl.setPixelRatio(window.devicePixelRatio);
+          
+            console.log(gl.info.memory);
+            console.log(gl.info.render);
           }}
+          
           camera={{
             position: [0, 0, 10],
             fov: 75,
@@ -114,6 +119,8 @@ function ARScene() {
               params={{ smooth: false }}
               type={'pattern'}
               patternUrl={pattern.patternUrl}
+              onMarkerFound={() => console.log("Marker detected:", pattern.patternUrl)}
+              onMarkerLost={() => console.log("Marker lost:", pattern.patternUrl)}
             >
               <AR_RPD_sample_case modelUrl={pattern.modelUrl} scale={0.05} />
             </ARMarker>

@@ -18,7 +18,8 @@ function AR_RPD_sample_case({ modelUrl, scale }) {
           loadedModel.scale.set(scale, scale, scale);
 
           setModel(loadedModel);
-          // console.log("Model should now be visible");
+          // console.log("model",model);
+          console.log("Model should now be visible");
         } catch (error) {
           console.error("Error loading model:", error);
         }
