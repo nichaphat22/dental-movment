@@ -9,7 +9,8 @@ import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
 import { RiEdit2Fill } from "react-icons/ri";
 import { RiDeleteBin6Line } from "react-icons/ri";
-
+import { toast, Flip, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
 
 function View_Biomechanical_consideration() {
   const [animations, setAnimations] = useState([]);
@@ -35,20 +36,39 @@ function View_Biomechanical_consideration() {
   };
 
   const removeAnimation = (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this animation?");
-    if (confirmDelete) {
+     Swal.fire({
+        title: "คุณแน่ใจหรือไม่?",
+        text: "คุณต้องการลบอนิเมชันนี้หรือไม่?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "ลบ",
+        cancelButtonText: "ยกเลิก",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+    // const confirmDelete = window.confirm("Are you sure you want to delete this animation?");
+    // if (confirmDelete) {
       axios
         .delete(`http://localhost:8080/api/animation/deleteAnimation/${id}`)
         .then((response) => {
           setAnimations(animations.filter((animation) => animation._id !== id));
-          alert("Animation deleted successfully!");
+          // alert("Animation deleted successfully!");
         })
-        .catch((error) => {
-          console.error("Error:", error);
-          alert("Failed to delete animation.");
-        });
-    }
-  };
+      // แสดงข้อความสำเร็จหลังจากการลบ
+             Swal.fire("ลบสำเร็จ!", "อนิเมชันถูกลบเรียบร้อยแล้ว", "success");
+     
+           } catch (error) {
+             console.error("Error deleting model:", error);
+             Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถลบอนิเมชันได้", "error");
+           }
+         } else {
+           console.log("Deletion canceled");
+         }
+       });
+     };
+     
 
   const handleAddAnimation = () => {
     navigate(`/Add-Biomechanical-consideration`);
@@ -60,6 +80,7 @@ function View_Biomechanical_consideration() {
 
   return (
     <div className="Content" style={{ backgroundColor: "#fff" }}>
+        <ToastContainer  />  
       <h1 className="title-h1" >Biomechanical consideration</h1>
 
       <div className="flex justify-between my-2 mx-4 ">

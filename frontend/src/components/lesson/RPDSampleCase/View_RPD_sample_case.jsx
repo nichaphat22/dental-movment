@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react"; 
 import { ref, get, remove } from "firebase/database"; 
-import { getDownloadURL, ref as storageRef, deleteObject,listAll } from "firebase/storage"; 
+import { getDownloadURL, getStorage,ref as storageRef, deleteObject,listAll } from "firebase/storage"; 
 import { database, storage } from "../../../config/firebase";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
@@ -12,7 +12,8 @@ import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { MdEdit } from "react-icons/md";
 import { Card, Button, Row, Col,Container } from 'react-bootstrap';
-
+import { toast, Flip, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
 const ViewRPDSampleCase = () => {
   const [models, setModels] = useState([]);
   const [clickedBookmark, setClickedBookmark] = useState({});
@@ -120,56 +121,114 @@ const ViewRPDSampleCase = () => {
   };
 
   const deleteFileFromStorage = async (fileUrl) => {
-    // แก้ไข URL ที่ encode เกินไป
-    const decodedUrl = decodeURIComponent(fileUrl);  // ใช้ decodeURIComponent เพื่อแก้ไข URL ที่ถูก encode เกิน
-  
-    const fileRef = storageRef(storage, decodedUrl);
     try {
-      await deleteObject(fileRef); // ลบไฟล์
-      console.log(`File ${decodedUrl} deleted successfully`);
-    } catch (error) {
-      console.error(`Error deleting file from storage:`, error);
-    }
-  };
-  
-  const removeModel = async (modelId) => {
-    if (window.confirm(`ต้องการที่จะลบโมเดลนี้ ใช่ไหม?`)) {
-      try {
-        const modelRef = ref(database, `models/${modelId}`);
-        const modelToDelete = models.find((model) => model.id === modelId);
-  
-        if (!modelToDelete) {
-          throw new Error("Model not found");
+      console.log("fileUrl",fileUrl);
+        // ตรวจสอบว่า fileUrl มีค่าหรือไม่
+        if (!fileUrl) {
+            throw new Error('File URL is undefined or null');
         }
-  
-        // ลบไฟล์ใน folder image
-        await deleteFileFromStorage(`images/${modelToDelete.imageUrl.split('/').pop().split('?')[0]}`);
-        console.log(`Image files for ${modelId} deleted successfully`);
-  
-        // ลบไฟล์ใน folder pattern
-        await deleteFileFromStorage(`patterns/${modelToDelete.patternUrl.split('/').pop().split('?')[0]}`);
-        console.log(`Pattern files for ${modelId} deleted successfully`);
-  
-        // ลบไฟล์ใน folder model
-        await deleteFileFromStorage(`models/${modelToDelete.url.split('/').pop().split('?')[0]}`);
-        console.log(`Model files for ${modelId} deleted successfully`);
-  
-        // ลบข้อมูลจาก Realtime Database
+
+        // แยกเอา path ของไฟล์ออกจาก URL โดยการใช้ decodeURIComponent และการ split ตาม '?'
+        const filePath = decodeURIComponent(fileUrl.split('?')[0].split('o/')[1]);
+        // const fileName = filePath.split('/').pop();  // ดึงแค่ชื่อไฟล์จากพาธ
+        
+        // console.log("fileName",fileName);
+        // `${folder}/${newFileName}
+        // เตรียมการเข้าถึง Firebase Storage
+        // const storage = getStorage();
+        const fileRef =  storageRef(storage, `${filePath}`);  // สร้าง reference สำหรับไฟล์ที่ต้องการลบ
+       
+        // ลบไฟล์จาก Storage
+        await deleteObject(fileRef);
+        console.log("File deleted successfully from Storage!");
+    } catch (error) {
+        // หากเกิดข้อผิดพลาด ให้จับและแสดงข้อความผิดพลาด
+        console.error("Error deleting file from Storage:", error.message);
+    }
+};
+
+
+
+
+const removeModel = async (modelId, index) => {
+  // แสดง Swal เพื่อขอการยืนยันจากผู้ใช้
+  Swal.fire({
+    title: "คุณแน่ใจหรือไม่?",
+    text: "คุณต้องการลบโมเดลนี้หรือไม่?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "ลบ",
+    cancelButtonText: "ยกเลิก",
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        // แสดง Toast ขณะกำลังกำจัดไฟล์
+      // toast.info("กำลังกำจัดไฟล์โมเดล...", {
+      //     position: "top-right",
+      //     autoClose: false, // ให้ค้างไว้จนกว่าการลบจะเสร็จ
+      //     theme: "light",
+      //     transition: Flip,
+      //   });
+         // อัปเดต Toast สำหรับไฟล์โมเดลที่ลบเสร็จแล้ว
+        //  toast.update(toastId, {
+        //   render: "ลบไฟล์โมเดลเสร็จสิ้น!",
+        //   type: "success",
+        //   autoClose: 1000, // ปิดหลังจาก 2 วินาที
+        // });
+        // เรียกดูข้อมูลของโมเดลจาก Firebase Realtime Database
+        const modelRef = ref(database, `models/${modelId}`);
+        const modelSnapshot = await get(modelRef);
+        const modelData = modelSnapshot.val();
+
+        if (!modelData) {
+          console.log(`No data found for model ${modelId}`);
+          return;
+        }
+
+        // ดึง URLs ของไฟล์ที่เกี่ยวข้อง
+        const { imageUrl, patternUrl, url } = modelData;
+        console.log("Deleting files with URLs:", { imageUrl, patternUrl, url });
+
+        // ลบไฟล์จาก Firebase Storage
+        if (imageUrl) {
+          await deleteFileFromStorage(imageUrl); // ส่ง URL ของไฟล์
+          console.log(`Image files for ${modelId} deleted successfully`);
+        }
+
+        if (patternUrl) {
+          await deleteFileFromStorage(patternUrl); // ส่ง URL ของไฟล์
+          console.log(`Pattern files for ${modelId} deleted successfully`);
+        }
+
+        if (url) {
+          await deleteFileFromStorage(url); // ส่ง URL ของไฟล์
+          console.log(`Model files for ${modelId} deleted successfully`);
+        }
+
+        // ลบข้อมูลของโมเดลออกจาก Firebase Realtime Database
         await remove(modelRef);
         console.log(`Model ${modelId} deleted from database`);
-  
-        // อัปเดต state ใน UI
+
+        // อัพเดทสถานะ UI
         const updatedModels = models.filter((model) => model.id !== modelId);
         setModels(updatedModels);
-  
+
+        // แสดงข้อความสำเร็จหลังจากการลบ
+        Swal.fire("ลบสำเร็จ!", "โมเดลถูกลบเรียบร้อยแล้ว", "success");
+
       } catch (error) {
         console.error("Error deleting model:", error);
+        Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถลบโมเดลได้", "error");
       }
     } else {
       console.log("Deletion canceled");
     }
-  };
-  
+  });
+};
+
+
   
   
   const goToEditPage = (model) => {
@@ -188,6 +247,7 @@ const ViewRPDSampleCase = () => {
 
   return (
     <div className="Content" style={{}}>
+       <ToastContainer  />  
       <div className="flex justify-between my-2 mx-4">
         <h1 className="my-2 text-xl font-semibold">RPD sample case</h1>
         <button 

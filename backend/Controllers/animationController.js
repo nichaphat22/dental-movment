@@ -1,14 +1,15 @@
 const Animation = require('../Models/animationModel.js');
-// const multer = require('multer');
-// const express from 'express';
+const multer = require('multer');
+// const express = require("express");
 
 // const router = express.Router();
-// const upload = multer({
-//   storage: multer.memoryStorage(),
-//   limits: {
-//     fileSize: 20 * 1024 * 1024, // 20 MB
-//   },
-// });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20 MB
+  },
+  
+});
 
 // GET all Animations
 const getAnimation = async (req, res) => {
@@ -23,6 +24,7 @@ const getAnimation = async (req, res) => {
 }
 
 // GET Animation by ID
+// GET Animation by ID
 const getAnimationById = async (req, res) => {
   try {
     const id = req.params._id; // ใช้ _id แทน id
@@ -32,58 +34,76 @@ const getAnimationById = async (req, res) => {
       return res.status(404).json({ error: 'Animation not found' });
     }
 
+
+
     res.json(animation);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
-}
+};
+
 
 const updateAnimation = async (req, res) => {
-  const id = req.params._id;  // ใช้ id แทน _id
+  const id = req.params._id; // ควรใช้ id ตรงๆ ไม่ใช่ _id
   const { Ani_name, Ani_description } = req.body;
 
   try {
     // หาค่าปัจจุบันจากฐานข้อมูล
     const animation = await Animation.findById(id);
-    
-    // ตรวจสอบว่าไฟล์ใหม่ถูกส่งมาไหม และอัปเดตเฉพาะกรณีที่ไฟล์ใหม่ถูกส่ง
-    let updateData = {
-      Ani_name: Ani_name || animation.Ani_name,  // หากไม่ส่งมาใช้ค่าเดิม
-      Ani_description: Ani_description || animation.Ani_description,  // หากไม่ส่งมาใช้ค่าเดิม
-    };
+    if (!animation) {
+      return res.status(404).json({ msg: "Animation not found" });
+    }
 
-    // ตรวจสอบว่าไฟล์ใหม่ถูกส่งมาในคำขอ
+    // เก็บค่าที่จะอัปเดต (เฉพาะค่าที่ถูกส่งมา)
+    let updateData = {};
+
+    if (Ani_name) updateData.Ani_name = Ani_name;
+    if (Ani_description) updateData.Ani_description = Ani_description;
+
+    // ตรวจสอบว่ามีไฟล์แนบมาหรือไม่
     if (req.files) {
       const { Ani_animation, Ani_image } = req.files;
 
-      // อัปเดตเฉพาะเมื่อไฟล์ใหม่ถูกส่ง
       if (Ani_animation) {
         updateData.Ani_animation = {
+          name: encodeURIComponent(Ani_animation[0].originalname), 
           data: Ani_animation[0].buffer,
           contentType: Ani_animation[0].mimetype,
-          size: Ani_animation[0].size
+          size: Ani_animation[0].size,
         };
       }
 
       if (Ani_image) {
         updateData.Ani_image = {
+          name: encodeURIComponent(Ani_image[0].originalname), 
           data: Ani_image[0].buffer,
           contentType: Ani_image[0].mimetype,
-          size: Ani_image[0].size
+          size: Ani_image[0].size,
         };
       }
     }
 
-    // อัปเดตข้อมูลในฐานข้อมูล
-    await Animation.findByIdAndUpdate(id, updateData);
-    res.json("Updated Successfully");
+    // ถ้าไม่มีข้อมูลเปลี่ยนแปลง ให้ส่ง error กลับไป
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ msg: "ไม่มีการเปลี่ยนแปลงข้อมูล" });
+    }
+
+    // อัปเดตข้อมูล
+    const updatedAnimation = await Animation.findByIdAndUpdate(id, updateData, {
+      new: true, // คืนค่าใหม่หลังอัปเดต
+    });
+
+    if (!updatedAnimation) {
+      return res.status(500).json({ msg: "Failed to update animation." });
+    }
+
+    res.json({ msg: "Animation updated successfully", updatedAnimation });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ err: err, msg: "Something went wrong!" });
+    console.error("Error updating animation:", err);
+    res.status(500).json({ err: err.message, msg: "Something went wrong!" });
   }
 };
-
 
 
 
@@ -92,24 +112,45 @@ const saveAnimation = async (req, res) => {
   const { Ani_name, Ani_description } = req.body;
   const { Ani_animation, Ani_image } = req.files;
 
+  // 🔹 แปลงชื่อไฟล์จาก latin1 → utf8
+  let imageNameUTF8 = Buffer.from(Ani_image[0].originalname, "latin1").toString("utf8").trim();
+  let animationNameUTF8 = Buffer.from(Ani_animation[0].originalname, "latin1").toString("utf8").trim();
+
+  // 🔹 แก้ปัญหาช่องว่างหรืออักขระผิดพลาด
+  imageNameUTF8 = imageNameUTF8.replace(/(\d{4})-0 (\d{2}-\d{2})/, "$1-$2");
+  animationNameUTF8 = animationNameUTF8.replace(/(\d{4})-0 (\d{2}-\d{2})/, "$1-$2");
+
+  console.log("Fixed Image Name:", imageNameUTF8);
+  console.log("Fixed Animation Name:", animationNameUTF8);
   if (!Ani_name || !Ani_description || !Ani_animation || !Ani_image) {
-    return res.status(400).json({ err: "Ani_name, Ani_description, Ani_animation, and Ani_image details are required." });
+    return res.status(400).json({ err: "All fields are required." });
   }
 
   try {
     const newAnimation = await Animation.create({
       Ani_name,
       Ani_description,
-      Ani_animation: { data: Ani_animation[0].buffer, contentType: Ani_animation[0].mimetype, size: Ani_animation[0].size },
-      Ani_image: { data: Ani_image[0].buffer, contentType: Ani_image[0].mimetype, size: Ani_image[0].size }
+      Ani_animation: {
+        name: animationNameUTF8,  
+        data: Ani_animation[0].buffer, 
+        contentType: Ani_animation[0].mimetype, 
+        size: Ani_animation[0].size
+      },
+      Ani_image: {
+        name: imageNameUTF8,  
+        data: Ani_image[0].buffer, 
+        contentType: Ani_image[0].mimetype, 
+        size: Ani_image[0].size
+      }
     });
-    console.log("Saved Successfully...");
-    res.status(201).json(newAnimation);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ err: err, msg: "Something went wrong!" });
+
+    res.status(201).json({ message: "Animation saved successfully!", newAnimation });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save animation" });
   }
-}
+};
+
 
 
 

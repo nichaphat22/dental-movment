@@ -11,8 +11,10 @@ import { Button, Input, } from '@chakra-ui/react';
 import { CiFileOn } from "react-icons/ci";
 // import { HiUpload } from 'react-icons/hi';
 import { RxCross2 } from "react-icons/rx";
-
-
+import { toast, Flip, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2"; // นำเข้า SweetAlert2
+// import { toast, Flip, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function Add_RPD() {
   const [modelName, setModelName] = useState("");
@@ -131,52 +133,89 @@ const uploadFile = async (file, folder, contentType) => {
 
 const handleSaveModel = async (event) => {
   event.preventDefault();
-
-  // ตรวจสอบว่าไฟล์ทั้งหมดถูกเลือก
-  if (!modelName) {
-    alert("กรุณาเพิ่มชื่อไฟล์");
-    return; // หยุดการส่งข้อมูล
-  }
-
-  if (!fileImage) {
-    alert("กรุณาเลือกไฟล์ภาพ");
-    return; // หยุดการส่งข้อมูล
-  }
-
-  if (!filePattern) {
-    alert("กรุณาเลือกไฟล์แพทเทิร์น");
-    return;
-  }
-
-  if (!fileModel) {
-    alert("กรุณาเลือกไฟล์โมเดล");
-    return;
-  }
-
-  // ตรวจสอบว่าไฟล์ทั้งหมดถูกเลือก
-  if (!fileImage || !filePattern || !fileModel) {
-    alert("กรุณาเลือกไฟล์ทั้งหมด");
-    return; // หยุดการส่งข้อมูล
-  }
   
+    // ตรวจสอบว่าไฟล์และชื่อโมเดลครบถ้วน
+    if (!modelName || !fileImage || !filePattern || !fileModel) {
+      toast.error("กรุณากรอกข้อมูลให้ครบถ้วน", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+        transition: Flip,
+      });
+      return;
+    }
+  
+  
+  // ตรวจสอบว่าโมเดลชื่อเดียวกันมีอยู่แล้ว
   const existingModel = models.find((model) => model.name === modelName);
   if (existingModel) {
-    alert("ชื่อโมเดลนี้ถูกใช้ไปแล้ว");
+    Swal.fire({
+      title: "ชื่อโมเดลนี้ถูกใช้ไปแล้ว",
+      icon: "warning",
+      confirmButtonText: "ตกลง",
+    });
     return;
   }
 
   setUploading(true);
-
   try {
-    // กำหนด contentType ตามประเภทไฟล์
+    // กำหนดประเภทของไฟล์
     const modelContentType = 'model/gltf-binary';
     const patternContentType = 'application/octet-stream';
     const imageContentType = 'image/jpeg';
-
+  
     // อัปโหลดไฟล์ทั้ง 3
+    
+    // อัปโหลดไฟล์โมเดล
+    const modelToastId = toast.info("กำลังอัปโหลดไฟล์โมเดล...", {
+      position: "top-right",
+      autoClose: false, // ให้ค้างไว้จนกว่าการอัปโหลดจะเสร็จ
+      theme: "light",
+      transition: Flip,
+    });
     const modelUrl = await uploadFile(fileModel, 'models', modelContentType);
+  
+    // อัปเดต Toast สำหรับไฟล์โมเดลเมื่อการอัปโหลดเสร็จสิ้น
+    toast.update(modelToastId, {
+      render: "อัปโหลดไฟล์โมเดลเสร็จสิ้น!",
+      type: "success",
+      autoClose: 1500, // ปิดหลังจาก 2 วินาที
+    });
+  
+    // อัปโหลดไฟล์พัทเทิร์น
+    const patternToastId = toast.info("กำลังอัปโหลดไฟล์พัทเทิร์น...", {
+      position: "top-right",
+      autoClose: false, // ให้ค้างไว้จนกว่าการอัปโหลดจะเสร็จ
+      theme: "light",
+      transition: Flip,
+    });
     const patternUrl = await uploadFile(filePattern, 'patterns', patternContentType);
+  
+    // อัปเดต Toast สำหรับไฟล์พัทเทิร์นเมื่อการอัปโหลดเสร็จสิ้น
+    toast.update(patternToastId, {
+      render: "อัปโหลดไฟล์พัทเทิร์นเสร็จสิ้น!",
+      type: "success",
+      autoClose: 1500, // ปิดหลังจาก 2 วินาที
+    });
+  
+    // อัปโหลดไฟล์รูปภาพ
+    const imageToastId = toast.info("กำลังอัปโหลดไฟล์รูปภาพ...", {
+      position: "top-right",
+      autoClose: false, // ให้ค้างไว้จนกว่าการอัปโหลดจะเสร็จ
+      theme: "light",
+      transition: Flip,
+    });
     const imageUrl = await uploadFile(fileImage, 'images', imageContentType);
+  
+    // อัปเดต Toast สำหรับไฟล์รูปภาพเมื่อการอัปโหลดเสร็จสิ้น
+    toast.update(imageToastId, {
+      render: "อัปโหลดไฟล์รูปภาพเสร็จสิ้น!",
+      type: "success",
+      autoClose: 1500, // ปิดหลังจาก 2 วินาที
+    });
+  
+
+  
 
     // **สร้าง ID อัตโนมัติใน Firebase**
     const newModelRef = push(dbRef(database, 'models/'));
@@ -186,21 +225,54 @@ const handleSaveModel = async (event) => {
     const newModel = { id: modelId, name: modelName, url: modelUrl, patternUrl, imageUrl };
     await set(newModelRef, newModel);
 
+    // อัปเดตสถานะของโมเดลใน state
     setModels([...models, newModel]);
     setUploading(false);
     setUploadProgress(0);
-    alert("เพิ่มโมเดลสำเร็จ!");
+
+ // แจ้งเตือนเมื่อเพิ่มโมเดลสำเร็จ
+ Swal.fire({
+  title: "เพิ่มโมเดลสำเร็จ!",
+  text: "โมเดลของคุณถูกเพิ่มเรียบร้อยแล้ว",
+  icon: "success",
+  confirmButtonText: "ตกลง",
+}).then((result) => {
+  if (result.isConfirmed) {
+    // เมื่อผู้ใช้กด "ตกลง" จะทำการนำทางไปยังหน้าถัดไป
     navigate('/Possible-Movement-Of-RPD');
+  }
+});
   } catch (error) {
     console.error("ไม่สามารถบันทึกโมเดลได้", error);
     setUploading(false);
+    toast.error("เกิดข้อผิดพลาดในการอัปโหลดไฟล์", {
+      position: "top-right",
+      autoClose: 2000,
+      theme: "light",
+      transition: Flip,
+    });
+    Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกโมเดลได้", "error");
   }
 };
 
-
   const handleCancel = () => {
-    navigate('/Possible-Movement-Of-RPD');
-  };
+     Swal.fire({
+          title: "คุณแน่ใจหรือไม่?",
+          text: "การยกเลิกจะไม่บันทึกข้อมูลที่คุณแก้ไขไว้!",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "ใช่, ยกเลิก",
+          cancelButtonText: "ไม่, กลับไปแก้ไข",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // ถ้าผู้ใช้กดยืนยันให้เปลี่ยนเส้นทาง
+            navigate("/Possible-Movement-Of-RPD");
+          }
+        });
+      };
+  // };
   
       // ฟังก์ชันในการลบไฟล์
       const handleDeleteFile = (fileType) => {
@@ -212,15 +284,20 @@ const handleSaveModel = async (event) => {
           setFileImage(null);
         }
       };
-
+      // const showToast = () => {
+      //   toast.success('Hello World!');
+      // };
     
   return (
     <div className="Content" style={{ backgroundColor: '#fff', color: "#000", margin: '0' }}>
       {/* boxShadow: 'rgba(163, 163, 163, 0.12) 0px 0px 5px 1px, rgba(204, 203, 203, 0.5) 0px 1px 10px 1px' , */}
       {/* <div className="" style={{background:'none',background: '#fff' }}>
-
+<ToastContainer  />   
       </div> */}
+     
       <div style={{ margin: '20px' }}>
+      <ToastContainer  />   
+      {/* <button onClick={showToast}>Show Toast</button> */}
         <h3 style={{ fontSize: '1.5rem', margin: '0', marginBottom: '', }}>เพิ่มสื่อการสอน RPD sample case</h3>
 
         <form encType="multipart/form-data" onSubmit={handleSaveModel} style={{ marginTop: '15px' }}>
@@ -266,7 +343,7 @@ const handleSaveModel = async (event) => {
       accept=".obj,.gltf,.glb" // กำหนดชนิดไฟล์ที่รองรับ
       display="none" // ซ่อน input
       name="model-file" 
-      required
+      // required
     />
     <Button
       variant="outline"
@@ -323,7 +400,7 @@ const handleSaveModel = async (event) => {
       type="file"
       id="pattern-file"
       name="pattern-file" 
-      onChange={(e) => handleFileChange(e, setFilePattern)} required 
+      onChange={(e) => handleFileChange(e, setFilePattern)}  
       accept=".patt" // กำหนดชนิดไฟล์ที่รองรับ
       display="none" // ซ่อน input
     />
@@ -380,7 +457,7 @@ const handleSaveModel = async (event) => {
     <Input
       type="file"
       id="image-file"
-      onChange={(e) => handleFileChange(e, setFileImage)} required
+      onChange={(e) => handleFileChange(e, setFileImage)}  
       accept=".jpg,.jpeg,.png,.svg" // กำหนดชนิดไฟล์ที่รองรับ
       display="none" // ซ่อน input
       name="image-file" 
@@ -437,7 +514,7 @@ const handleSaveModel = async (event) => {
           </div>
         </form>
 
-        {uploading && (
+        {/* {uploading && (
           <div style={{ marginLeft: '20px' }}>
             <div className={`upload-status ${uploadProgress < 100 ? "uploading" : "completed"}`}>
               Status: {uploadProgress < 100 ? "Uploading" : "Completed"}
@@ -445,7 +522,7 @@ const handleSaveModel = async (event) => {
             <div>Progress: {uploadProgress < 100 ? `${uploadProgress.toFixed(2)}%` : "100%"}</div>
             <progress value={uploadProgress} max="100"></progress>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -6,11 +6,13 @@ const AnimationSchema = new mongoose.Schema({
       required: true,
     },
     Ani_animation: {
+      name: String ,  
       data: Buffer,
       contentType: String,
       size: Number
     },
     Ani_image: {
+      name: String ,  
       data: Buffer,
       contentType: String,
       size: Number
