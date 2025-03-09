@@ -307,18 +307,15 @@ const handleSaveModel = async (event) => {
             </label>
             <textarea
               style={{
-                // margin:'10px 20px 10px 20px',
                 width: '100%',
                 padding: '10px',
-                // marginBottom: '20px',
-                // border: '1px solid #d0d0d0',
-                border: '1px solid rgb(255, 255, 255)',
+                marginBottom: '20px',
+                border: '1px solid #d0d0d0',
                 borderRadius: '5px',
                 height: '45px',
                 resize: 'none',
-                overflow: 'hidden',
                 background: '#f5f5f5',
-                boxSizing: 'border-box'
+                overflow: 'hidden'
 
               }}
               wrap="soft"

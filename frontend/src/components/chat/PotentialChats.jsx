@@ -19,7 +19,8 @@ const PotentialChats = () => {
             key={index} // ใช้ index เป็น key สำหรับการทำแผนที่ของ React
             onClick={() => createChat(user._id, u._id)} // ฟังก์ชันคลิกเพื่อสร้างการสนทนาใหม่กับผู้ใช้ที่เลือก
           >
-            {u.fname} {u.lname}
+                        {u.name} 
+            {/* {u.fname} {u.lname} */}
             <span
               className={
                 onlineUsers?.some((user) => user?.userId === u._id)

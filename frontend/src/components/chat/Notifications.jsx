@@ -39,6 +39,7 @@ const Notifications = ({}) => {
   
 
   const handleNotificationsClick = async () => {
+    // console.error("id", id);
     try {
       // อัปเดตสถานะ isRead เป็น true เมื่อคลิกที่การแจ้งเตือน
       await patchRequest(`${baseUrl}/messages/notifications/read/${user._id}`, { isRead: true });

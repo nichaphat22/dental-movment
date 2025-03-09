@@ -512,18 +512,15 @@ const Edit_RPD = () => {
             <label htmlFor="name" className="lebel-bio">ชื่อโมเดล :</label>
             <textarea
               style={{
-                fontSize: '14px',
-                color: '#444444',
                 width: '100%',
                 padding: '10px',
-
-                border: 'none',
-                // border: '1px solid #d0d0d0',
+                marginBottom: '20px',
+                border: '1px solid #d0d0d0',
                 borderRadius: '5px',
                 height: '45px',
                 resize: 'none',
-                overflow: 'hidden',
                 background: '#f5f5f5',
+                overflow: 'hidden'
               }}
               wrap="soft"
               value={name}

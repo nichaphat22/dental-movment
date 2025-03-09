@@ -138,6 +138,9 @@ video {
     text-align: justify;
     margin:5px 20px 20px 20px;
     color:#000;
+    white-space: pre-wrap; /* รองรับ \n และช่องว่าง */
+  word-wrap: break-word;
+  white-space: pre-line;
     /* width: 50vw; */
     /* hyphens: auto; */
     
@@ -198,6 +201,10 @@ video {
     /* z-index: 2; */
     /* box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.05); */
     /* transform: scale(1.05); */
+}
+
+.d-flex.justify-content-center.my-5{
+  margin-top: 50px !important;
 }
 .animationid{
   margin-bottom:30px;
@@ -296,3 +303,8 @@ border-radius:5px;
   /* background: #ffb819 !important;  */
 }
 
+
+.text-manage{
+  white-space: pre-wrap; /* รองรับ \n และช่องว่าง */
+  word-wrap: break-word;
+}

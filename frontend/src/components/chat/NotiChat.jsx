@@ -39,8 +39,10 @@ const NotiChat = ({ chat, user }) => {
 // ฟังก์ชันในการคลิกเพื่อทำให้การแจ้งเตือนเป็น "อ่านแล้ว"
 // ✅ ฟังก์ชันเมื่อกดที่แชท
 const handleClick = async (id) => {
+  console.error("id", id);
   // ตรวจสอบว่า latestMessage มีค่าหรือไม่ และข้อความยังไม่ได้อ่าน|| id !== user._id
-  if (!latestMessage || !id  ) {
+  // if (!latestMessage || !id  ) {
+  if (!id  ) {
       // ถ้าข้อความถูกอ่านแล้ว หรือไม่มี latestMessage ก็ไม่ต้องทำอะไร
       console.log("Message is already read or latestMessage is undefined.");
       return;
@@ -56,7 +58,7 @@ const handleClick = async (id) => {
   } catch (error) {
       console.error("❌ Error marking message as read:", error);
   }
-  
+
   // นำทางไปยังหน้าของแชท
   navigate(`/chat/${id}`);
 };
@@ -77,7 +79,8 @@ const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
         </div>
         <div className="text-content">
           <div className="name" style={{ color: "black" }}>
-            {recipientUser?.fname} {recipientUser?.lname}
+          {recipientUser?.name}
+            {/* {recipientUser?.fname} {recipientUser?.lname} */}
           </div>
           <div className="text" style={{fontSize:'12.5px'}}>
   {latestMessage && (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import axios from "axios";
 import "./Biomechanical_consideration.css";
 import { useParams } from "react-router-dom";
@@ -13,6 +13,7 @@ import { Button, Input, } from '@chakra-ui/react';
 import { RxCross2 } from "react-icons/rx";
 import { HiUpload } from "react-icons/hi"
 import { TbFile } from "react-icons/tb";
+import { Card, Row, Col,Container,Spinner  } from 'react-bootstrap';
 
 
 function Edit_Biomechanical_consideration() {
@@ -34,6 +35,9 @@ function Edit_Biomechanical_consideration() {
   const [originalAnimation, setOriginalAnimation] = useState(null);
   const [originalImage, setOriginalImage] = useState(null);
   const navigate = useNavigate(); // ใช้ useNavigate เพื่อเปลี่ยนเส้นทาง
+  const nameRef = useRef(null);
+  const descriptionRef = useRef(null);
+  const [loading, setLoading] = useState(true); // Loading state
 
 
   useEffect(() => {
@@ -51,9 +55,11 @@ function Edit_Biomechanical_consideration() {
           setOriginalAnimationDescription(Ani_description);
           setOriginalAnimation(Ani_animation );
           setOriginalImage(Ani_image);
+          setLoading(false);
         })
         .catch(error => {
           console.error('Error:', error);
+          setLoading(false);
         });
     } else {
       console.error('ID is null or undefined');
@@ -214,20 +220,74 @@ if (!formData.has("Ani_name") &&
   };
   console.log(selectedImage);
 
-        
+// ปรับขนาดเมื่อค่าจากฐานข้อมูลเปลี่ยน
+useEffect(() => {
+  if (nameRef.current) {
+    nameRef.current.style.height = "auto";
+    nameRef.current.style.height = `${nameRef.current.scrollHeight}px`;
+  }
+}, [newAnimationName]);
+
+useEffect(() => {
+  if (descriptionRef.current) {
+    descriptionRef.current.style.height = "auto";
+    descriptionRef.current.style.height = `${descriptionRef.current.scrollHeight}px`;
+  }
+}, [newAnimationDescription]);
+
+  const handleInputChange = (e) => {
+    handleAnimationNameChange(e);
+
+    // ปรับขนาดเมื่อผู้ใช้พิมพ์
+    const target = textAreaRef.current;
+    target.style.height = "auto"; 
+    target.style.height = `${target.scrollHeight}px`;
+  };
+
+  const handleInputChangeDescription = (e) => {
+    handleAnimationDescriptionChange(e);
+
+    // ปรับขนาดเมื่อผู้ใช้พิมพ์
+    const target = textAreaRef.current;
+    target.style.height = "auto"; 
+    target.style.height = `${target.scrollHeight}px`;
+  };
+
   return (
     <div className="Content">
       <ToastContainer />
+      
       <h1 className="title-h1">Biomechanical consideration</h1>
       <div className="title">Mechanical force</div>
       <div className="Content" style={{ backgroundColor: "#fff", margin: '20px' }}>
         <h1 style={{ margin: '0', fontSize: '20px', marginBottom: '15px' }}>แก้ไขแอนิเมชัน</h1>
-
+        {loading ? (
+         <Button variant="" disabled    style={{
+          display: 'flex', // ใช้ flex เพื่อให้เนื้อหาภายในจัดแนวในแนวนอน
+          background: 'none',
+          border: 'none',
+          margin: 'auto',
+          alignItems: 'center', // ทำให้สปินเนอร์และข้อความอยู่ตรงกลาง
+        }}
+      >
+         <Spinner
+           as="span"
+           animation="grow"
+          //  size="lg"
+           role="status"
+           aria-hidden="true"
+           style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+            height: '25px'}}
+         />
+         กำลังโหลด...
+       </Button>
+      ) : (
         <form>
         <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
           <label htmlFor="Ani_name" className="lebel-bio">ชื่อแอนิเมชัน :</label>
           <br />
           <textarea
+           ref={nameRef}
             // placeholder="ชื่อโมเดล"
             style={{
               width: '100%',
@@ -235,17 +295,18 @@ if (!formData.has("Ani_name") &&
               marginBottom: '20px',
               border: '1px solid #d0d0d0',
               borderRadius: '5px',
-              height: '45px',
+              // height: '45px',
               resize: 'none',
               background: '#f5f5f5',
               overflow: 'hidden'
             }} wrap="soft"
             value={newAnimationName}
-            onChange={(e) => {
-              handleAnimationNameChange(e);
-              e.target.style.height = 'auto';  // รีเซ็ตความสูงก่อน
-              e.target.style.height = `${e.target.scrollHeight}px`;  // ปรับความสูงตามเนื้อหา
-            }}
+            onChange={handleInputChange}
+            // onChange={(e) => {
+            //   handleAnimationNameChange(e);
+            //   e.target.style.height = 'auto';  // รีเซ็ตความสูงก่อน
+            //   e.target.style.height = `${e.target.scrollHeight}px`;  // ปรับความสูงตามเนื้อหา
+            // }}
             required
           />
           </div>
@@ -254,30 +315,32 @@ if (!formData.has("Ani_name") &&
           <label htmlFor="Ani_description" className="lebel-bio">รายละเอียดแอนิเมชัน :</label>
           <br />
           <textarea
+           ref={descriptionRef}
             style={{
               width: '100%',
               padding: '10px',
               marginBottom: '20px',
               border: '1px solid #d0d0d0',
               borderRadius: '5px',
-              height: '45px',
+              // height: '45px',
               resize: 'none',
               background: '#f5f5f5',
               overflow: 'hidden'
             }}
             wrap="soft"
             value={newAnimationDescription}
-            onChange={(e) => {
-              handleAnimationDescriptionChange(e);
-              e.target.style.height = 'auto';  // รีเซ็ตความสูงก่อน
-              e.target.style.height = `${e.target.scrollHeight}px`;  // ปรับความสูงตามเนื้อหา
-            }}
+            onChange={handleInputChangeDescription}
+            // onChange={(e) => {
+            //   handleAnimationDescriptionChange(e);
+            //   e.target.style.height = 'auto';  // รีเซ็ตความสูงก่อน
+            //   e.target.style.height = `${e.target.scrollHeight}px`;  // ปรับความสูงตามเนื้อหา
+            // }}
             required
           />
 </div>
           
 <div className="filepattern-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', background: '#fff', marginBottom: '20px' }}>
-          <label htmlFor="Ani_animation" className="lebel-bio">ไฟล์แอนิเมชัน : <span style={{ color: 'red', fontWeight: '400', fontSize: '0.85rem' }}>ขนาดไฟล์ไม่เกิน 16MB.</span></label>
+          <label htmlFor="Ani_animation" className="lebel-bio">ไฟล์แอนิเมชัน : </label>
           <br />
 
           <Input
@@ -394,24 +457,9 @@ if (!formData.has("Ani_name") &&
                             </Button>
                             </div>
               )}
+
               </form>
-          {/* {selectedImage && (
-            <div>
-              <img src={URL.createObjectURL(selectedImage)} alt="Selected" width="35%" />
-            </div>
-          )}
-          {existingImage && !selectedImage && (
-            <div>
-              <img src={existingImage} alt="Existing" width="35%" />
-            </div>
-          )} */}
-          {/* <small>Note: The image file size should not exceed 5MB.</small> */}
-          {/* <input
-            type="button"
-            value="Save"
-            className="save-button"
-            onClick={handleUpdateAnimation}
-          /> */}
+            
           <button type="button" className="cancel-button" onClick={handleCancel}>
             ยกเลิก
           </button>
@@ -421,22 +469,9 @@ if (!formData.has("Ani_name") &&
 
 
         </form>
-        {/* <div style={{ marginTop: '20px' }}> */}
-
-
+)}
       </div>
-      {/* {uploading && (
-        <div style={{ marginLeft: '20px' }}>
-          <div className={`upload-status ${uploadProgress < 100 ? "uploading" : "completed"}`}>
-            Status: {uploadProgress < 100 ? "Uploading" : "Completed"}
-          </div>
-          <div>Progress: {uploadProgress < 100 ? `${uploadProgress.toFixed(2)}%` : "100%"}</div>
-          <progress value={uploadProgress} max="100"></progress>
-        </div>
-      )} */}
 
-
-      {/* </div> */}
     </div>
   );
 }

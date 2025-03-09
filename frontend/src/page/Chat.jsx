@@ -20,10 +20,14 @@ const Chat = () => {
     
 
     return (
-        <Container style={{ marginTop: '80px', padding: '0 0 0 5px' }}>
-            <PotentialChats />
+        <Container style={{ position:'fixed',margin:'auto',padding:'auto',top:'70px', padding: '0 0 0 0',  
+            // maxWidth: "100px",  // ป้องกันการขยายเต็มหน้าจอ
+            // height: "80vh",
+            alignItems: "center",
+            justifyContent: "center", }}>
+            {/* <PotentialChats /> */}
             {userChats?.length < 1 ? null : (
-                <Stack direction="horizontal" gap={2} className="align-items-start">
+                <Stack direction="horizontal" gap={2} className="align-items-start"   style={{ width: "100%", maxWidth: "95%",margin:'auto' }}>
                     <Stack className="messages-box1 flex-grow-0 pe-3">
                         {isUserChatsLoading && <p></p>}
                         {userChats?.map((chat) => (

@@ -4,7 +4,9 @@ const {
     findUser,
     getUsers,
     addTeacher,
-    addStudent
+    addStudent,
+    getUserId
+    ,registerUser
 } = require("../Controllers/userController");
 const {uploadedFile} = require("../Controllers/manageStudent");
 // const passport = require('../config/passport');
@@ -14,7 +16,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const router = express.Router();
 
-// router.post("/register", registerUser);
+router.post("/register", registerUser);
 router.post("/login", loginUser);
 // router.get("/google-login", googleLogin);
 router.get("/find/:userId", findUser);
@@ -22,7 +24,7 @@ router.get("/", getUsers);
 router.post("/addTeacher", addTeacher);
 router.post("/addStudent", addStudent);
 router.post('/upload', uploadedFile)
-
+router.get('/:userId', getUserId)
 //Google login
 //Redirect to Google Login
 // router.get('/google', passport.authenticate('google', {scope: ['profile', 'email']}));

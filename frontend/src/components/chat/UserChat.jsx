@@ -79,7 +79,8 @@ const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
         </div>
         <div className="text-content">
           <div className="name" style={{ color: "black" }}>
-            {recipientUser?.fname} {recipientUser?.lname}
+            {/* {recipientUser?.fname} {recipientUser?.lname} */}
+            {recipientUser?.name}
           </div>
           <div className="text">
   {latestMessage && (

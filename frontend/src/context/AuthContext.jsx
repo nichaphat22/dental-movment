@@ -61,31 +61,34 @@ export const AuthContextProvider = ({ children }) => {
         }
     }, [registerInfo]);
 
-
-    const loginUser = useCallback(async (e) => {
+    const loginUser = useCallback(async (e) => { 
         e.preventDefault();
         setIsLoginLoading(true);
         setLoginError(null);
-
+    
         try {
             const response = await postRequest(
                 `${baseUrl}/users/login`,
                 loginInfo
             );
-
+    
             if (response.error) {
                 setLoginError(response);
                 return;
             }
-
+    
             localStorage.setItem("User", JSON.stringify(response));
             setUser(response);
             setIsLoginLoading(false);
+    
+            console.log("Login Response:", response); // ตรวจสอบข้อมูลผู้ใช้
+            createChat(response); // เรียกใช้ createChat หลังจากผู้ใช้ล็อกอินสำเร็จ
         } catch (error) {
             setIsLoginLoading(false);
             setLoginError({ error: 'Something went wrong, please try again later.' });
         }
     }, [loginInfo]);
+    
 
     const loginWithGoogle = async (googleUser) => {
         try {
@@ -104,8 +107,35 @@ export const AuthContextProvider = ({ children }) => {
             console.error('Something went wrong with Google Login:', error);
         }
     };
-    
 
+    const createChat = useCallback(async (user) => {
+        try {
+            const { roleRef, email, token } = user;
+    
+            const chatResponse = await postRequest(`${baseUrl}/chats/`, {
+                email,
+                roleRef,
+                token,
+            });
+    
+            console.log("Create Chat Response:", chatResponse);
+    
+           
+            if (chatResponse.message === 'Chat already exists for student') {
+                // แจ้งว่ามีแชทอยู่แล้ว
+                console.log('Chat already exists');
+            } else {
+                // การสร้างแชทสำเร็จ
+                console.log('Chats created:', chatResponse.chats);
+            }
+        } catch (error) {
+            console.error("Error creating chat:", error);
+        }
+    }, []);
+    
+    
+    
+    
     const logoutUser = useCallback(() => {
         localStorage.removeItem("User");
         setUser(null);
@@ -127,6 +157,7 @@ export const AuthContextProvider = ({ children }) => {
                 updateLoginInfo,
                 isLoginLoading,
                 loginWithGoogle,
+                createChat
             }}
         >
             {children}

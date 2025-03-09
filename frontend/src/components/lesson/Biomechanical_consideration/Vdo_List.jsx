@@ -25,7 +25,7 @@ function VideoList() {
                         Your browser does not support the video tag.
                     </video>
                     <h3>{animation.Ani_name}</h3>
-                    <p>{animation.Ani_description}</p>
+                    <p className="text-manage">{animation.Ani_description}</p>
                 </div>
             ))}
         </div>

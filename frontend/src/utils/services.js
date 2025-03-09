@@ -2,15 +2,17 @@
 export const baseUrl = "http://localhost:8080/api";
 // export const baseUrl = "https://project-it-410215.uc.r.appspot.com/api";
 
-export const postRequest = async (url, body) => {
+export const postRequest = async (url, body,token) => {
     const response = await fetch(url, {
         method: "POST",
         headers: { 
             "Access-Control-Allow-Headers" : "Content-Type",
              "Access-Control-Allow-Origin": "*",
            'Content-Type': 'application/json',
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PATCH"
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PATCH",
+            "Authorization": `Bearer ${token}`,
        },
+       
        body: JSON.stringify(body),
     });
     const data = await response.json();

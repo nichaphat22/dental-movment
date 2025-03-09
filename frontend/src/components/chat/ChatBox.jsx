@@ -146,7 +146,10 @@ const ChatBox = ({ chat, }) => {
             onClick={() => handleClick(recipientUser._id)} // Click handler for image
         >
             <div className="chat-header">
-                <strong>{recipientUser.fname} {recipientUser.lname}</strong>
+                <strong>
+                  {/* {recipientUser.fname} {recipientUser.lname} */}
+                  {recipientUser.name}
+                </strong>
             </div>
 
 

@@ -2,11 +2,11 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
     {
-        googleId: {
-            type: String,
-            unique: true,
-            required: true,
-        },
+        // googleId: {
+        //     type: String,
+        //     unique: true,
+        //     required: true,
+        // },
         email: {
             type: String,
             unique: true,
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
         img: {
             type: String,
         },
-        role: {
+        roleRef: {
             type: String,
             enum: ['student', 'teacher'],
             required: true,

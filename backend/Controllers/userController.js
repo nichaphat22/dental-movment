@@ -17,45 +17,49 @@ const createToken = (_id) => {
 
 // register
 // // register
-// const registerUser = async (req, res) => {
-//     try {
-//         const { fname, lname, email, password, role, img } = req.body;
+const registerUser = async (req, res) => {
+    try {
+        const { fname, lname, email, password, roleRef, img } = req.body;
 
-//         let user = await userModel.findOne({ email });
+        let user = await userModel.findOne({ email });
 
-//         if (user) return res.status(400).json("User with the given email already exists...");
+        if (user) return res.status(400).json("User with the given email already exists...");
 
-//         if (!fname || !lname || !email || !password || !role || !img) return res.status(400).json("All fields are required...");
+        if (!fname || !lname || !email || !password || !roleRef || !img) return res.status(400).json("All fields are required...");
 
-//         if (!validator.isEmail(email)) return res.status(400).json("Email must be a valid email...");
+        if (!validator.isEmail(email)) return res.status(400).json("Email must be a valid email...");
 
-//         user = new userModel({ fname, lname, email, password, role,img });
+        user = new userModel({ fname, lname, email, password, roleRef,img });
 
-//         const salt = await bcrypt.genSalt(10);
-//         user.password = await bcrypt.hash(user.password, salt);
+        if (!password) {
+            return res.status(400).json("Password is required");
+        }
+        
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);  // ใช้ password ที่รับมาจาก req.body
+        
+        // Save the user
+        await user.save();
 
-//         // Save the user
-//         await user.save();
+        // Check if the role is 'student' and create student record
+        if (roleRef === 'student') {
+            const student = await Student.create({ user: user._id });
+            user.student = student._id;
+            await user.save();
+        } else if (roleRef === 'teacher') {
+            const teacher = await Teacher.create({ user: user._id });
+            user.teacher = teacher._id;
+            await user.save();
+        }
 
-//         // Check if the role is 'student' and create student record
-//         if (role === 'student') {
-//             const student = await Student.create({ user: user._id });
-//             user.student = student._id;
-//             await user.save();
-//         } else if (role === 'teacher') {
-//             const teacher = await Teacher.create({ user: user._id });
-//             user.teacher = teacher._id;
-//             await user.save();
-//         }
+        const token = createToken(user._id);
 
-//         const token = createToken(user._id);
-
-//         res.status(200).json({ _id: user._id, fname, lname, email, role, img, token });
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json(error);
-//     }
-// };
+        res.status(200).json({ _id: user._id, fname, lname, email, roleRef, img, token });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json(error);
+    }
+};
 
 
 // login
@@ -73,7 +77,7 @@ const loginUser = async (req, res) => {
 
         const token = createToken(user._id);
 
-        res.status(200).json({ _id: user._id, name: user.name, email, role: user.role, img: user.img, token });
+        res.status(200).json({ _id: user._id, name: user.name, email, roleRef: user.roleRef, img: user.img, token });
     } catch (error) {
         console.log(error);
         res.status(500).json(error);
@@ -149,4 +153,45 @@ const getUsers = async (req, res) => {
     }
 };
 
-module.exports = {  loginUser, findUser, getUsers, addTeacher, addStudent };
+const getUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        console.log("UserID:", userId); // ตรวจสอบ userId
+
+        const currentUser = await userModel.findById(userId);
+        const roleRef = currentUser.roleRef; // ถ้าฟิลด์เป็น roleRef แทน
+        // const role = currentUser.role; // ถ้าฟิลด์เป็น roleRef แทน
+        // console.log("roleRef:", currentUser.roleRef); // ตรวจสอบ currentUser
+        // console.log("role:", currentUser.role); // ตรวจสอบ currentUser
+
+        if (!currentUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        console.log("CurrentUser:", currentUser); // ตรวจสอบ currentUser
+        // ตรวจสอบว่า role อยู่ใน currentUser หรือไม่
+        // const role = currentUser.role; // ใช้ role จาก currentUser
+        if (!roleRef) {
+            return res.status(400).json({ message: "Role not found in user data" });
+        }
+
+        console.log("CurrentUser Role:", roleRef); // ตรวจสอบ role
+
+        let users;
+        if (roleRef.trim().toLowerCase() === "teacher") {
+            users = await userModel.find({ roleRef: "student" });
+        } else if (roleRef.trim().toLowerCase() === "student") {
+            users = await userModel.find({ roleRef: "teacher" });
+        } else {
+            users = []; // ถ้าไม่มี role ที่กำหนด
+        }
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching users", error });
+    }
+};
+
+
+
+module.exports = { registerUser,loginUser, findUser, getUsers, addTeacher, addStudent,getUserId };
