@@ -855,3 +855,14 @@ border-radius:5px;
 .custum-file-upload input {
   display: none;
 }
+      
+     #nav.padding {
+        width: calc(300px + (var(--padding) + var(--sidebar-width))) !important;
+        min-width: 300px !important; /* ขนาดขั้นต่ำ */
+    }
+
+          
+section#root.flex.flex-column{
+  width: calc(300px + (var(--padding) + var(--sidebar-width))) !important;
+  min-width: 300px !important; /* ขนาดขั้นต่ำ */
+}

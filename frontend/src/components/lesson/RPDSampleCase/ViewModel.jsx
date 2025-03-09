@@ -107,11 +107,12 @@ const ViewModel = () => {
     const loader = new GLTFLoader();
     // const renderer = new THREE.WebGLRenderer({ antialias: true });
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio); // ป้องกันภาพแตก
+    // renderer.setPixelRatio(window.devicePixelRatio); // ป้องกันภาพแตก
     // renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.domElement.style.width = "100%";
     renderer.domElement.style.height = "100%";
 
+    renderer.setPixelRatio(2); // ตั้งค่าความละเอียดเป็น 2 เท่าของค่าปกติ
 
 
     renderer.setClearColor(0xffffff, 1);
@@ -121,8 +122,9 @@ const ViewModel = () => {
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    cameraRef.current = camera;
-
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    
     const controls = new OrbitControls(camera, renderer.domElement);
     controlsRef.current = controls;
     controls.enableDamping = true;
@@ -167,7 +169,7 @@ const ViewModel = () => {
 
     const container = containerRef.current;
     container.appendChild(renderer.domElement);
-
+    renderer.setSize(container.clientWidth, container.clientHeight);
     if (location.state && location.state.selectedModel) {
       const { url } = location.state.selectedModel;
       loader.load(

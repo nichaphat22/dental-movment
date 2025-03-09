@@ -35,7 +35,7 @@ const ChatBox = ({ chat, }) => {
     const { latestMessage: initialLatestMessage } = useFetchLatestMessage(currentChat, chat, user);
     const [latestMessage, setLatestMessage] = useState(initialLatestMessage);
 
-
+// เข้าถึง Shadow DOM
 
     useEffect(() => {
         setLatestMessage(initialLatestMessage);

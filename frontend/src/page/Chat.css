@@ -1,7 +1,7 @@
 /* Hide ChatBox on mobile and only show UserChat */
-@media (max-width: 767px) {
+@media (max-width: 830px) {
     .chat-box {
-        width: 100%;
+        width: 100% !important;
     }
     .messages-box1 {
         display: none;
@@ -19,11 +19,11 @@
 @media (max-width: 830px) {
     em-emoji-picker {
         max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
-        max-height: 300px !important; /* ลดความสูงของป็อปอัป */
+        /* max-height: 300px !important; ลดความสูงของป็อปอัป */
     }
     .react-emoji-picker--wrapper{
-        left:0px;
-        bottom:-135px !important;
+        /* left:0px; */
+        bottom:0!important;
     }
     
 }
@@ -31,22 +31,27 @@
 @media (min-width: 640px)  and (max-width: 767px) {
     em-emoji-picker {
         max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
-        max-height: 300px !important; /* ลดความสูงของป็อปอัป */
+        /* max-height: 300px !important; ลดความสูงของป็อปอัป */
     }
     .react-emoji-picker--wrapper{
-        left:0;
-        bottom:-135px !important;
+        /* left:0; */
+        bottom: 0 !important;
     }
   }
+  /* .react-emoji-picker--wrapper {
+    
+} */
 
   @media (max-width: 578px) {
-    .react-emoji-picker--wrapper em-emoji-picker {  em-emoji-picker {
+    .react-emoji-picker--wrapper em-emoji-picker { 
         max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
-        max-height: 300px !important; /* ลดความสูงของป็อปอัป */
+        /* max-height: 300px !important;  */
     }
     .react-emoji-picker--wrapper{
-        left:0;
-        bottom:-135px !important;
+        left:0 !important;
+        bottom: 0 !important;
+        /* bottom:-35px !important; */
+        /* top:-1px; */
     }
   }        /* left:0; */
         /* bottom:-135px !important; */
@@ -74,7 +79,7 @@ width:152px !important;
         width:152px !important;
 
     }
-  }
+  /* } */
   
 /* Display ChatBox when UserChat is clicked */
 @media (min-width: 768px) {
@@ -82,3 +87,10 @@ width:152px !important;
         display: block;
     }
 }
+
+@media (max-width: 767px) {
+    .align-items-start {
+        max-width: 100% !important;
+    }
+  }
+  

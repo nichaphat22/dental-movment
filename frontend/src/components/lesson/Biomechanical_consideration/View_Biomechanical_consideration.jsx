@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Biomechanical_consideration.css";
 import { useNavigate } from "react-router-dom";
-import { Card, Button, Row, Col,Container,Spinner  } from 'react-bootstrap';
+// import {   } from "react-bootstrap";
+import { Card, Button, Row, Col,Container,Spinner,Dropdown, ButtonGroup,  } from 'react-bootstrap';
 import { baseUrl } from '../../../utils/services';
 import { HiPlusSm } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
@@ -11,12 +12,13 @@ import { RiEdit2Fill } from "react-icons/ri";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
+import { VscKebabVertical } from "react-icons/vsc";
 
 function View_Biomechanical_consideration() {
   const [animations, setAnimations] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
   const navigate = useNavigate();
-
+  const [showButtons, setShowButtons] = useState(false);
   useEffect(() => {
     fetchAnimations();
   }, []);
@@ -115,14 +117,20 @@ function View_Biomechanical_consideration() {
                       <h3 className="Ani_name" title={animation?.Ani_name}>
                         {animation?.Ani_name}
                       </h3>
-                      <span className="bt">
-                        <Button className="button-edit-ani" title="แก้ไขแอนิเมชัน" onClick={() => goToEditPage(animation._id)}>
-                          แก้ไข
-                        </Button>
-                        <Button className="button-remove-ani" title="ลบแอนิเมชัน" onClick={() => removeAnimation(animation._id)}>
-                          ลบ
-                        </Button>
-                      </span>
+                      <Dropdown as={ButtonGroup}>
+                      <Dropdown.Toggle  id="dropdown-custom-components" className="no-arrow" >
+        <VscKebabVertical />
+      </Dropdown.Toggle>
+
+      <Dropdown.Menu className="dwMenu" >
+        <Dropdown.Item className="btEdit" onClick={() => goToEditPage(animation._id)} title="แก้ไขแอนิเมชัน">
+          แก้ไข
+        </Dropdown.Item>
+        <Dropdown.Item className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
+          ลบ
+        </Dropdown.Item>
+      </Dropdown.Menu>
+      </Dropdown>
                     </div>
                   </div>
                 </div>

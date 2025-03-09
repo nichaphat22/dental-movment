@@ -121,7 +121,7 @@ body {
 }
 
 
-@media (max-width: 767px) {
+@media (max-width: 830px) {
   .chat-box {
    height: 100vh;
   margin:auto;
