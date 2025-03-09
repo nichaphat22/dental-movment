@@ -251,14 +251,20 @@ const ViewModel = () => {
   // เพิ่มฟังก์ชัน Redo
   // import { fabric } from 'fabric';
 
-  useEffect(() => {
+  useEffect(() => { 
     if (showCanvas) {
       if (!fabricCanvas) {
         console.log("Canvas is now visible, initializing fabric canvas...");
+        
         const newCanvas = new fabric.Canvas(canvasRef.current, {
-          // width: '100%',
           isDrawingMode: false,
+          imageSmoothingEnabled: true, // Enable image smoothing for better image sharpness
         });
+        const container = containerRef.current;
+        newCanvas.setWidth(container.clientWidth);
+        newCanvas.setHeight(container.clientHeight);
+        
+        
         const undoStack = [];
         const redoStack = [];
 
