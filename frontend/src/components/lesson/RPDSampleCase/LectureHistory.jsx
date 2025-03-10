@@ -6,6 +6,13 @@ import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
+import { Card, Button, Row, Col,Container } from 'react-bootstrap';
+import { toast, Flip, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { RiDeleteBin5Fill } from "react-icons/ri";
+
+
 const LectureHistory = () => {
   // Hook สำหรับการนำทาง
   const navigate = useNavigate();
@@ -46,19 +53,36 @@ const LectureHistory = () => {
 
   // ฟังก์ชันจัดการการคลิกปุ่มลบ
   const handleDeleteClick = async (id) => {
-    const isConfirmed = window.confirm('Are you sure you want to delete this lecture?'); // ยืนยันการลบ
-  
-    if (!isConfirmed) {
-      return; // ออกจากฟังก์ชันหากผู้ใช้ยกเลิก
-    }
-  
-    try {
+
+     // แสดง Swal เพื่อขอการยืนยันจากผู้ใช้
+      Swal.fire({
+        title: "คุณแน่ใจหรือไม่?",
+        text: "คุณต้องการลบรูปภาพนี้หรือไม่?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "ลบ",
+        cancelButtonText: "ยกเลิก",
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            
+    // try {
       await axios.delete(`${baseUrl}/lecture/lectures/${id}`); // ลบบรรยายตาม ID
       fetchLectures(user._id); // ดึงข้อมูลบรรยายใหม่หลังจากลบ
-    } catch (error) {
-      console.error('Error deleting lecture:', error); // จัดการข้อผิดพลาด
-    }
-  };
+  //  / แสดงข้อความสำเร็จหลังจากการลบ
+           Swal.fire("ลบสำเร็จ!", "รูปภาพถูกลบเรียบร้อยแล้ว", "success");
+   
+         } catch (error) {
+           console.error("Error deleting model:", error);
+           Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถรูปภาพได้", "error");
+         }
+        } else {
+          console.log("Deletion canceled");
+        }
+      });
+    };
   
   // ฟังก์ชันปิด modal
   const closeModal = () => {
@@ -66,57 +90,71 @@ const LectureHistory = () => {
   };
 
   return (
-    <div className="lecture-history" style={{position:'relative',top:'70px'}}>
-      <h1 className="title-h1">Lecture History</h1>
-      <div className="lecture-thumbnails" style={{ display: 'flex', flexWrap: 'wrap', textAlign: 'center', justifyContent: 'center' }}>
+    <div className="lecture-history" style={{position:'relative',top:'70px',}}>
+             <ToastContainer  />  
+      <h1 className="title-h1-lect" style={{}}>Lecture History</h1>
+      <div className="lecture-thumbnails" style={{ display: 'flex', flexWrap: 'wrap', textAlign: 'center', justifyContent: 'center',width:'100%',margin:'auto' }}>
         
-        
+      <Container className="container-lect" style={{}}>
+      <Row style={{ }}>
+
         {lectures.map((lecture) => (
           
-          <div 
-            key={lecture._id} 
+          <Col xs={12} sm={6} md={6} lg={3} xl={3} className="mb-4" 
+            key={lecture._id} >
+              <div 
             className="thumbnail-container" 
             style={{ 
-              border: '1px solid #f3f3f3', 
-              boxShadow: 'hsla(221, 10.40%, 30.20%, 0.25) 0px 1px 1px, rgba(213, 218, 226, 0.13) 0px 0px 1px 1px',
+              // border: '1px solid #f3f3f3', 
+              // boxShadow: 'hsla(221, 10.40%, 30.20%, 0.25) 0px 1px 1px, rgba(213, 218, 226, 0.13) 0px 0px 1px 1px',
               borderRadius: '0', 
-              padding: '0 15px', 
-              margin: '20px', 
+              position: 'relative', 
+              // padding: '16px', 
               marginBottom: '20px', 
               justifyContent: 'center', 
               textAlign: 'center', 
+              border:'1px solid #b1b1b1'
             }}
           >
              <button 
+             className='delete-lect'
               onClick={() => handleDeleteClick(lecture._id)} 
               style={{ 
-                // backgroundColor: 'none', 
-                color: '#aaaaaa', 
-                borderRadius: '5px', 
-                marginTop: '2px', 
                 border: 'none' ,
-                padding:'0 0',
-                float:'right'
+                padding:'5px',
+                  border: 'none',
+                  padding: '5px',
+                  position: 'absolute',
+                  top: '3px' ,
+                  right: '3px'  ,   
+                  zIndex: '10'   ,     
+                  cursor: 'pointer'     ,
+                  background:'rgba(232, 232, 232, 0.49)',
+                  borderRadius:'50%'
+              
+                // float:'right'
               }}
             >
-              <RxCross2  size={18}/>
+              <RiDeleteBin5Line className='deleteiimg-icon' size={18} style={{color:'#393939'}}/>
             </button>
-            <br />
+            {/* <br /> */}
             {lecture.img ? (
               <img 
                 src={lecture.img} 
                 alt="Lecture thumbnail" 
-                width="150px" 
+                width="100%" 
                 style={{ borderRadius: '0', cursor: 'pointer' }} 
                 onClick={() => handleThumbnailClick(lecture)} 
               />
             ) : (
               <p>No image available</p> // ข้อความเมื่อไม่มีภาพ
             )}
-            <br />
-           
-          </div>
+            {/* <br /> */}
+           </div>
+          </Col>
         ))}
+        </Row>
+        </Container>
       </div>
       {selectedLecture && <LectureModal lecture={selectedLecture} onClose={closeModal} />} 
       {/* แสดง modal เมื่อมีบรรยายที่เลือก */}

@@ -45,6 +45,9 @@ import { IoHandRightOutline } from "react-icons/io5";
 import { RxBorderWidth } from "react-icons/rx";
 import InputNumber from 'rc-input-number';
 
+import { toast, Flip, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+
 const ViewModel = () => {
   const location = useLocation();
   const containerRef = useRef(null);
@@ -122,8 +125,8 @@ const ViewModel = () => {
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
+    cameraRef.current = camera;
+
     
     const controls = new OrbitControls(camera, renderer.domElement);
     controlsRef.current = controls;
@@ -170,6 +173,8 @@ const ViewModel = () => {
     const container = containerRef.current;
     container.appendChild(renderer.domElement);
     renderer.setSize(container.clientWidth, container.clientHeight);
+
+
     if (location.state && location.state.selectedModel) {
       const { url } = location.state.selectedModel;
       loader.load(
@@ -664,7 +669,6 @@ const ViewModel = () => {
   };
 
 
-
   const saveDrawing = async () => {
     if (
       !drawingCanvasRef.current &&
@@ -722,13 +726,80 @@ const ViewModel = () => {
     try {
       const response = await axios.post(`${baseUrl}/lecture`, canvasData);
       console.log("Image and notes saved successfully:", response.data);
-      alert("Image and notes saved successfully!");
+      toast.success("บันทึกรูปภาพเสร็จสิ้น!", { autoClose: 1500 });
     } catch (error) {
       console.error("Error saving image:", error);
-      alert("Error saving image. Please try again.");
+      toast.error("ไม่สามารถบันทึกรูปภาพได้.", { autoClose: 1500 });
     }
   };
+  
 
+//  const saveDrawing = async () => { 
+//   if (
+//     !drawingCanvasRef.current &&
+//     !rendererRef.current &&
+//     !sceneRef.current &&
+//     !canvasRef.current &&
+//     !cameraRef.current
+//   ) {
+//     console.error("No Canvas or Three.js scene/camera is initialized");
+//     toast.error("ไม่สามารถบันทึกรูปภาพได้.", { autoClose: 2000 });
+//     return;
+//   }
+
+//   const renderer = rendererRef.current;
+//   const scene = sceneRef.current;
+//   const camera = cameraRef.current;
+
+//   if (renderer && scene && camera) {
+//     renderer.setClearColor(0xffffff, 1);
+//     renderer.render(scene, camera);
+//   }
+
+//   // สร้าง canvas ใหม่สำหรับการจับภาพจาก renderer
+//   const rendererCanvas = document.createElement("canvas");
+//   const rendererContext = rendererCanvas.getContext("2d");
+//   rendererCanvas.width = renderer.domElement.width;
+//   rendererCanvas.height = renderer.domElement.height;
+
+//   // ดึงข้อมูลจาก renderer DOM element ไปวาดลงใน canvas ที่สร้างใหม่
+//   rendererContext.drawImage(renderer.domElement, 0, 0);
+
+//   // แคปเจอร์ข้อมูลจาก userCanvas และ textCanvas
+//   const userCanvas = drawingCanvasRef.current || document.createElement("canvas");
+//   const textCanvas = canvasRef.current || document.createElement("canvas");
+
+//   // สร้าง canvas ใหม่เพื่อรวมภาพทั้งหมด
+//   const combinedCanvas = document.createElement("canvas");
+//   combinedCanvas.width = rendererCanvas.width;  // ใช้ขนาดของ rendererCanvas
+//   combinedCanvas.height = rendererCanvas.height;
+
+//   const context = combinedCanvas.getContext("2d");
+
+//   // วาดแต่ละ canvas ลงใน combinedCanvas
+//   context.drawImage(rendererCanvas, 0, 0);
+//   context.drawImage(userCanvas, 0, 0);
+//   context.drawImage(textCanvas, 0, 0);
+
+//   // แปลง combinedCanvas เป็น dataURL
+//   const dataURL = combinedCanvas.toDataURL("image/png", 1);
+
+//   const canvasData = {
+//     img: dataURL,
+//     userLectureID: user?._id,
+//   };
+
+//   try {
+//     const response = await axios.post(`${baseUrl}/lecture`, canvasData);
+//     console.log("Image and notes saved successfully:", response.data);
+//     toast.success("บันทึกรูปภาพเสร็จสิ้น!", { autoClose: 1500 });
+//   } catch (error) {
+//     console.error("Error saving image:", error);
+//     toast.error("ไม่สามารถบันทึกรูปภาพได้.", { autoClose: 1500 });
+//   }
+// };
+
+  
   const handleToggle = () => {
     setIsChecked(!isChecked);
     if (isChecked) {
@@ -747,7 +818,7 @@ const ViewModel = () => {
   return (
     <div className="container-ar" style={{ position: 'relative' }}>
 
-
+   <ToastContainer  />  
 
       <div className="model-container" style={{ zIndex: 10, marginTop: '0', paddingTop: '0px' ,width:'100%'}}>
       <div className="switch-mode" style={{marginTop:'20px'}}>

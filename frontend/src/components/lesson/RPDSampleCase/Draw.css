@@ -143,11 +143,11 @@
 /* Add this CSS to your stylesheet */
 .lecture-modal {
   position: fixed;
-  top: -50px;
+  top: 0;  /* เริ่มที่ตำแหน่งด้านบนของหน้าจอ */
   left: 0;
   width: 100%;
-  height: 120%;
-  background-color: rgba(0, 0, 0, 0.25);
+  height: 100%;  /* ใช้ความสูงเต็มหน้าจอ */
+  background-color: rgba(0, 0, 0, 0.5);  /* ปรับพื้นหลังให้มืดเล็กน้อย */
   z-index: 1000;
   display: flex;
   justify-content: center;
@@ -165,11 +165,42 @@
   box-shadow: 0 0 50px 5px rgba(0, 0, 0, 0.2);
 }
 
+.modal-img {
+  position: relative; /* ทำให้ปุ่มสามารถใช้ absolute ภายใน div นี้ */
+  display: inline-block;
+}
+
 .close {
   position: absolute;
   top: 10px;
-  right: 20px;
-  font-size: 35px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.7); /* เพิ่มพื้นหลังให้ปุ่มมองเห็นง่าย */
+  border-radius: 50%;
+  padding: 5px;
   cursor: pointer;
-  color: #ccc;
+  z-index: 10; /* ทำให้ปุ่มอยู่เหนือรูป */
 }
+.download-btn {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7); /* เพิ่มพื้นหลังให้ปุ่มมองเห็นง่าย */
+  border-radius: 50%;
+  /* gap: 5px; */
+  /* background: #007bff; */
+  /* color: white; */
+  /* padding: 8px 12px; */
+  border-radius: 5px;
+  padding: 5px;
+  text-decoration: none;
+  /* font-size: 14px; */
+  font-weight: bold;
+  top: 10px;
+  right: 50px;
+  position: absolute;
+  transition: background 0.3s ease-in-out;
+}
+/* .lecture-fullscreen {
+  max-width: 100%;  /* ทำให้ภาพไม่เกินขนาดของ container */
+  /* max-height: 100vh; /* ปรับให้ความสูงไม่เกินขนาดหน้าจอ */
+  /* object-fit: contain; /* ป้องกันการตัดส่วนของภาพ */
+/* } */

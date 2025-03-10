@@ -446,7 +446,7 @@ canvas.lower-canvas {
   width:100% !important;
   height:auto!important;
   position: absolute !important;
-  top: 10% !important;
+  top: 11% !important;
   /* top: 2% !important;
   left: 15% !important; */
   /* transform: translate(-50%, -50%) !important; */
@@ -865,4 +865,12 @@ border-radius:5px;
 section#root.flex.flex-column{
   width: calc(300px + (var(--padding) + var(--sidebar-width))) !important;
   min-width: 300px !important; /* ขนาดขั้นต่ำ */
+}
+
+.title-h1-lect {
+  margin: 20px 0 30px 20px;
+  font-size:24px;
+}
+.deleteiimg-icon:hover {
+  color: #000 !important;
 }
