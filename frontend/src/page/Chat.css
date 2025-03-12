@@ -1,13 +1,14 @@
 /* Hide ChatBox on mobile and only show UserChat */
 @media (max-width: 830px) {
     .chat-box {
-        width: 100% !important;
+        /* width: 100% !important; */
+        /* max-height: calc(100vh) !important;  */
     }
     .messages-box1 {
         display: none;
     }
     .align-items-start{
-        max-width: 80% !important;
+        /* max-width: calc(100vh) !important; */
     }
     .messages.vstack.gap-3{
         font-size: 13px;
@@ -53,17 +54,7 @@
         /* bottom:-35px !important; */
         /* top:-1px; */
     }
-  }        /* left:0; */
-        /* bottom:-135px !important; */
-
-        /* width: 100% !important;
-        height: 100% !important;
-        max-width: 250px !important;
-        max-height: 220px !important;
-        overflow:auto !important;
-        overflow-x: auto !important;
-        overflow-y: auto !important; */
-    /* } */
+  }   
     .flex.flex-center.flex-middle {
         width:25px !important;
         height:25px !important;
@@ -90,7 +81,13 @@ width:152px !important;
 
 @media (max-width: 767px) {
     .align-items-start {
-        max-width: 100% !important;
+        /* max-height: calc(100vh) !important; */
     }
   }
   
+  
+@media (min-width: 831px)  and (max-width: 1200px) {
+    .align-items-start {
+        /* max-height: calc(100vh) !important; */
+    }
+}

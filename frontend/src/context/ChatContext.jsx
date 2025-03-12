@@ -33,7 +33,8 @@ export const ChatContextProvider = ({ children, user }) => {
         // wss://backend-dot-project-it-410215.uc.r.appspot.com
         // const newSocket = io("http://localhost:8080");
        // กำหนด URL สำหรับการเชื่อมต่อ WebSocket
-    const socketUrl = 'https://backend-dot-project-it-410215.uc.r.appspot.com';
+    // const socketUrl = 'https://backend-dot-project-it-410215.uc.r.appspot.com';
+    const socketUrl = 'http://localhost:8080';
 
     // สร้างการเชื่อมต่อ WebSocket
     const newSocket = io(socketUrl, {

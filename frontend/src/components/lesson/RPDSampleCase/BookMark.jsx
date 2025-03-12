@@ -8,6 +8,11 @@ import { baseUrl } from "../../../utils/services";
 import { AuthContext } from '../../../context/AuthContext';
 import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import { RiDeleteBin6Line } from "react-icons/ri";
+// import bk1 from '../../../../public/bookmark1.png'
+import bk from '../../../../public/bookmark.png'
+
+
+
 
 function BookMark() {
   const [bookmarkedModels, setBookmarkedModels] = useState([]);
@@ -159,7 +164,7 @@ function BookMark() {
                   className="bookmark" onClick={() => handleRemoveBookmark(model.id, model.name)}>
                   <img 
   className="img-bookmark"
-  src="/bookmark.png"
+  src={bk}
   alt="bookmark"
   style={{ minWidth: "28px", minHeight: "28px", height: "28px", width: "28px" }}
 />

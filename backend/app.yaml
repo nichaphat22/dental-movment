@@ -4,8 +4,11 @@ env: flex
 runtime_config:
   operating_system: ubuntu22
 
-manual_scaling:
-  instances: 1  # กำหนดจำนวนอินสแตนซ์ที่คุณต้องการ
+automatic_scaling:
+  min_instances: 0
+  max_instances: 0
+# manual_scaling:
+#   instances: 1  # กำหนดจำนวนอินสแตนซ์ที่คุณต้องการ
 
 env_variables:
   DATABASE_URL: mongodb+srv://kanthimac:DIHVjKUiAlmBX0UD@cluster1.umn22sg.mongodb.net/Project_IT?retryWrites=true&w=majority&appName=Cluster1

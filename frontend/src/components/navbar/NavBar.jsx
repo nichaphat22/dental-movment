@@ -194,13 +194,13 @@ const NavBar = () => {
                     <Link to="/Biomechanical-consideration" className="block px-4 py-2 text-gray-700 hover:bg-gray-100 focus:text-purple-600" onClick={closeMenu}>
                     Biomechanical consideration
                     </Link>
-                    <Link to="/home" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
+                    <Link to="/Possible-Movement-Of-RPD" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
                     Possible movement of RPD
                     </Link>
                     <Link to="/MovementOfRPD" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
                       การเคลื่อนที่ของฟันเทียม
                     </Link>
-                    <Link to="/home" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
+                    <Link to="/Possible-Movement-Of-RPD" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>
                     RPD sample case
                     </Link>
                     <Link to="/AR-RPD" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={closeMenu}>

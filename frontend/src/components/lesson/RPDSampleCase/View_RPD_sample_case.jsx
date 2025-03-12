@@ -14,6 +14,12 @@ import { MdEdit } from "react-icons/md";
 import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
+import bk1 from '../../../../public/bookmark1.png'
+import bk from '../../../../public/bookmark.png'
+
+
+
+
 const ViewRPDSampleCase = () => {
   const [models, setModels] = useState([]);
   const [clickedBookmark, setClickedBookmark] = useState({});
@@ -286,7 +292,7 @@ const removeModel = async (modelId, index) => {
                   className="bookmark" onClick={() => handleBookmarkClick(user._id, model.id)}>
                     <img
                       className="img-bookmark"
-                      src={clickedBookmark[model.id] ? '/bookmark.png' : '/bookmark1.png'}
+                      src={clickedBookmark[model.id] ? bk : bk1 }
                       alt="bookmark"
                       style={{minWidth:'28px',minHeight:'28px',height:'28px',width:'28px'}}
                     />
