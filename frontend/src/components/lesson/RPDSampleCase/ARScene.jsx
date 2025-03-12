@@ -11,6 +11,7 @@ function ARScene() {
   const [patterns, setPatterns] = useState([]);
   const [isARActive, setIsARActive] = useState(true);
   const navigate = useNavigate();
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
     const fetchModelData = async () => {
@@ -80,6 +81,26 @@ function ARScene() {
     disposeResources();
   };
 
+  useEffect(() => {
+    // ตรวจสอบขนาดหน้าจอ
+    const updateScale = () => {
+      const windowWidth = window.innerWidth;
+
+      if (windowWidth < 1024) {
+        setScale(0.028);  // เล็กลงสำหรับหน้าจอเล็กกว่า 1024px
+      } else {
+        setScale(0.04);   // ปรับขนาดสำหรับหน้าจอที่ใหญ่กว่า
+      }
+    };
+
+    // เรียกใช้งานเมื่อโหลดหน้าจอและขนาดหน้าจอเปลี่ยน
+    updateScale();
+    window.addEventListener('resize', updateScale);
+
+    // ทำความสะอาดการใช้ event listener เมื่อ component ถูกทำลาย
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
   return (
     <div>
       {isARActive ? (
@@ -122,7 +143,7 @@ function ARScene() {
               onMarkerFound={() => console.log("Marker detected:", pattern.patternUrl)}
               onMarkerLost={() => console.log("Marker lost:", pattern.patternUrl)}
             >
-              <AR_RPD_sample_case modelUrl={pattern.modelUrl} scale={0.05} />
+              <AR_RPD_sample_case modelUrl={pattern.modelUrl} scale={scale} />
             </ARMarker>
           ))}
         </ARCanvas>

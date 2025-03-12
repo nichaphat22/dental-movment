@@ -80,6 +80,7 @@ function App () {
       {/* <NavBar /> */}
 
       <Container className="text-secondary">
+        
         <Routes>
           <Route path="/" element={<Home/>}/>
           <Route path="/googleLogin" element={<GoogleLoginButton/>}/>

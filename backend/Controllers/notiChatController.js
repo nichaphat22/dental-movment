@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { ObjectId } = require('mongodb');
+// const mongoose = require('mongoose');
+// const { ObjectId } = require('mongodb');
 const notificationChatModel = require('../Models/notificationChatModel'); // เรียกใช้โมเดล
 // const messageModel = require('../Models/messageModel'); // โมเดลของข้อความ
 

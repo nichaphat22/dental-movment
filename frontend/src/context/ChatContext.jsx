@@ -30,9 +30,15 @@ export const ChatContextProvider = ({ children, user }) => {
 
     useEffect(() => {
         if (!user?._id) return;
+        // wss://backend-dot-project-it-410215.uc.r.appspot.com
+        // const newSocket = io("http://localhost:8080");
+       // กำหนด URL สำหรับการเชื่อมต่อ WebSocket
+    const socketUrl = 'https://backend-dot-project-it-410215.uc.r.appspot.com';
 
-        const newSocket = io("http://localhost:8800");
-
+    // สร้างการเชื่อมต่อ WebSocket
+    const newSocket = io(socketUrl, {
+      transports: ['websocket', 'polling'], // ใช้ทั้ง WebSocket และ polling
+    });
         newSocket.on("connect", () => {
             console.log("✅ Socket connected:", newSocket.id);
             setSocket(newSocket);

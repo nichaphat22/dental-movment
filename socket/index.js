@@ -1,8 +1,10 @@
 const { Server } = require("socket.io");
 const io = new Server(8800, {
   cors: {
-    origin: "http://localhost:5173",  // เปลี่ยน URL ตามที่คุณใช้งาน
-  },
+    origin: ['http://localhost:5173','https://itweb0867.cpkkuhost.com'],  // เปลี่ยน URL ตามที่คุณใช้งาน
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
+    credentials: true
+}
 });
 
 // ใช้ Map เพื่อเก็บ userId -> socketId ของทั้ง sender และ recipient

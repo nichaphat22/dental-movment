@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 // const oauth2client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const createToken = (_id) => {
-    const jwtkey = process.env.JWT_SECRET_KEY;
+    const jwtkey = process.env.SECRET_KEY;
     return jwt.sign({ _id }, jwtkey, { expiresIn: "3d" });
 };
 
