@@ -1,7 +1,7 @@
 const userModel = require("../Models/userModel");
 const Teacher = require("../Models/teacherModel");
 const Student = require("../Models/studentModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 // const { oauth2client } = require("../utils/googleConfig");

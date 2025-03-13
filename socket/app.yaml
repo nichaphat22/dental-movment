@@ -1,12 +1,12 @@
-runtime: nodejs20
-env: standard
+# runtime: nodejs20
+# env: standard
 
-entrypoint: npm run start
+# entrypoint: npm run start
 
-handlers:
-  - url: /socket.io/.*    # จัดการคำขอที่มาจาก path /socket.io
-    script: auto
-    secure: always
+# handlers:
+#   - url: /socket.io/.*    # จัดการคำขอที่มาจาก path /socket.io
+#     script: auto
+#     secure: always
 
-  - url: /    # จัดการคำขอทั้งหมดที่ไม่ได้ไปที่ /socket.io
-    script: auto
+#   - url: /    # จัดการคำขอทั้งหมดที่ไม่ได้ไปที่ /socket.io
+#     script: auto

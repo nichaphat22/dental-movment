@@ -118,8 +118,8 @@ app.use("/api/bookmark", bookmarkRoute)
 const uri = process.env.DBURI;
 
 mongoose.connect(uri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
 }).then(() => {
     console.log("MongoDB connection established");
 }).catch((error) => {
