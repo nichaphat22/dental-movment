@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { ChatContext } from "../context/ChatContext";
-import { baseUrl, getRequest } from "../utils/services";
+import axios from "axios";
 
 export const useFetchLatestMessage = (chat) => {
     const { newMessage, notifications } = useContext(ChatContext);
@@ -9,32 +9,31 @@ export const useFetchLatestMessage = (chat) => {
     useEffect(() => {
         const getMessages = async () => {
             if (!chat?._id) {
-                // console.log("No chatId provided");
                 return;
             }
 
             try {
-                // ส่งคำขอ GET ไปยังเซิร์ฟเวอร์เพื่อดึงข้อความทั้งหมดจากแชทที่กำหนด
-                const response = await getRequest(`${baseUrl}/messages/${chat._id}`);
+                // Sending GET request to fetch messages for the given chat
+                const response = await axios.get(`/api/messages/${chat._id}`);
 
-                // ตรวจสอบข้อผิดพลาดในการดึงข้อมูล
-                if (response.error) {
-                    console.log("error getting message...", response.error);
+                // Check if there's an error in the response
+                if (response?.data?.error) {
+                    console.log("error getting message...", response.data.error);
                     return;
                 }
 
-                // ดึงข้อความล่าสุดจากการตอบสนอง (สมมุติว่าข้อความถูกจัดเรียงตามลำดับเวลา)
-                const lastMessage = response[response.length - 1];
+                // Assuming messages are in response.data and are ordered by timestamp
+                const lastMessage = response.data[response.data.length - 1]; // Access messages from response.data
 
-                // อัปเดตสถานะ latestMessage ด้วยข้อความล่าสุด
+                // Update the latestMessage state with the last message
                 setLatestMessage(lastMessage);
             } catch (error) {
-                console.log("error getting message...", error);
+                console.log("Error getting messages...", error);
             }
         };
 
         getMessages();
-    }, [newMessage, notifications, chat?._id]); // การเรียกใช้งาน useEffect ขึ้นอยู่กับ newMessage, notifications, และ chat._id
+    }, [newMessage, notifications, chat?._id]); // useEffect depends on newMessage, notifications, and chat._id
 
     return { latestMessage };
 };

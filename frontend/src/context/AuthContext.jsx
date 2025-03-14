@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, createContext } from 'react';
-import { postRequest, baseUrl } from '../utils/services';
+// import { postRequest, baseUrl } from '../utils/services';
+import axios from 'axios';
 
 export const AuthContext = createContext();
 
@@ -41,8 +42,8 @@ export const AuthContextProvider = ({ children }) => {
         setRegisterError(null);
 
         try {
-            const response = await postRequest(
-                `${baseUrl}/users/register`,
+            const response = await axios.post(
+                `/api/users/register`,
                 registerInfo
             );
 
@@ -67,32 +68,34 @@ export const AuthContextProvider = ({ children }) => {
         setLoginError(null);
     
         try {
-            const response = await postRequest(
-                `${baseUrl}/users/login`,
-                loginInfo
+            const response = await axios.post(
+                `/api/users/login`, 
+                loginInfo // อย่าลืมตรวจสอบว่า loginInfo มีข้อมูลครบถ้วนไหม เช่น email และ password
             );
     
-            if (response.error) {
-                setLoginError(response);
+            if (response.data.error) { // ควรเช็ค response.data.error ไม่ใช่ response.error
+                setLoginError(response.data.error);
                 return;
             }
     
-            localStorage.setItem("User", JSON.stringify(response));
-            setUser(response);
+            localStorage.setItem("User", JSON.stringify(response.data)); // response.data น่าจะเป็นข้อมูลผู้ใช้
+            setUser(response.data); // set user state
             setIsLoginLoading(false);
     
-            console.log("Login Response:", response); // ตรวจสอบข้อมูลผู้ใช้
-            createChat(response); // เรียกใช้ createChat หลังจากผู้ใช้ล็อกอินสำเร็จ
+            console.log("Login Response:", response.data); // ตรวจสอบข้อมูลผู้ใช้
+            createChat(response.data); // เรียกใช้ createChat หลังจากผู้ใช้ล็อกอินสำเร็จ
         } catch (error) {
             setIsLoginLoading(false);
             setLoginError({ error: 'Something went wrong, please try again later.' });
+            console.error('Login error:', error); // เพิ่มการ log ข้อผิดพลาดเพื่อการดีบัก
         }
     }, [loginInfo]);
+    
     
 
     const loginWithGoogle = async (googleUser) => {
         try {
-            const response = await postRequest(`${baseUrl}/users/google-login`, {
+            const response = await axios.post(`/api/users/google-login`, {
                 tokenId: googleUser.tokenId,
             });
     
@@ -112,7 +115,7 @@ export const AuthContextProvider = ({ children }) => {
         try {
             const { roleRef, email, token } = user;
     
-            const chatResponse = await postRequest(`${baseUrl}/chats/`, {
+            const chatResponse = await axios.post(`/api/chats`, {
                 email,
                 roleRef,
                 token,

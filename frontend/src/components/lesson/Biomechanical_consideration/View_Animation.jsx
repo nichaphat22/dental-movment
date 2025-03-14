@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-import { baseUrl } from '../../../utils/services';
+// import { baseUrl } from '../../../utils/services';
 import { Card, Button, Row, Col,Container,Spinner  } from 'react-bootstrap';
 
 function View_Animation() {
@@ -26,7 +26,7 @@ function View_Animation() {
 
   const fetchAnimation = () => {
     axios
-      .get(`${baseUrl}/animation/getAnimationById/${id}`)
+      .get(`/api/animation/getAnimationById/${id}`)
       .then((response) => {
         setAnimation(response.data);
         setLoading(false); 

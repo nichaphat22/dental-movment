@@ -1,4 +1,4 @@
-import { baseUrl, getRequest, postRequest, patchRequest } from "../../utils/services";
+// import { baseUrl, getRequest, postRequest, patchRequest } from "../../utils/services";
 import { Stack } from "react-bootstrap";
 import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
@@ -7,6 +7,9 @@ import { BsChatTextFill } from "react-icons/bs";
 import NotiChat from "./NotiChat";
 import moment from "moment/min/moment-with-locales";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
+
+
 // import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 moment.locale("th");
 
@@ -21,35 +24,35 @@ const Notifications = ({}) => {
     };
 }, [updateCurrentChat]);
   
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await getRequest(`${baseUrl}/messages/notifications/unread/${user?._id}`);
-        const notifications = response;
-        const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
-        setUnreadNotifications(unread);
-        setNotifications(notifications); // อัปเดตข้อมูลใน ChatContext
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-  
-    fetchNotifications();
-  }, [user?._id, setNotifications,setUnreadNotifications]);  // ดึงข้อมูลใหม่ทุกครั้งที่ user._id หรือ setNotifications เปลี่ยนแปลง
-  
+useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get(`/api/messages/notifications/unread/${user?._id}`);
+      const notifications = response.data;  // เข้าถึงข้อมูลในโปรเปอร์ตี้ data ของ response
+      const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
+      setUnreadNotifications(unread);
+      setNotifications(notifications); // อัปเดตข้อมูลการแจ้งเตือนใน ChatContext
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  fetchNotifications();
+}, [user?._id, setNotifications, setUnreadNotifications]);
+
 
   const handleNotificationsClick = async () => {
     // console.error("id", id);
     try {
       // อัปเดตสถานะ isRead เป็น true เมื่อคลิกที่การแจ้งเตือน
-      await patchRequest(`${baseUrl}/messages/notifications/read/${user._id}`, { isRead: true });
+      await axios.patch(`/api/messages/notifications/read/${user._id}`, { isRead: true });
   
       // ปรับปรุงการแจ้งเตือนใน state หลังจากการอัปเดต
       setIsOpen(!isOpen);  // Toggle visibility of notification box
       // setUnreadNotifications([]); // ลบการแจ้งเตือนที่ยังไม่ได้อ่านจาก state
       // รีเฟรชการดึงข้อมูลใหม่
-      const response = await getRequest(`${baseUrl}/messages/notifications/unread/${user._id}`);
-      const notifications = response;
+      const response = await axios.get(`/api/messages/notifications/unread/${user._id}`);
+      const notifications = response.data; 
       const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
       setUnreadNotifications(unread);  // อัปเดตการแจ้งเตือนใหม่
     } catch (error) {

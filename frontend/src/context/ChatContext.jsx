@@ -1,7 +1,8 @@
 import { createContext, useState, useEffect, useCallback } from "react";
-import { baseUrl, getRequest, postRequest, putRequest, patchRequest } from "../utils/services";
+// import { baseUrl, getRequest, postRequest, putRequest, patchRequest } from "../utils/services";
 import { io } from "socket.io-client";
 // import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
+import axios from "axios";
 
 export const ChatContext = createContext();
 
@@ -14,7 +15,7 @@ export const ChatContextProvider = ({ children, user }) => {
     const [messages, setMessages] = useState(null);
     const [isMessagesLoading, setIsMessagesLoading] = useState(false);
     const [messagesError, setMessagesError] = useState(null);
-    const [sendTextMessageError, setSendTextMessageError] = useState(null);
+    // const [sendTextMessageError, setSendTextMessageError] = useState(null);
     const [newMessage, setNewMessage] = useState(null);
     const [socket, setSocket] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
@@ -34,10 +35,10 @@ export const ChatContextProvider = ({ children, user }) => {
         // const newSocket = io("http://localhost:8080");
        // กำหนด URL สำหรับการเชื่อมต่อ WebSocket
     // const socketUrl = 'https://backend-dot-project-it-410215.uc.r.appspot.com';
-    const socketUrl = 'https://backend-dental-production.up.railway.app';
+    // const socketUrl = 'https://backend-dental-production.up.railway.app';
 
     // สร้างการเชื่อมต่อ WebSocket
-    const newSocket = io(socketUrl, {
+    const newSocket = io( {
       transports: ['websocket', 'polling'], // ใช้ทั้ง WebSocket และ polling
     });
         newSocket.on("connect", () => {
@@ -182,22 +183,26 @@ export const ChatContextProvider = ({ children, user }) => {
     
 
     // console.log('messages',messages)
+useEffect(() => {
+    const getUsers = async () => {
+        try {
+            const { data } = await axios.get(`/api/users`);
+            
+            if (data.error) {
+                console.error("Error fetching users:", data);
+                return;
+            }
 
-    // Fetch all users from API
-    useEffect(() => {
-        const getUsers = async () => {
-            const response = await getRequest(`${baseUrl}/users`);
-
-            if (response.error) {
-                console.error("Error fetching users:", response);
+            if (!Array.isArray(data)) {
+                console.error("Expected data to be an array, but got:", data);
                 return;
             }
 
             // Separate students and teachers
-            const students = response.filter((u) => u.role === 'student');
-            const teachers = response.filter((u) => u.role === 'teacher');
+            const students = data.filter((u) => u.roleRef === 'student');
+            const teachers = data.filter((u) => u.roleRef === 'teacher');
 
-            setAllUsers(response); // Set all users (students and teachers)
+            setAllUsers(data); // Set all users (students and teachers)
 
             // Filter out potential chats (teachers not already in userChats)
             const pChats = teachers.filter((teacher) => {
@@ -214,74 +219,82 @@ export const ChatContextProvider = ({ children, user }) => {
             });
 
             setPotentialChats(pChats);
-        };
+        } catch (error) {
+            console.error("Error fetching users:", error);
+        }
+    };
 
-        getUsers();
-    }, [userChats, user]);
+    getUsers();
+}, [userChats, user]);
 
-    useEffect(() => {
-        const getUserChats = async () => {
-            if (!user?._id) return;
-    
-            setIsUserChatsLoading(true);
-            setUserChatsError(null);
-    
-            try {
-                const response = await getRequest(`${baseUrl}/chats/${user._id}`);
-                setIsUserChatsLoading(false);
-    
-                if (response.error) {
-                    setUserChatsError(response);
-                    return;
-                }
-    
-                // ดึงข้อความล่าสุดสำหรับแต่ละแชท
-                const chatsWithLatestMessage = await Promise.all(
-                    response.map(async (chat) => {
-                        const latestMessageResponse = await getRequest(`${baseUrl}/messages/${chat._id}`);
-                        if (!latestMessageResponse.error && latestMessageResponse.length > 0) {
-                            const lastMessage = latestMessageResponse[latestMessageResponse.length - 1];
-                            return { ...chat, latestMessage: lastMessage };
-                        }
-                        return { ...chat, latestMessage: null };
-                    })
-                );
-    
-                // เรียงลำดับแชทตาม timestamp ของข้อความล่าสุด
-                const sortedChats = chatsWithLatestMessage.sort((a, b) => {
-                    if (!a.latestMessage) return 1;  // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
-                    if (!b.latestMessage) return -1; // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
-                    return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
-                });
-                
-    console.log('sortedChats',sortedChats)
-                setUserChats(sortedChats);
-            } catch (error) {
-                setIsUserChatsLoading(false);
-                setUserChatsError(error);
+
+useEffect(() => {
+    const getUserChats = async () => {
+        if (!user?._id) return;
+
+        setIsUserChatsLoading(true);
+        setUserChatsError(null);
+
+        try {
+            const response = await axios.get(`/api/chats/${user._id}`);
+            console.log('Response from chats API:', response.data);
+            setIsUserChatsLoading(false);
+
+            // ตรวจสอบ error ใน response data
+            if (response.data.error) {
+                setUserChatsError(response.data);
+                return;
             }
-        };
-    
-        getUserChats();
-    }, [user, notifications]);  // เพิ่ม dependencies เพื่อให้โหลดใหม่เมื่อมีการเปลี่ยนแปลง
-    
+
+            // ดึงข้อความล่าสุดสำหรับแต่ละแชท
+            const chatsWithLatestMessage = await Promise.all(
+                response.data.map(async (chat) => {
+                    const latestMessageResponse = await axios.get(`/api/messages/${chat._id}`);
+                    console.log('Latest Message Response:', latestMessageResponse.data);
+                    if (latestMessageResponse.data.length > 0) {
+                        const lastMessage = latestMessageResponse.data[latestMessageResponse.data.length - 1];
+                        return { ...chat, latestMessage: lastMessage };
+                    }
+                    return { ...chat, latestMessage: null };
+                })
+            );
+
+            // เรียงลำดับแชทตาม timestamp ของข้อความล่าสุด
+            const sortedChats = chatsWithLatestMessage.sort((a, b) => {
+                if (!a.latestMessage) return 1;  // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
+                if (!b.latestMessage) return -1; // แชทที่ไม่มีข้อความล่าสุดอยู่ด้านล่าง
+                return new Date(b.latestMessage.createdAt) - new Date(a.latestMessage.createdAt);
+            });
+
+            console.log('sortedChats:', sortedChats);
+            setUserChats(sortedChats);
+        } catch (error) {
+            setIsUserChatsLoading(false);
+            setUserChatsError(error);
+        }
+    };
+
+    getUserChats();
+}, [user, notifications]);
+
+
     useEffect(() => {
         const getMessages = async () => {
             setIsMessagesLoading(true);
             setMessagesError(null);
 
             try {
-                const response = await getRequest(`${baseUrl}/messages/${currentChat?._id}`);
-
-                console.log("Messages response:", response);  // ตรวจสอบข้อมูลที่ได้
+                const response = await axios.get(`/api/messages/${currentChat?._id}`);
+                
+                console.log("Messages response:", response.data);  // ตรวจสอบข้อมูลที่ได้
 
                 if (response.error) {
-                    setMessagesError(response);
+                    setMessagesError(response.data);
                     return;
                 }
 
 
-                setMessages(response);
+                setMessages(response.data);
             } catch (error) {
                 console.error("Error fetching messages:", error);
                 setMessagesError(error);
@@ -303,34 +316,34 @@ export const ChatContextProvider = ({ children, user }) => {
             if (!recipientId) return console.log("No recipient found!");
 
             try {
-                const response = await postRequest(`${baseUrl}/messages`, {
+                const response = await axios.post(`/api/messages`, {
                     chatId: currentChatId,
                     senderId: sender._id,
                     recipientId,
                     text: textMessage,
                     file: fileMessage,
                 });
-
+                
                 if (response.error) {
-                    console.error("Send message error:", response);
+                    console.error("Send message error:", response.data);
                     return;
                 }
 
                 // อัปเดตข้อความใหม่
                 setNewMessage(
-                    response);
+                    response.data);
                 setMessages((prevMessages) => [
                     ...prevMessages,
-                    response.message
+                    response.data.message
                 ]);
                 setTextMessage("");  // Clear the text input
                 setFileMessage(null);  // Clear the file input
 
                 // ส่งข้อความผ่าน Socket
                 if (socket && socket.connected) {
-                    socket.emit("sendMessage", { ...response.message, recipientId, });
+                    socket.emit("sendMessage", { ...response.data.message, recipientId, });
                     // ส่งการแจ้งเตือนให้กับผู้รับ
-                    socket.emit("getNotification", { ...response.notification ,recipientId,});
+                    socket.emit("getNotification", { ...response.data.notification ,recipientId,});
                 }
             // อัปเดต userChats และเรียงลำดับใหม่
             setUserChats((prevChats) => {
@@ -339,7 +352,7 @@ export const ChatContextProvider = ({ children, user }) => {
                         // ปรับปรุงแชทที่ถูกส่งข้อความใหม่
                         return {
                             ...chat,
-                            latestMessage: response.message,
+                            latestMessage: response.data.message,
                         };
                     }
                     return chat;
@@ -382,10 +395,10 @@ export const ChatContextProvider = ({ children, user }) => {
 
 
             // 🔥 ส่ง API ไปอัปเดตใน MongoDB หรือ Firebase
-            const response = await putRequest(`${baseUrl}/messages/notifications/userRead/${senderId}`, {
+            const response = await axios.put(`/api/messages/notifications/userRead/${senderId}`, {
                 isRead: true,  // ส่งข้อมูลที่ต้องการอัปเดต
             });
-
+            
             console.log('API Response:', response);
             // console.log("✅ Updated notifications in database");
 
@@ -421,8 +434,8 @@ export const ChatContextProvider = ({ children, user }) => {
             console.log("🔄 Sending request to mark message as read", { senderId });
 
             // ส่งการอัปเดตสถานะการอ่านไปที่ Server
-            const response = await patchRequest(`${baseUrl}/messages/read/${senderId}`, { isRead: true });
-
+            const response = await axios.patch(`/api/messages/read/${senderId}`, { isRead: true });
+            
             console.log("📩 API Response:", response); // ดูค่าตอบกลับจาก API
 
             if (response) {
@@ -450,7 +463,7 @@ export const ChatContextProvider = ({ children, user }) => {
     ///////////////////////
     const createChat = useCallback(
         async (studentId, teacherId) => {
-            const response = await postRequest(`${baseUrl}/chats`, {
+            const response = await axios.post(`/api/chats`, {
                 studentId,
                 teacherId,
             });

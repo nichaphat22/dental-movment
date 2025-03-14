@@ -92,7 +92,7 @@ function App () {
           <Route path="/chat/:id" element={user ? <Chat /> : <Login />} />
           <Route path="/AR-RPD" element={user ? <ARModel /> : <Login />} />
 
-          {user && user.role === 'teacher' && (
+          {user && user.roleRef === 'teacher' && (
             <>
               <Route path='/teacher-dashboard' element={<DashboardTeacher/>}/>
               <Route path="/lesson" element={user ?<HomeTeacher /> : <Login />}/>
@@ -117,7 +117,7 @@ function App () {
             </>
           )}
 
-          {user && user.role === 'student' && (
+          {user && user.roleRef === 'student' && (
             <>
               <Route path='/student-dashboard' element={<DashboardStudent/>}/>
               <Route path="/lesson" element={user ? <HomeStudent />: <Login />} />

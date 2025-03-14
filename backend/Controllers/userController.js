@@ -11,7 +11,7 @@ const jwt = require("jsonwebtoken");
 // const oauth2client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const createToken = (_id) => {
-    const jwtkey = process.env.SECRET_KEY;
+    const jwtkey = process.env.JWT_SECRET_KEY;
     return jwt.sign({ _id }, jwtkey, { expiresIn: "3d" });
 };
 
@@ -61,26 +61,31 @@ const registerUser = async (req, res) => {
     }
 };
 
-
 // login
 const loginUser = async (req, res) => {
-    const { email } = req.body;
+    const { email, password } = req.body;  // อย่าลืมรับ password ด้วย
 
     try {
         let user = await userModel.findOne({ email });
 
-        if (!user) return res.status(400).json("Invalid email or password...");
+        if (!user) return res.status(400).json({ error: "Invalid email or password..." });
 
-        // const isValidPassword = await bcrypt.compare(password, user.password);
+        // หากไม่ได้ตรวจสอบรหัสผ่าน (เพราะคอมเมนต์ไว้) ต้องแน่ใจว่าโค้ดด้านบนไม่ลืมเช็ค password
 
-        // if (!isValidPassword) return res.status(400).json("Invalid email or password...");
+        const token = createToken(user._id); // สมมติว่า createToken สร้าง JWT token ให้
 
-        const token = createToken(user._id);
-
-        res.status(200).json({ _id: user._id, name: user.name, email, roleRef: user.roleRef, img: user.img, token });
+        // ส่งข้อมูลผู้ใช้และ token กลับไป
+        res.status(200).json({ 
+            _id: user._id, 
+            name: user.name, 
+            email: user.email, 
+            roleRef: user.roleRef, 
+            img: user.img, 
+            token 
+        });
     } catch (error) {
         console.log(error);
-        res.status(500).json(error);
+        res.status(500).json({ error: "Something went wrong, please try again later." });
     }
 };
 

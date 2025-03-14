@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Biomechanical_consideration.css";
-import { baseUrl } from '../../../utils/services';
+// import { baseUrl } from '../../../utils/services';
 import { useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col,Container,Spinner } from 'react-bootstrap';
 
@@ -16,7 +16,7 @@ function View_Biomechanical_consideration_Student() {
 
   const fetchAnimations = () => {
     axios
-      .get(`${baseUrl}/animation/getAnimation`)
+      .get(`/api/animation/getAnimation`)
       .then((response) => {
         setAnimations(response.data);
         setLoading(false); // Set loading to false once data is fetched

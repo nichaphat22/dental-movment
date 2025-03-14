@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import LectureModal from './LectureModal';
-import { baseUrl } from '../../../utils/services';
+// import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
@@ -30,7 +30,7 @@ const LectureHistory = () => {
         console.error('No userLectureID provided'); // ตรวจสอบว่า ID ผู้ใช้ถูกส่งมา
         return;
       }
-      const response = await axios.get(`${baseUrl}/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
+      const response = await axios.get(`/api/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
       setLectures(response.data); // ตั้งค่าข้อมูลบรรยายใน state
     } catch (error) {
       console.error('Error fetching lectures:', error); // จัดการข้อผิดพลาด
@@ -69,7 +69,7 @@ const LectureHistory = () => {
           try {
             
     // try {
-      await axios.delete(`${baseUrl}/lecture/lectures/${id}`); // ลบบรรยายตาม ID
+      await axios.delete(`/api/lecture/lectures/${id}`); // ลบบรรยายตาม ID
       fetchLectures(user._id); // ดึงข้อมูลบรรยายใหม่หลังจากลบ
   //  / แสดงข้อความสำเร็จหลังจากการลบ
            Swal.fire("ลบสำเร็จ!", "รูปภาพถูกลบเรียบร้อยแล้ว", "success");

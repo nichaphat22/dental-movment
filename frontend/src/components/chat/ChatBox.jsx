@@ -1,4 +1,3 @@
-import { baseUrl, patchRequest } from "../../utils/services";
 import { useContext, useState, useRef, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";

@@ -11,31 +11,36 @@ const upload = multer({
 // GET all Animations with pagination
 const getAnimation = async (req, res) => {
   try {
-    const { lastCreatedAt, limit = 10 } = req.query; // รับค่าจาก query string
-    const query = {};  // กำหนด query เป็นวัตถุเปล่า
+    const { lastCreatedAt, limit = 10 } = req.query;
+    const query = {};
 
-    // ถ้ามี lastCreatedAt (ค่าของ createdAt จากหน้าก่อนหน้า) ให้ใช้ในการหาข้อมูลต่อ
+    // Ensure limit is a valid number and doesn't exceed a max limit
+    const maxLimit = 50; // Set a max limit for pagination
+    const paginationLimit = Math.min(Number(limit), maxLimit);
+
+    // Handle lastCreatedAt pagination
     if (lastCreatedAt) {
-      const lastCreatedDate = new Date(lastCreatedAt); // แปลงเป็น Date
+      const lastCreatedDate = new Date(lastCreatedAt);
       if (!isNaN(lastCreatedDate)) {
-        query.createdAt = { $lt: lastCreatedDate }; // หาข้อมูลที่มี createdAt น้อยกว่าค่าที่ส่งมา
+        query.createdAt = { $lt: lastCreatedDate };
       } else {
         return res.status(400).json({ msg: 'Invalid lastCreatedAt format' });
       }
     }
 
-    console.time("APIRequest"); // เริ่มต้นการวัดเวลา
+    console.time("APIRequest");
 
-    // ดึงข้อมูลแอนิเมชันจากฐานข้อมูล
-    const animations = await Animation.find(query)  // ใช้ query ในการค้นหา
+    // Fetch animations from the database
+    const animations = await Animation.find(query)
       .select('Ani_name Ani_image createdAt')
       .sort({ createdAt: -1 })
-      .limit(Number(limit))
+      .limit(paginationLimit)
       .lean();
 
-    console.timeEnd("APIRequest"); // หยุดการวัดเวลา
+    console.timeEnd("APIRequest");
 
-    // ส่งข้อมูลกลับไปยัง client
+    // Return the animations as JSON
+    res.setHeader('Content-Type', 'application/json');
     res.json(animations);
   } catch (error) {
     console.error(error);

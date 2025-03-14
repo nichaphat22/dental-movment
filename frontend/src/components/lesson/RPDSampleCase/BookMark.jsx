@@ -4,7 +4,7 @@ import { database } from "../../../config/firebase"; // ใช้การตั
 import { useNavigate } from "react-router-dom";
 import "./RPD_sample_case.css";
 import axios from "axios"; // นำเข้า axios
-import { baseUrl } from "../../../utils/services";
+// import { baseUrl } from "../../../utils/services";
 import { AuthContext } from '../../../context/AuthContext';
 import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -28,7 +28,7 @@ function BookMark() {
     }
 
     try {
-      const response = await axios.get(`${baseUrl}/bookmark/${user._id}`);
+      const response = await axios.get(`/api/bookmark/${user._id}`);
   
       // ตรวจสอบว่า response มีข้อมูลบุ๊คมาร์คหรือไม่
       if (!response.data) {
@@ -137,7 +137,7 @@ function BookMark() {
     // if (confirmDelete) {
       try {
         // Send a DELETE request with the correct modelId
-        await axios.delete(`${baseUrl}/bookmark/remove-bookmark/${user._id}/${modelId}`);
+        await axios.delete(`/api/bookmark/remove-bookmark/${user._id}/${modelId}`);
         
         // Update UI to remove the model using modelId
         setBookmarkedModels(prevModels => prevModels.filter(model => model.id !== modelId)); // ใช้ model.id แทน model.name

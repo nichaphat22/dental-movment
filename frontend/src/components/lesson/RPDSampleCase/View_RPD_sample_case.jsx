@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
 import { HiPlusSm } from "react-icons/hi";
 import { IoIosSearch } from "react-icons/io";
-import { baseUrl } from '../../../utils/services';
+// import { baseUrl } from '../../../utils/services';
 import axios from 'axios';
 import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -87,7 +87,7 @@ const ViewRPDSampleCase = () => {
 
   const fetchBookmarks = async (userId) => {
     try {
-      const response = await axios.get(`${baseUrl}/bookmark/${userId}`);
+      const response = await axios.get(`/api/bookmark/${userId}`);
       setClickedBookmark(response.data || {});
     } catch (error) {
       console.error("Error fetching bookmarks:", error);
@@ -115,7 +115,7 @@ const ViewRPDSampleCase = () => {
     setClickedBookmark(updatedBookmarks);
   
     try {
-      await axios.post(`${baseUrl}/bookmark/${userId}`, {
+      await axios.post(`/api/bookmark/${userId}`, {
         userId,
         bookmarks: updatedBookmarks,
       });

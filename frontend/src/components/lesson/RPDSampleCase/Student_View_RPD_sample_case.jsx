@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
 import { IoIosSearch } from "react-icons/io";
 import axios from 'axios';
-import { baseUrl } from '../../../utils/services';
+// import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 // import { HiPlusSm } from "react-icons/hi";
 
@@ -77,7 +77,7 @@ const Student_View_RPD_sample_case = () => {
 
   const fetchBookmarks = async (userId) => {
     try {
-      const response = await axios.get(`${baseUrl}/bookmark/${userId}`);
+      const response = await axios.get(`/api/bookmark/${userId}`);
   
       console.log("Response from API:", response.data); // ดูโครงสร้างข้อมูลที่กลับมา
   
@@ -109,7 +109,7 @@ const Student_View_RPD_sample_case = () => {
     setClickedBookmark(updatedBookmarks); // อัปเดต UI ทันที
   
     try {
-      await axios.post(`${baseUrl}/bookmark/${userId}`, {
+      await axios.post(`/api/bookmark/${userId}`, {
         userId,
         bookmarks: updatedBookmarks,
       });

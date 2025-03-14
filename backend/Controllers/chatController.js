@@ -3,7 +3,7 @@ const userModel = require("../Models/userModel");
 const Teacher = require("../Models/teacherModel");
 const Student = require("../Models/studentModel");
 const jwt = require('jsonwebtoken');
-const secret = process.env.JWT_SECRET; // Make sure you have this key set in your environment variables
+const secret = process.env.JWT_SECRET_KEY; // Make sure you have this key set in your environment variables
 require('dotenv').config();
 
 // create chat

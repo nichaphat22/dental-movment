@@ -6,7 +6,7 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './RPD_sample_case.css';
 import { FaPen, FaEraser, FaTrash } from "react-icons/fa"; // Import icons
-import { baseUrl } from '../../../utils/services';
+// import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 import { IoIosSave } from "react-icons/io";
 // import { SlNote } from "react-icons/sl";
@@ -724,7 +724,7 @@ const ViewModel = () => {
     };
 
     try {
-      const response = await axios.post(`${baseUrl}/lecture`, canvasData);
+      const response = await axios.post(`/api/lecture`, canvasData);
       console.log("Image and notes saved successfully:", response.data);
       toast.success("บันทึกรูปภาพเสร็จสิ้น!", { autoClose: 1500 });
     } catch (error) {

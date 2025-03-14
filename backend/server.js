@@ -15,7 +15,9 @@ const bookmarkRoute = require("./Routes/bookmarkRoute")
 const bodyParser = require('body-parser');
 const http = require("http");
 const { Server } = require("socket.io"); // เพิ่มการใช้งาน socket.io
+const path = require("path");
 require('dotenv').config();
+
 
 // console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
 // console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
@@ -51,7 +53,7 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(express.json());
 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com'],
+  origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com','https://backend-dental-production.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   // allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
   // credentials: true, // ใช้สำหรับอนุญาต cookie หรือข้อมูล session
@@ -84,19 +86,11 @@ const io = new Server(server, {
     credentials: true
   },
   transports: ['websocket', 'polling'], // เผื่อว่ามีปัญหากับ WebSocket
-  // path: '/socket.io',
 });
 
 
-
-
-
-// เริ่ม server หลังจากตั้งค่า io
-// server.listen(port, () => {
-//   console.log(`Server running on port: ${port}`);
-// }).on('error', (err) => {
-//   console.error("Failed to start server:", err);
-// });
+// ให้ Express เสิร์ฟไฟล์ Frontend หลังจาก API
+app.use(express.static(path.join(__dirname, "./dist")));
 
 //Router
 app.get("/", (req, res) => {
@@ -113,6 +107,9 @@ app.use("/api/notiChat", notiRoute)
 app.use("/api/bookmark", bookmarkRoute)
 
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./dist/index.html"));
+});
 
 
 const uri = process.env.DBURI;
