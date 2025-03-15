@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import quizService from "../../../utils/quizService";
 import { Input, Select, Textarea, Option } from "@material-tailwind/react";
 import Swal from "sweetalert2";
@@ -15,9 +15,17 @@ import {
   GoChevronDown,
   GoChevronUp,
 } from "react-icons/go";
+import { useSelector } from "react-redux";
 
 const CreateQuiz = () => {
   const [title, setTitle] = useState("");
+  const user = useSelector(state => state.auth.user);
+  const roleData = useSelector(state => state.auth.roleData);
+
+  console.log(user);      // ข้อมูลของผู้ใช้
+  console.log(roleData);  // ข้อมูล roleData ของผู้ใช้
+  const [teacher, setTeacher] = useState("");
+  const teacherId = localStorage.getItem("teacherId");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState([
     {
@@ -32,6 +40,17 @@ const CreateQuiz = () => {
   const questionRefs = useRef([]);
   const [image, setImage] = useState(); // ตั้งค่า default image
   const navigate = useNavigate();
+
+  console.log("Stored Teacher ID:", roleData);
+
+  useEffect(() => {
+    const storedTeacher = localStorage.getItem("teacherId");
+    console.log("Stored Teacher ID:", storedTeacher); // ตรวจสอบค่า teacherId
+
+    if (storedTeacher) {
+      setTeacher(storedTeacher);
+    }
+  }, []);
 
   // Question
   const handleAddQuestion = (index) => {
@@ -120,7 +139,7 @@ const CreateQuiz = () => {
     setQuestions(updatedQuestions);
   };
 
-  // เพิ่มการจัดการไฟล์รูปภาพ
+  // // เพิ่มการจัดการไฟล์รูปภาพ
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -139,7 +158,7 @@ const CreateQuiz = () => {
     }
   };
 
-  //ลบรูปภาพ title
+  // //ลบรูปภาพ title
   const handleRemoveImageTitle = () => {
     setImage(null);
   };
@@ -176,14 +195,21 @@ const CreateQuiz = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // ถ้าผู้ใช้กดยืนยันให้เปลี่ยนเส้นทาง
-        navigate("/ListQuiz");
+        navigate("/ListQuiz-teacher");
       }
     });
   };
+  useEffect(() => {
+    // ตัวอย่าง: ดึงข้อมูล teacher จาก localStorage หรือ API
+    const storedTeacher = localStorage.getItem("teacherId");
+    if (storedTeacher) {
+      setTeacher(storedTeacher);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // ตรวจสอบข้อมูลก่อนส่ง
     if (
       !title ||
@@ -198,26 +224,34 @@ const CreateQuiz = () => {
       });
       return;
     }
-
+  
+    // สร้างข้อมูล quiz
     const quizData = {
       title,
-      image,
+      teacher: roleData, // ส่ง teacherId ที่มาจากข้อมูลผู้ใช้
       description,
       questions,
     };
-
+  
+    console.log("Quiz Data before sending:", quizData); // ตรวจสอบข้อมูลก่อนส่ง
+  
     try {
-      await quizService.createQuiz(quizData);
+      const response = await quizService.createQuiz(quizData); // รับค่าผลลัพธ์จาก API
       setTitle("");
-      setImage(defaultImage);
+      // setImage(defaultImage);
       setDescription("");
       setQuestions([]);
-
-      navigate(`/ListQuiz`, {
+  
+      navigate(`/ListQuiz-teacher`, {
         state: { success: true, message: "Quiz created successfully!" },
       });
+  
+      console.log("✅ Quiz Created:", response.data); // ใช้ response ที่ได้จาก API
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Error creating quiz:",
+        error.response?.data || error.message // ตรวจสอบ error.response หรือ error.message
+      );
       toast.error("Failed to create quiz!", {
         position: "top-right",
         autoClose: 2000,
@@ -226,15 +260,18 @@ const CreateQuiz = () => {
       });
     }
   };
+  
 
   // สลับตำแหน่งคำถาม
   const handleMoveUp = (index) => {
     if (index > 0) {
       const updatedQuestions = [...questions];
-      [updatedQuestions[index - 1], updatedQuestions[index]] = 
-      [updatedQuestions[index], updatedQuestions[index - 1]];
+      [updatedQuestions[index - 1], updatedQuestions[index]] = [
+        updatedQuestions[index],
+        updatedQuestions[index - 1],
+      ];
       setQuestions(updatedQuestions);
-  
+
       setTimeout(() => {
         questionRefs.current[index - 1]?.scrollIntoView({
           behavior: "smooth",
@@ -243,14 +280,16 @@ const CreateQuiz = () => {
       }, 100);
     }
   };
-  
+
   const handleMoveDown = (index) => {
     if (index < questions.length - 1) {
       const updatedQuestions = [...questions];
-      [updatedQuestions[index], updatedQuestions[index + 1]] = 
-      [updatedQuestions[index + 1], updatedQuestions[index]];
+      [updatedQuestions[index], updatedQuestions[index + 1]] = [
+        updatedQuestions[index + 1],
+        updatedQuestions[index],
+      ];
       setQuestions(updatedQuestions);
-  
+
       setTimeout(() => {
         questionRefs.current[index + 1]?.scrollIntoView({
           behavior: "smooth",
@@ -259,7 +298,7 @@ const CreateQuiz = () => {
       }, 100);
     }
   };
-  
+
   return (
     <div className="relative border-t-8 border-purple-500 p-4 md:p-10 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
       <ToastContainer />
@@ -469,7 +508,7 @@ const CreateQuiz = () => {
                   }
                   rows={3}
                   className="block w-full border rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2  focus:outline-gray-400 sm:text-sm/6"
-                  defaultValue={""}
+                  // defaultValue={""}
                 ></textarea>
               </div>
             </div>

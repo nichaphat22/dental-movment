@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-// import { deleteNotification, markAsRead } from "../../../backend/Controllers/notificationController";
-// import { deleteNotification as deleteNotificationA, markAsRead as markAsReadA } from "../../../backend/Controllers/notificationController";
 
 const notificationSlice = createSlice({
     name: "notifications",
@@ -8,23 +6,28 @@ const notificationSlice = createSlice({
     reducers: {
         setNotifications: (state, action) => {
             state.list = action.payload;
-            state.unreadCount = action.payload.filter(n => !n.isRead).length;
-
+            state.unreadCount = action.payload.filter((n) => !n.isRead).length;
         },
         addNotification: (state, action) => {
-            state.list.unshift(action.payload);
-            state.unreadCount += 1;
+            const exists = state.list.some(n => n._id === action.payload._id);
+            if (!exists) {
+                state.list.unshift(action.payload); // เพิ่มแจ้งเตือนใหม่
+                state.unreadCount += 1;
+            }
         },
         markAsReadReducer: (state, action) => {
-            const notification = state.list.find(n => n._id === action.payload);
-            if (notification) notification.isRead = true;
+            const ids = Array.isArray(action.payload) ? action.payload : [action.payload]; // แปลงเป็น array ถ้าไม่ใช่
+            ids.forEach(id => {
+              const notification = state.list.find(n => n._id === id);
+              if (notification) notification.isRead = true;
+            });
+            state.unreadCount = state.list.filter((n) => !n.isRead).length;
+          },
+          deleteNotificationReducer: (state, action) => {
+            const idToDelete = action.payload;
+            state.list = state.list.filter(n => n._id !== idToDelete);
             state.unreadCount = state.list.filter(n => !n.isRead).length;
-
-        },
-        deleteNotificationReducer: (state, action) => {
-            state.list = state.list.filter(n => n._id !== action.payload);
-            state.unreadCount = state.list.filter(n => !n.isRead).length;
-        }
+          }          
     }
 });
 

@@ -4,15 +4,10 @@ const Student = require("../Models/studentModel");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
-// const { oauth2client } = require("../utils/googleConfig");
-// const axios = require('axios');
-
-// const { OAuth2Client } = require('google-auth-library')
-// const oauth2client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const createToken = (_id) => {
-    const jwtkey = process.env.JWT_SECRET_KEY;
-    return jwt.sign({ _id }, jwtkey, { expiresIn: "3d" });
+  const jwtkey = process.env.JWT_SECRET_KEY;
+  return jwt.sign({ _id }, jwtkey, { expiresIn: "3d" });
 };
 
 // register
@@ -57,96 +52,148 @@ const createToken = (_id) => {
 //     }
 // };
 
-
 // login
+
 const loginUser = async (req, res) => {
-    const { email } = req.body;
+  const { email } = req.body;
 
-    try {
-        let user = await userModel.findOne({ email });
+  try {
+    let user = await userModel.findOne({ email });
 
-        if (!user) return res.status(400).json("Invalid email or password...");
+    if (!user) return res.status(400).json("Invalid email or password...");
 
-        // const isValidPassword = await bcrypt.compare(password, user.password);
+    // const isValidPassword = await bcrypt.compare(password, user.password);
 
-        // if (!isValidPassword) return res.status(400).json("Invalid email or password...");
+    // if (!isValidPassword) return res.status(400).json("Invalid email or password...");
 
-        const token = createToken(user._id);
+    const token = createToken(user._id);
 
-        res.status(200).json({ _id: user._id, name: user.name, email, role: user.role, img: user.img, token });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    }
+    res
+      .status(200)
+      .json({
+        _id: user._id,
+        name: user.name,
+        email,
+        role: user.role,
+        img: user.img,
+        token,
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
 };
-
-
 
 // Add teacher
 const addTeacher = async (req, res) => {
-    try {
-        const { userId } = req.body;
+  try {
+    const { userId } = req.body;
 
-        const user = await userModel.findById(userId);
-        if (!user) return res.status(404).json("User not found...");
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json("User not found...");
 
-        const teacher = await Teacher.create({ user: userId }); // สร้างข้อมูลใน teacherModel
-        user.teacher = teacher._id; // อัปเดตฟิลด์ teacher ใน userModel
+    const teacher = await Teacher.create({ user: userId }); // สร้างข้อมูลใน teacherModel
+    user.teacher = teacher._id; // อัปเดตฟิลด์ teacher ใน userModel
 
-        await user.save();
+    await user.save();
 
-        res.status(200).json({ message: "Teacher added successfully", user });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    }
+    res.status(200).json({ message: "Teacher added successfully", user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
 };
 
 // Add student
 const addStudent = async (req, res) => {
-    try {
-        const { userId } = req.body;
+  try {
+    const { userId } = req.body;
 
-        const user = await userModel.findById(userId);
-        if (!user) return res.status(404).json("User not found...");
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json("User not found...");
 
-        const student = await Student.create({ user: userId }); // สร้างข้อมูลใน studentModel
-        user.student = student._id; // อัปเดตฟิลด์ student ใน userModel
+    const student = await Student.create({ user: userId }); // สร้างข้อมูลใน studentModel
+    user.student = student._id; // อัปเดตฟิลด์ student ใน userModel
 
-        await user.save();
+    await user.save();
 
-        res.status(200).json({ message: "Student added successfully", user });
-    } catch (error) {
-        console. log(error);
-        res.status(500).json(error);
-    }
+    res.status(200).json({ message: "Student added successfully", user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
 };
 
 // finduser
 const findUser = async (req, res) => {
-    const userId = req.params.userId;
+  const userId = req.params.userId;
 
-    try {
-        const user = await userModel.findById(userId);
+  try {
+    const user = await userModel.findById(userId);
 
-        if (!user) return res.status(404).json("User not found...");
+    if (!user) return res.status(404).json("User not found...");
 
-        res.status(200).json(user);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
 };
 
 // getUsers
 const getUsers = async (req, res) => {
-    try {
-        const users = await userModel.find();
-        res.status(200).json(users);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    }
+  try {
+    const users = await userModel.find();
+    res.status(200).json(users);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
 };
 
-module.exports = {  loginUser, findUser, getUsers, addTeacher, addStudent };
+//getStudent
+const getStudents = async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.json({ students });
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+//update profile
+const updateProfile = async (req, res) => {
+    const { name, img } = req.body;
+    const userId = req.userId; // ได้รับมาจาก middleware `verifyToken`
+  
+    try {
+      const user = await userModel.findById(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+  
+      // ตรวจสอบว่า name หรือ img ต้องมีค่าก่อนอัปเดต
+      if (!name && !img) {
+        return res.status(400).json({ error: "No data to update" });
+      }
+  
+      if (name) user.name = name; 
+      if (img) user.img = img;
+  
+      await user.save();
+  
+      res.status(200).json({ fname: user.fname, img: user.img });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ error: "Error updating profile" });
+    }
+  };
+
+module.exports = {
+  loginUser,
+  findUser,
+  getUsers,
+  addTeacher,
+  addStudent,
+  getStudents,
+  updateProfile
+};

@@ -19,9 +19,9 @@ export default {
     theme: {
       extend: {
         fontFamily:{
-        'sans': ['Helvetica', 'Arial', 'sans-serif'],
-        'display': ['Oswald'],
-        'body': ['"Open Sans"']
+          sans: ['Noto Sans Thai', 'Open Sans', 'Arial', 'sans-serif'],
+          display: ['Oswald'],  // ฟอนต์สำหรับ header หรือแสดงผลใหญ่
+          body: ['"Noto Sans Thai"', 'Open Sans'],
         },
         gridTemplateColumns:{
           '70/30':'70% 28%',

@@ -87,7 +87,7 @@ const Student_View_RPD_sample_case = () => {
   return (
     <div className="Content">
       <h1 className="title-h1">RPD sample case</h1>
-      <div className="title"></div>
+      <div className="title">ฝฝ</div>
 
       <div className="grid-container" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (

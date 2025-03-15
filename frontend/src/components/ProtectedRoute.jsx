@@ -1,19 +1,27 @@
-import React from 'react';
-import { Navigate, Outlet } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({ allowedRoles }) => {
-    const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.auth.token);
+  const location = useLocation();
 
-    if (!user) {
-        return <Navigate to="/login" />;
+  useEffect(() => {
+    if (user?.role === "teacher") {
+      localStorage.setItem("teacherId", user._id);
     }
+  }, [user]);
 
-    if (!allowedRoles.includes(user.role)) {
-        return <Navigate to="/" />;  // ถ้า role ไม่ตรงให้กลับหน้าหลัก
-    }
+  if (!token || !user) {
+    return <Navigate to="/login" />;
+  }
 
-    return <Outlet />;
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/" />;
+  }
+
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

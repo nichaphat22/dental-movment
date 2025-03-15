@@ -55,16 +55,18 @@ const QuizList = () => {
   }, []);
 
   const handleQuizClick = (id) => {
-    navigate(`/quiz/${id}`);
+    navigate(`/quiz-teacher/${id}`);
     console.log(id);
   };
 
   const handleEditQuiz = (id) => {
-    navigate(`/quiz/${id}/edit`);
+    navigate(`/quiz-teacher/${id}/edit`);
     console.log(id);
   };
 
   const handleDeleteQuiz = (id) => {
+    console.log("Deleting Quiz ID:", id); // ตรวจสอบว่า id ถูกต้อง
+  
     Swal.fire({
       title: "ยืนยันการลบ",
       text: "คุณแน่ใจหรือไม่ว่าต้องการลบแบบทดสอบนี้? การกระทำนี้ไม่สามารถย้อนกลับได้",
@@ -95,6 +97,7 @@ const QuizList = () => {
       }
     });
   };
+  
 
   return (
     <div className="relative grid grid-cols-1 gap-6 mt-4 sm:m-4 md:m-10 lg:m-60 cursor-pointer">
@@ -140,6 +143,9 @@ const QuizList = () => {
                   <p className="text-xs text-gray-600 lg:pl-2 ml-9 mb:ml-14 lg:ml-16 md:mt-2 mb-2">
                     จำนวนข้อ: {quiz.questions?.length || 0}
                   </p>
+                  {/* <p>
+                  ผู้สร้าง: {quiz.teacher?.user?.name || 'No teacher assigned'}
+                  </p> */}
                 </div>
 
               

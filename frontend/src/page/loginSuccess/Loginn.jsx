@@ -1,34 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { API } from "../../api/api";
-import { setUser } from "../../redux/authSlice";
-import { GoogleLogin } from "@react-oauth/google";
+import { loginSuccess } from "../../redux/authSlice";
 import { jwtDecode } from "jwt-decode";
 
 const Loginn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const user = useSelector((state) => state.auth.user);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const token = queryParams.get("token");
 
-    console.log("Google login token:", token); // ✅ ตรวจสอบค่าที่ได้จาก Google OAuth
-
     if (token && typeof token === "string") {
       try {
-        localStorage.setItem("token", token);
         const decoded = jwtDecode(token);
-        dispatch(setUser(decoded));
+
+        // ✅ ตรวจสอบ Token หมดอายุ
+        if (decoded.exp * 1000 < Date.now()) {
+          console.error("❌ Token expired");
+          localStorage.removeItem("token"); // ✅ ลบ Token ที่หมดอายุ
+          navigate("/"); // ✅ Redirect กลับไปหน้า Login
+          return;
+        }
+
+        localStorage.setItem("token", token);
+        dispatch(loginSuccess({ token, user: decoded })); // ✅ ใช้ { token, user } แทน token อย่างเดียว
 
         if (decoded.role === "teacher") {
-          navigate("/teacher-dashboard");
+          localStorage.setItem("teacherId", decoded._id);
+          navigate("/dashboard-teacher");
         } else if (decoded.role === "student") {
-          navigate("/student-dashboard");
+          navigate("/dashboard-student");
         } else {
           navigate("/");
         }
@@ -36,11 +45,12 @@ const Loginn = () => {
         console.error("Token decoding error:", error);
       }
     }
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate]); // ✅ เอา token ออกจาก dependencies
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const res = await API.post(
         `${import.meta.env.VITE_APP_API_URL}/api/auth/login`,
@@ -48,33 +58,40 @@ const Loginn = () => {
         { headers: { "Content-Type": "application/json" } }
       );
 
-      console.log("Login response:", res.data); // ✅ ตรวจสอบข้อมูลที่ได้รับจาก API
-
       const { token } = res.data;
       if (!token || typeof token !== "string") {
-        throw new Error("Invalid token received"); // ✅ ป้องกัน token ที่ไม่มีค่า
+        throw new Error("Invalid token received");
+      }
+
+      const decoded = jwtDecode(token);
+
+      // ✅ ตรวจสอบ Token หมดอายุ
+      if (decoded.exp * 1000 < Date.now()) {
+        console.error("❌ Token expired");
+        setLoading(false);
+        return;
       }
 
       localStorage.setItem("token", token);
-      const decoded = jwtDecode(token);
-      dispatch(setUser(decoded));
+      dispatch(loginSuccess({ token, user: decoded })); // ✅ ใช้ { token, user } แทน token อย่างเดียว
 
       if (decoded.role === "teacher") {
-        navigate("/teacher-dashboard");
+        localStorage.setItem("teacherId", decoded._id);
+        navigate("/dashboard-teacher");
       } else if (decoded.role === "student") {
-        navigate("/student-dashboard");
+        navigate("/dashboard-student");
       } else {
         navigate("/");
       }
     } catch (error) {
       console.error("Login Failed:", error.response?.data || error.message);
+      setLoading(false); // ✅ ปิด loading เมื่อเกิด error
     }
-    setLoading(false);
   };
 
   return (
     <div className="mt-16">
-      <h2>login</h2>
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="email"

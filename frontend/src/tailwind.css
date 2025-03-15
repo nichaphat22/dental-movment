@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-
+body {
+    font-family: 'Noto Sans Thai', 'Open Sans', sans-serif;  /* ใช้ฟอนต์ที่เลือก */
+  }
 @layer components {
     .primary-btn {
         @apply inline-block bg-violet-500 text-white font-semibold

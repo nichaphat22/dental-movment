@@ -1,10 +1,13 @@
 // import { Routes, Route, Navigate } from "react-router-dom"
-import { BrowserRouter as Router, Routes, Route,useLocation, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route,useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useState, useEffect, useContext } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { API } from '../src/api/api';
-import { setUser } from './redux/authSlice';
+// import { setUser } from './redux/authSlice';
+import { loginSuccess } from './redux/authSlice';
+import { AuthContextProvider } from './context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 
 // import 
 import Chat from "./page/Chat"
@@ -80,33 +83,18 @@ function App () {
   // const { user } = useContext(AuthContext); // Fetch user data from context
   // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
-
+  const navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.token);
+
 
   useEffect(() => {
-    const fetchUser = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            dispatch(setUser(null)); // Clear user
-            return;
-        }
-
-        try {
-            const res = await API.get('api/auth/user', {
-                headers: { Authorization: `Bearer ${token}` },
-                withCredentials: true,
-            });
-            dispatch(setUser(res.data));
-        } catch (error) {
-            console.error("Failed to fetch user:", error);
-            localStorage.removeItem("token");
-            dispatch(setUser(null));
-            window.location.href = "/login"; // Redirect
-        }
-    };
-    fetchUser();
-}, [dispatch]);
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(loginSuccess(token)); // ✅ โหลด Token จาก LocalStorage
+    }
+  }, [dispatch]);
 
 
   return (
@@ -119,57 +107,82 @@ function App () {
 
       <Container className="text-secondary">
         <Routes>
-          <Route path="/" element={user ?<Home/>: <Login />}/>
+        <Route 
+          path="/" 
+          element={
+        user 
+            ? (user.role === 'student' 
+                ? <Navigate to="/dashboard-student" /> 
+                : <Navigate to="/dashboard-teacher" />) 
+            : <Login />
+            } 
+        />
+
         
           <Route path="/register" element={user ? <Chat /> :<Register />} />
           <Route path="/login" element={user ? <Navigate to="/"/>:<Login />} />
-          <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>
-          <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
+          {/* <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>
+          <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} /> */}
           <Route path="/chat" element={user ? <Chat /> : <Login />} />
           <Route path="/AR-RPD" element={user ? <ARModel /> : <Login />} />
 
+          <Route element={<ProtectedRoute allowedRoles={['teacher', 'student']}/>}>
+               <Route path="/Model/:name/view" element={ <Model /> } />
+              <Route path="/animation/view/:id" element={ <ViewBiomechanicalConsideration /> } />
+              <Route path="/animation3d/:name/view" element={ <ViewMovementOfRPD /> } />
+          </Route>
+
+
           {/* Route สำหรับ Student */}
           <Route element={<ProtectedRoute allowedRoles={['student']}/>}>
-              <Route path='/student-dashboard' element={<DashboardStudent/>}/>
-              <Route path="/lesson" element={ <HomeStudent />} />
-              <Route path="/ListQuiz" element={ <ListQuiz/>}/>
+              <Route path='/dashboard-student' element={<DashboardStudent/>}/>
+
+              <Route path="/lesson-student" element={ <HomeStudent />} />
+
+              <Route path="/Biomechanical-consideration-student" element={ <BiomechanicalConsiderationStudent /> } />
+              <Route path="/Possible-Movement-Of-RPD-student" element={ <PossibleMovementOfRPDStudent/> }/>
+              <Route path="/MovementOfRPD-student" element={ <MovementOfRPDStudent /> } />
+
+              <Route path="/ListQuiz-student" element={ <ListQuiz/>}/>
               <Route path='/Quiz/:id/start' element={ <QuizStart/> }/>
               <Route path='/quiz/:id/result' element={ <Result/>}/> 
-
               <Route path='/Quiz/:id' element={ <QuizDetail/> }/>
-              <Route path="/bookmark" element={ <Bookmark /> } />
-              <Route path="/Model/:name/view" element={ <Model /> } />
-              <Route path="/animation/view/:id" element={ <ViewBiomechanicalConsideration /> } />
-              <Route path="/Biomechanical-consideration" element={ <BiomechanicalConsiderationStudent /> } />
-              <Route path="/animation3d/:name/view" element={ <ViewMovementOfRPD /> } />
-              <Route path="/Possible-Movement-Of-RPD" element={ <PossibleMovementOfRPDStudent/> }/>
-              <Route path="/MovementOfRPD" element={ <MovementOfRPDStudent /> } />
+
+              <Route path="/bookmark-student" element={ <Bookmark /> } />
+              <Route path="/lectureHistory-student" element={<LectureHistory/> } />
+              
+             
               {/* <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/> */}
 
           </Route>
 
           {/* Route สำหรับ Teacher */}
           <Route element={<ProtectedRoute allowedRoles={['teacher']}/>}>
-              <Route path='/teacher-dashboard' element={<DashboardTeacher/>}/>
-              <Route path="/lesson" element={<HomeTeacher /> }/>
-              <Route path="/Edit-RPD/:name/edit" element={ <EditRPDSampleCase /> } />
+              <Route path='/dashboard-teacher' element={<DashboardTeacher/>}/>
+
+              <Route path="/lesson-teacher" element={<HomeTeacher /> }/>
+
+              <Route path="/Biomechanical-consideration-teacher" element={ <BiomechanicalConsideration /> } />
+              <Route path="/Possible-Movement-Of-RPD-teacher" element={ <PossibleMovementOfRPDTeacher/> }/>
+              <Route path="/MovementOfRPD-teacher" element={ <MovementOfRPD /> } />
+
               <Route path="/Add-RPD" element={ <AddRPDSampleCase /> } />
-              <Route path="/bookmark" element={ <Bookmark /> } />
-              <Route path="/Model/:name/view" element={ <Model /> } />
-              <Route path="/animation/view/:id" element={ <ViewBiomechanicalConsideration /> } />
-              <Route path="/Edit-Biomechanical-consideration/:id" element={ <EditBiomechanicalConsideration /> } />
-              <Route path="/Biomechanical-consideration" element={ <BiomechanicalConsideration /> } />
+              <Route path="/Edit-RPD/:name/edit" element={ <EditRPDSampleCase /> } />
               <Route path="/Add-Biomechanical-consideration" element={ <AddBiomechanicalConsideration /> } />
-              <Route path="/Edit-MovementOfRPD/:name/edit" element={ <Edit_MovementOfRPD /> } />
-              <Route path="/Possible-Movement-Of-RPD" element={ <PossibleMovementOfRPDTeacher/> }/>
-              <Route path="/MovementOfRPD" element={ <MovementOfRPD /> } />
+              <Route path="/Edit-Biomechanical-consideration/:id" element={ <EditBiomechanicalConsideration /> } />
               <Route path="/Add-MovementOfRPD" element={ <AddMovementOfRPD /> } />
-              <Route path="/animation3d/:name/view" element={ <ViewMovementOfRPD /> } />
+              <Route path="/Edit-MovementOfRPD/:name/edit" element={ <Edit_MovementOfRPD /> } />
+
+              <Route path="/ListQuiz-teacher" element={ <QuizList/>}/>
+              <Route path='/Add-Quiz' element={ <CreateQuizT/>}/>           
+              <Route path='/quiz-teacher/:id' element={ <DetailQ/>}/> 
+              <Route path='/quiz-teacher/:id/edit' element={ <EditQuiz/>}/> 
+
+              <Route path="/bookmark-teacher" element={ <Bookmark /> } />
+              <Route path="/lectureHistory-teacher" element={<LectureHistory/> } />
               <Route path="/Form" element={ <Form /> } />
-              <Route path="/ListQuiz" element={ <QuizList/>}/>
-              <Route path='/Add-Quiz' element={ <CreateQuizT/>}/> 
-              <Route path='/quiz/:id' element={ <DetailQ/>}/> 
-              <Route path='/quiz/:id/edit' element={ <EditQuiz/>}/> 
+
+
               {/* <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/> */}
           </Route>
 {/* 
@@ -220,6 +233,7 @@ function App () {
             </>
             
           )} */}
+          
               {/* Fallback for undefined routes */}
               <Route path="*" element={<Navigate to="/login" />} />
 

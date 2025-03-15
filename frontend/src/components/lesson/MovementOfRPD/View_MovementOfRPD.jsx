@@ -1,88 +1,42 @@
 import React, { useEffect, useState } from "react";
-// import axios from "axios";
 import "./MovementOfRPD.css";
-import { useParams } from "react-router-dom";
-import { ref, getDownloadURL, deleteObject, listAll } from "firebase/storage";
-import { storage } from "../../../config/firebase";
 import { useNavigate, useLocation } from "react-router-dom";
+import { ref as storageRef, getDownloadURL, deleteObject } from "firebase/storage";
+import { getDatabase, ref as dbRef, onValue, remove } from "firebase/database";
+import { storage } from "../../../config/firebase";
 import Swal from "sweetalert2";
 import { HiPlusSm } from "react-icons/hi";
 
 function View_MovementOfRPD() {
   const [animation3d, setAnimation3d] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    if (location.state && location.state.selectedFile) {
-      setSelectedFile(location.state.selectedFile);
-    }
+    const db = getDatabase();
+    const animationRef = dbRef(db, "animations");
 
-    // ดึงคำค้นหาจาก URL query string
-    const query = new URLSearchParams(location.search);
-    const search = query.get("search") || "";
-    setSearchTerm(search);
-
-    const fetchAnimation3d = async () => {
-      try {
-        const animation3dRef = ref(storage, "animation3d/");
-        const animation3dList = await listAll(animation3dRef);
-        const animation3dData = await Promise.all(
-          animation3dList.prefixes.map(async (folderRef) => {
-            try {
-              console.log(
-                `Fetching animation3d.mp4 for folder: ${folderRef.name}`
-              );
-              const animation3dUrl = await getDownloadURL(
-                ref(storage, `${folderRef.fullPath}/animation3d.mp4`)
-              );
-              console.log(
-                `Successfully fetched animation3d.mp4 for folder: ${folderRef.name}`
-              );
-
-              const aniImageUrl = await getDownloadURL(
-                ref(storage, `${folderRef.fullPath}/image.jpg`)
-              );
-              console.log(
-                `Successfully fetched image.jpg for folder: ${folderRef.name}`
-              );
-
-              return {
-                id: folderRef.name,
-                name: folderRef.name,
-                url: animation3dUrl,
-                aniImageUrl,
-              };
-            } catch (error) {
-              console.warn(
-                `Error fetching files for ${folderRef.name}:`,
-                error.message
-              );
-              return null;
-            }
-          })
-        );
-        setAnimation3d(animation3dData.filter((item) => item !== null));
-      } catch (error) {
-        console.error("Error fetching animation3d:", error);
+    onValue(animationRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const animationsArray = Object.keys(data).map((key) => ({
+          id: key,
+          ...data[key],
+        }));
+        setAnimation3d(animationsArray);
       }
-    };
-    fetchAnimation3d(); // Fetch animations on component load
-  }, [location.state, location.search]);
+    });
+  }, []);
 
-  const goToEditPage = (name, url, aniImageUrl) => {
-    navigate(`/Edit-MovementOfRPD/${name}/edit`, {
-      state: { name, url, aniImageUrl },
+  const goToEditPage = (animation) => {
+    navigate(`/Edit-MovementOfRPD/${animation.id}/edit`, {
+      state: animation,
     });
   };
 
-  const removeAnimation = async (animation3dName) => {
+  const removeAnimation = async (animation) => {
     const confirmDelete = await Swal.fire({
-      title: "คุณต้องการลบแอนนิเมชันนี้หรือไม่?",
-      // text: "คุณจะไม่สามารถย้อนกลับได้!",
+      title: "คุณต้องการลบแอนิเมชันนี้หรือไม่?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -93,26 +47,22 @@ function View_MovementOfRPD() {
 
     if (confirmDelete.isConfirmed) {
       try {
-        const folderRef = ref(storage, `animation3d/${animation3dName}`);
-        const listResult = await listAll(folderRef);
-        await Promise.all(
-          listResult.items.map((itemRef) => deleteObject(itemRef))
-        );
+        // ลบไฟล์จาก Firebase Storage
+        const videoRef = storageRef(storage, `animation3d/${animation.name}/animation3d.mp4`);
+        const imageRef = storageRef(storage, `animation3d/${animation.name}/image.jpg`);
+        await deleteObject(videoRef);
+        await deleteObject(imageRef);
 
-        console.log("ลบเสร็จสิ้น");
+        // ลบข้อมูลจาก Firebase Database
+        const db = getDatabase();
+        const animationRef = dbRef(db, `animations/${animation.id}`);
+        await remove(animationRef);
 
-        const updatedAnimation3d = animation3d.filter(
-          (animation) => animation.name !== animation3dName
-        );
-        setAnimation3d(updatedAnimation3d);
-
-        Swal.fire("ลบแล้ว!", "แอนนิเมชันของคุณถูกลบเรียบร้อยแล้ว", "success");
+        Swal.fire("ลบแล้ว!", "แอนิเมชันของคุณถูกลบเรียบร้อยแล้ว", "success");
       } catch (error) {
         console.error("Error deleting animation:", error);
-        Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการลบแอนนิเมชัน", "error");
+        Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการลบแอนิเมชัน", "error");
       }
-    } else {
-      console.log("ยกเลิกการลบ");
     }
   };
 
@@ -120,50 +70,30 @@ function View_MovementOfRPD() {
     navigate(`/Add-MovementOfRPD`);
   };
 
-  const handleImageClick = (name, url, aniImageUrl) => {
-    // setSelectedImage({name, url});
-
-    navigate(`/animation3d/${name}/view`, {
-      state: { selectedFile: { name, url, aniImageUrl } },
-    });
-  };
-
   return (
     <div className="cont">
       <div className="flex flex-col md:flex-row justify-between items-center my-2 mx-4">
-        {/* Title */}
         <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mx-4 my-2">
           การเคลื่อนที่ของฟันเทียม
         </h1>
-
-        {/* Button */}
         <button
           className="flex items-center bg-purple-600 hover:bg-purple-700 text-white font-semibold px-2 py-1.5 md:px-4 md:py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 mt-2 md:mt-0"
           onClick={handleAddAnimation}
         >
           <HiPlusSm className="w-4 h-4 lg:w-5 lg:h-5 mr-1 lg:mr-2" />
-          <span className="text-xs md:text-sm lg:text-base">
-            เพิ่มสื่อการสอน
-          </span>
+          <span className="text-xs md:text-sm lg:text-base">เพิ่มสื่อการสอน</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1  lg:grid-cols-3 gap-6 justify-center md:mx-10 lg:mx-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 justify-center md:mx-10 lg:mx-4">
         {animation3d.map((animation) => (
           <div
             className="cursor-pointer bg-white shadow-sm rounded-lg p-4 lg:transform lg:transition lg:duration-300 lg:hover:scale-105 lg:hover:shadow-md"
-            key={animation.name}
+            key={animation.id}
           >
             <img
-              onClick={() =>
-                handleImageClick(
-                  animation.name,
-                  animation.url,
-                  animation.aniImageUrl,
-                  animation.description
-                )
-              }
-              src={animation.aniImageUrl}
+              onClick={() => navigate(`/animation3d/${animation.name}/view`, { state: animation })}
+              src={animation.imageUrl}
               alt={animation.name}
               className="cursor-pointer mb-4 w-full rounded hover:transform-none shadow-none"
             />
@@ -173,21 +103,14 @@ function View_MovementOfRPD() {
 
             <div className="flex items-center justify-center w-full text-xs md:text-sm lg:text-base pt-2">
               <button
-                className=" bg-gray-300  text-black px-3 py-2 rounded mr-2 hover:bg-gray-400"
-                onClick={() =>
-                  goToEditPage(
-                    animation.name,
-                    animation.url,
-                    animation.aniImageUrl,
-                    animation.description
-                  )
-                }
+                className="bg-gray-300 text-black px-3 py-2 rounded mr-2 hover:bg-gray-400"
+                onClick={() => goToEditPage(animation)}
               >
                 แก้ไข
               </button>
               <button
-                className=" bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
-                onClick={() => removeAnimation(animation.name)}
+                className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
+                onClick={() => removeAnimation(animation)}
               >
                 ลบ
               </button>
@@ -195,15 +118,6 @@ function View_MovementOfRPD() {
           </div>
         ))}
       </div>
-
-      {/* <div style={{ display: 'flex', marginBottom: "20px", marginTop: '20px', justifyContent: 'center' }}>
-        <button className="button-add" onClick={handleAddAnimation}>
-        
-          <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45" fill="currentColor" className="bi bi-plus-lg" viewBox="0 0 16 16">
-            <path fillRule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-          </svg>
-        </button>
-      </div>  */}
     </div>
   );
 }

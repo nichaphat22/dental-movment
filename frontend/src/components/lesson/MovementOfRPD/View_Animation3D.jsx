@@ -1,31 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom"; 
-import { ref, getDownloadURL } from "firebase/storage";
-import { storage } from "../../../config/firebase"; 
+import { ref, get } from "firebase/database";
+import { database } from "../../../config/firebase"; // เปลี่ยนเป็น Realtime Database
 
 function View_Animation3D() {
-    const [animation3d, setAnimation3d] = useState(null); // ใช้ null แทน array
-    const { name } = useParams(); // รับชื่อจาก URL
+    const [animation3d, setAnimation3d] = useState(null);
+    const { name } = useParams(); 
     const videoRef = useRef(null);
 
     useEffect(() => {
         fetchAnimation();
-    }, [name]); // เพิ่ม name ใน dependency array
+    }, [name]); 
 
     const fetchAnimation = async () => {
         try {
-            const animation3dRef = ref(storage, `animation3d/${name}/animation3d.mp4`); // ใช้ name เพื่อสร้าง path
-            const videoUrl = await getDownloadURL(animation3dRef); 
-            // const descriptionRef = ref(storage, `animation3d/${name}/description.txt`); 
-            // const descriptionUrl = await getDownloadURL(descriptionRef);
-            
-            // const descriptionText = await fetch(descriptionUrl).then(res => res.text());
+            const animationRef = ref(database, `animation3d/${name}`); // อ้างอิงไปที่ Firebase Database
+            const snapshot = await get(animationRef); 
 
-            setAnimation3d({
-                Ani3D_name: name, // ใช้ name เป็นชื่อ
-                // Ani3D_description: descriptionText, 
-                videoUrl: videoUrl 
-            });
+            if (snapshot.exists()) {
+                setAnimation3d(snapshot.val()); 
+            } else {
+                console.error("Animation not found");
+            }
         } catch (error) {
             console.error("Error fetching animation:", error);
         }
@@ -42,22 +38,22 @@ function View_Animation3D() {
       <div className="ViewAnimation flex flex-wrap justify-center">
           {animation3d && (
               <div className="viewvdo text-center">
-                  <h1 className="text-base md:text-lg lg:text-2xl  font-bold mt-4 mb-2.5">{animation3d.Ani3D_name}</h1>
+                  <h1 className="text-base md:text-lg lg:text-2xl font-bold mt-4 mb-2.5">{animation3d.name}</h1>
                   <video
-                      id="animationVideo"
                       ref={videoRef}
                       controls
                       onEnded={handleVideoEnded}
-                      className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl  rounded-lg shadow-sm" 
+                      className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-2xl rounded-lg shadow-sm" 
                   >
                       <source src={animation3d.videoUrl} type="video/mp4" />
                       Your browser does not support the video tag.
                   </video>
-                  {/* <p className="ani_descrip">{animation3d.Ani3D_description}</p> แสดงคำบรรยาย */}
+                  {animation3d.description && (
+                      <p className="ani_descrip mt-2 text-gray-600">{animation3d.description}</p>
+                  )}
               </div>
           )}
       </div>
-  
     );
 }
 

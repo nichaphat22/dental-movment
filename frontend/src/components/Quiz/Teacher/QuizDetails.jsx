@@ -23,7 +23,7 @@ const QuizDetails = () => {
   }, [id]);
 
   const handleEditQuiz = (id) => {
-    navigate(`/quiz/${id}/edit`);
+    navigate(`/quiz-teacher/${id}/edit`);
     console.log(id);
   };
 
@@ -42,7 +42,7 @@ const QuizDetails = () => {
         try {
           await quizService.deleteQuiz(id);
           Swal.fire("ลบสำเร็จ!", "แบบทดสอบได้ถูกลบเรียบร้อยแล้ว", "success");
-          navigate("/ListQuiz"); // กลับไปที่หน้ารายชื่อควิซ
+          navigate("/ListQuiz-teacher"); // กลับไปที่หน้ารายชื่อควิซ
         } catch (error) {
           if (error.response) {
             console.error("เกิดข้อผิดพลาดในการลบควิซ:", error.response.data);
@@ -159,7 +159,7 @@ const QuizDetails = () => {
       <div className="flex justify-center">
         <button
           className="mt-6 px-4 py-2 text-xs md:text-base bg-purple-500 text-white rounded hover:bg-purple-600"
-          onClick={() => navigate("/ListQuiz")}
+          onClick={() => navigate("/ListQuiz-teacher")}
         >
           ย้อนกลับ
         </button>

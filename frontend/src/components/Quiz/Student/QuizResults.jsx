@@ -130,7 +130,7 @@ const QuizResults = () => {
           เริ่มใหม่
         </button>
         <button
-          onClick={() => navigate("/ListQuiz")}
+          onClick={() => navigate("/ListQuiz-student")}
           className="mt-6 px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
         >
           กลับหน้าหลัก

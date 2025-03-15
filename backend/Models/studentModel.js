@@ -3,10 +3,7 @@ const mongoose = require('mongoose')
 
 const studentSchema = new mongoose.Schema(
 {
-    studentId : {
-        type : 'string',
-        unique : true
-    },
+
     yearLevel : {
         type : String,
         default : null
@@ -14,12 +11,9 @@ const studentSchema = new mongoose.Schema(
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        // required: true
+        required: true
     },
-    quizResult: {
-        type : mongoose.Schema.Types.ObjectId,
-        ref: 'Result'
-    },
+    
 }, {
     timestamps: true
 }

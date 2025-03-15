@@ -30,9 +30,10 @@ router.post("/:quizId/questions", createQuestion); // เพิ่มคำถ�
 router.put("/:quizId/questions/:questionId", updateQuestion); // อัปเดตคำถาม
 router.delete("/:quizId/questions/:questionId", deleteQuestion); // ลบคำถาม
 
+
 //result 
 router.post('/submitResult', submitResult);
-router.get('/results/:quizId', getQuizResults);
+router.get('/results/:studentId', getQuizResults);
 
 
 module.exports = router;

@@ -4,8 +4,11 @@ import "./Biomechanical_consideration.css";
 import { baseUrl } from '../../../utils/services';
 import { useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col } from 'react-bootstrap';
+import { useSelect } from "@material-tailwind/react";
+import { useSelector } from "react-redux";
 
 function View_Biomechanical_consideration_Student() {
+  const user = useSelector((state) => state.auth.user);
   const [animations, setAnimations] = useState([]);
   const navigate = useNavigate();
 
@@ -24,7 +27,26 @@ function View_Biomechanical_consideration_Student() {
       });
   };
 
-  const handleImageClick = (id) => {
+  const handleAction = async (
+    actionType,
+    animationId = null,
+    quizId = null
+  ) => {
+    if (!user) return;
+    try {
+      await axios.post("http://localhost:8080/api/recent", {
+        userId: user._id, // ใช้ userId ที่ได้จาก useSelector
+        action: actionType,
+        animationId,
+        quizId,
+      });
+    } catch (error) {
+      console.error("Error saving action:", error);
+    }
+  }
+
+  const handleImageClick = (id,  Ani_name) => {
+    handleAction("บทเรียน", id,null ,Ani_name);
     navigate(`/animation/view/${id}`);
   };
 

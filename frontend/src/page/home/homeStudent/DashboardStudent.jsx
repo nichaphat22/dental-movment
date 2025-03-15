@@ -1,31 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import Recents from "../../../components/Home/Recents";
+
+import { useSelector } from "react-redux";
 
 const DashboardStudent = () => {
-    const navigate = useNavigate();
-    const [user, setUser] = useState(null);  // ปรับค่าเริ่มต้นเป็น null
-    const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState("");
+  const userId = useSelector((state) => state.auth.user?._id); // ดึงจาก Redux
+  console.log("🔍 userId:", userId);
+  return (
+    <div className="flex flex-col items-start mt-20 mx-auto p-6">
+      
+        <h1 className="text-2xl text-left">รายการล่าสุด</h1>
+        {userId ? <Recents userId={userId} /> : <p>⏳ กำลังโหลด...</p>}
+    
+     
+        <h1 className="text-2xl  mb-4 text-left">รายการโปรด</h1>
 
- 
-
-    if (loading) {
-        return <div>Loading...</div>;  // ถ้ากำลังโหลดให้แสดงข้อความนี้
-    }
-
-    if (errorMessage) {
-        return <div style={{ color: 'red' }}>{errorMessage}</div>;  // หากเกิดข้อผิดพลาดให้แสดงข้อความนี้
-    }
-
-   
-
-    return (
-        <div>
-            <h1>DashboardStudent</h1>
-            <p>Welcome, {user?.name || "User"}!</p>  {/* หากข้อมูลผู้ใช้พร้อมแล้วให้แสดงชื่อ */}
-            
-        </div>
-    );
+        <h1 className="text-2xl  mb-4 text-left">ประวัติการเลกเชอร์</h1>
+     
+    </div>
+  );
 };
 
 export default DashboardStudent;

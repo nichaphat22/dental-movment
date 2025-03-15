@@ -9,60 +9,13 @@ import {
 import { Input } from "@material-tailwind/react";
 import EditStudentModel from "./EditStudentModel";
 import AddUser from "./AddUser";
+import axios from "axios";
+import { baseUrl } from "../../utils/services";
+import { useSelector } from "react-redux";
 
 const TableStudent = () => {
-  const [students, setStudents] = useState([
-    {
-      name: "Nichaphat Siribut",
-      email: "nichaphat.si@kkumail",
-      sec: 1,
-      year: 2564,
-      role: "นักศึกษา",
-    },
-    {
-      name: "Anucha Boonmee",
-      email: "anucha.bm@kkumail",
-      sec: 2,
-      year: 2564,
-      role: "อาจารย์",
-    },
-    {
-      name: "Jirawat Phonmanee",
-      email: "jirawat.pm@kkumail",
-      sec: 1,
-      year: 2563,
-      role: "นักศึกษา",
-    },
-    {
-      name: "Saranya Jitpreecha",
-      email: "saranya.jp@kkumail",
-      sec: 3,
-      year: 2565,
-      role: "อาจารย์",
-    },
-    {
-      name: "Pongpat Sitthikorn",
-      email: "pongpat.sk@kkumail",
-      sec: 2,
-      year: 2564,
-      role: "นักศึกษา",
-    },
-    {
-      name: "Kittipat Kongsuwan",
-      email: "kittipat.ks@kkumail",
-      sec: 1,
-      year: 2565,
-      role: "นักศึกษา",
-    },
-    {
-      name: "Nattapong Wongchai",
-      email: "nattapong.wc@kkumail",
-      sec: 3,
-      year: 2563,
-      role: "นักศึกษา",
-    },
-  ]);
-
+  // const user = useSelector(state => state.auth.user);
+  const [users, setUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,6 +23,22 @@ const TableStudent = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
+  //get student
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(`${baseUrl}/users`);
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+        setUsers([]);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  console.log(users);
 
   useEffect(() => {
     if (isAddModalOpen) {
@@ -83,11 +52,10 @@ const TableStudent = () => {
     };
   }, [isAddModalOpen]);
 
-
-    //addUser
-    const handleAddUser = () => {
-      setIsAddModalOpen(true);
-    };
+  //addUser
+  const handleAddUser = () => {
+    setIsAddModalOpen(true);
+  };
 
   useEffect(() => {
     if (isEditModalOpen) {
@@ -101,11 +69,9 @@ const TableStudent = () => {
     };
   }, [isEditModalOpen]);
 
-
-
   //edit
-  const handleEdit = (student) => {
-    setSelectedStudent(student);
+  const handleEdit = (user) => {
+    setSelectedStudent(user);
     setIsEditModalOpen(true);
   };
 
@@ -119,11 +85,14 @@ const TableStudent = () => {
   };
 
   // ฟังก์ชัน Sort ข้อมูล
-  const sortedStudents = [...students]
+  // const sortedStudents = [...students]
+  const sortedUsers = [...users]
     .filter(
-      (student) =>
-        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.email.toLowerCase().includes(searchQuery.toLowerCase())
+      (users) =>
+        (users?.name &&
+          users?.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (users?.email &&
+          users?.email.toLowerCase().includes(searchQuery.toLowerCase()))
     )
     .sort((a, b) => {
       if (!sortConfig.key) return 0;
@@ -144,12 +113,9 @@ const TableStudent = () => {
   };
 
   // แสดงข้อมูลตามหน้า
-  const totalPages = Math.ceil(sortedStudents.length / rowsPerpage);
+  const totalPages = Math.ceil(sortedUsers.length / rowsPerpage);
   const startIndex = (currentPage - 1) * rowsPerpage;
-  const currentStudents = sortedStudents.slice(
-    startIndex,
-    startIndex + rowsPerpage
-  );
+  const currentUsers = sortedUsers.slice(startIndex, startIndex + rowsPerpage);
 
   return (
     <div className="p-4 w-full max-w-6xl mx-auto">
@@ -191,7 +157,7 @@ const TableStudent = () => {
             <tr className="bg-gray-600 text-white text-center ">
               <th className="py-2 px-4">ชื่อ</th>
               <th className="py-2 px-4">email</th>
-              <th
+              {/* <th
                 className="py-2 cursor-pointer text-left min-w-[100px]"
                 onClick={() => requestSort("sec")}
               >
@@ -207,9 +173,9 @@ const TableStudent = () => {
                     <GoChevronDown className="text-gray-400" />
                   )}
                 </div>
-              </th>
+              </th> */}
 
-              <th
+              {/* <th
                 className="py-2 px-4 cursor-pointer text-left min-w-[100px]"
                 onClick={() => requestSort("year")}
               >
@@ -225,7 +191,7 @@ const TableStudent = () => {
                     <GoChevronDown className="text-gray-400" />
                   )}
                 </div>
-              </th>
+              </th> */}
 
               <th
                 className="py-2 px-4 cursor-pointer text-left min-w-[100px]"
@@ -248,20 +214,20 @@ const TableStudent = () => {
             </tr>
           </thead>
           <tbody>
-            {currentStudents.length > 0 ? (
-              currentStudents.map((student, index) => (
+            {currentUsers.length > 0 ? (
+              currentUsers.map((user, index) => (
                 <tr
                   key={index}
                   className="odd:bg-white even:bg-gray-50 hover:bg-gray-100 text-center text-xs md:text-sm"
                 >
-                  <td className="py-2 px-4 border">{student.name}</td>
-                  <td className="py-2 px-4 border">{student.email}</td>
-                  <td className="py-2 px-2 border">{student.sec}</td>
-                  <td className="py-2 px-4 border">{student.year}</td>
-                  <td className="py-2 px-4 border">{student.role}</td>
+                  <td className="py-2 px-4 border">{user.name}</td>
+                  <td className="py-2 px-4 border">{user.email}</td>
+                  {/* <td className="py-2 px-2 border">{users?.sec}</td> */}
+                  {/* <td className="py-2 px-4 border">{users?.year}</td> */}
+                  <td className="py-2 px-4 border">{user.role}</td>
                   <td className="py-2 px-4 border">
                     <button
-                      onClick={() => handleEdit(student)}
+                      onClick={() => handleEdit(user)}
                       className="text-blue-500 hover:text-blue-700"
                     >
                       <GoPencil size={18} />

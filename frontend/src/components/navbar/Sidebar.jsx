@@ -77,7 +77,7 @@ const MenuItem = ({ isExpanded, icon, text, active ,alert}) => (
   >
     <span className="group-hover:text-black text-gray-600">{icon}</span>
     {isExpanded && (
-      <span className="ml-2 text-gray-700 group-hover:text-black">{text}</span>
+      <span className="ml-2 text-gray-700 group-hover:text-black font-normal">{text}</span>
     )}
   </li>
 );

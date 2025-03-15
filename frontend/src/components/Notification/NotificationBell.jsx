@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setNotifications,
@@ -13,46 +13,76 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import {
-  getNotifications,
-  markNotificationAsRead,
+  getUserNotifications,
+  markNotificationsAsRead,
   deleteNotification as deleteNotificationAPI,
 } from "../../utils/notificationAPI";
 
+const token = localStorage.getItem("token");
+
 // ตั้งค่า WebSocket
-const socket = io("http://localhost:8800");
+// const socket = io("http://localhost:8080", { autoConnect: false });
+const socket = io("http://localhost:8080", {
+  query: { token },
+  transports: ["websocket", "polling"],
+});
+
+socket.on("connect", () => {
+  console.log("✅ Connected to server with socket ID:", socket.id);
+});
 
 function NotificationBell() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { list, unreadCount } = useSelector((state) => state.notifications);
+  const user = useSelector((state) => state.auth.user);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-//   const [socket, setSocket] = useState(null);
-//   const [onlineUsers, setOnlineUsers] = useState([]);
+
+  // console.log("🔹 User ID:", user?._id);
+  // console.log("🔹 Notifications list:", list);
 
   useEffect(() => {
     // ดึงการแจ้งเตือนจากเซิร์ฟเวอร์
-    getNotifications()
-      .then((data) => dispatch(setNotifications(data)))
-      .catch((error) => console.error("Error loading notifications:", error));
-
-    // ฟัง event "newNotification" จาก WebSocket
-    socket.on("newNotification", (notification) => {
-      if (notification.type === "quiz_added") {
-        toast.success(`📢 ${notification.message}`, { autoClose: 3000 });
-      } else {
-        toast.info(notification.message);
-      }
-      dispatch(addNotification(notification));
-    });
-
-    // Clean up เมื่อคอมโพเนนต์ unmount
-    return () => {
-      socket.off("newNotification");
-    };
+    getUserNotifications()
+      .then((data) => {
+        console.log("🔹 Notifications fetched:", data);
+        dispatch(setNotifications(data));
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching notifications:", error);
+      });
   }, [dispatch]);
 
-  // ตรวจจับการคลิกภายนอก dropdown
+  useEffect(() => {
+    if (user && !socket.connected) {
+      socket.connect();
+      console.log("✅ Socket connected:", socket.id);
+      console.log("🔍 WebSocket connected:", socket.connected);
+      socket.emit("addNewUser", { userId: user._id });
+    } else if (!user) {
+      socket.disconnect();
+      console.log("❌ Socket disconnected");
+    }
+  
+    const handleNewNotification = (notification) => {
+      console.log("📩 Received notification:", notification);
+      if (notification?.message) {
+        toast.info(notification.message);
+        dispatch(addNotification(notification));
+      }
+    };
+  
+    socket.on("newNotification", handleNewNotification);
+  
+    return () => {
+      socket.off("newNotification", handleNewNotification);
+      socket.disconnect();
+    };
+  }, [dispatch, user]);
+  
+
+  // ปิด dropdown เมื่อคลิกข้างนอก
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -69,39 +99,48 @@ function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // เมื่อคลิกที่การแจ้งเตือน
-  const handleRead = async (id, link) => {
+  const handleRead = useCallback(async (notificationIds, link) => {
     try {
-      // อัปเดตสถานะการอ่านการแจ้งเตือน
-      await markNotificationAsRead(id);
-      dispatch(markAsReadReducer(id));
+      console.log(`✅ Marking notification as read: ${notificationIds}`);
+      await markNotificationsAsRead(notificationIds);
+      dispatch(markAsReadReducer(notificationIds));
+      navigate(link || "/default");
+    } catch (error) {
+      console.error("❌ Error marking notification as read:", error);
+    }
+  }, [dispatch, navigate]);
 
-      // นำทางไปที่ลิงก์ที่เกี่ยวข้อง
-      if (link) {
-        navigate(link);
-      } else {
-        navigate("/default"); // ถ้าไม่มี link ก็ไปหน้า default
+  const handleDelete = useCallback(async (notificationId) => {
+    try {
+      if (!user?._id) {
+        toast.error("❌ You must be logged in to delete notifications.");
+        return;
       }
+  
+      const notification = list.find((n) => n._id === notificationId);
+      if (!notification || notification.recipient !== user._id) {
+        toast.error("❌ You cannot delete this notification.");
+        return;
+      }
+  
+      console.log("🔹 Deleting notification ID:", notificationId);
+  
+      await deleteNotificationAPI(notificationId);
+      dispatch(deleteNotificationReducer(notificationId));
+      toast.success("✅ Notification deleted successfully.");
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      console.error("❌ Error deleting notification:", error);
+      toast.error("❌ Failed to delete notification.");
     }
-  };
-
-  // ลบการแจ้งเตือน
-  const handleDelete = async (id) => {
-    try {
-      await deleteNotificationAPI(id);
-      dispatch(deleteNotificationReducer(id));
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-    }
-  };
+  }, [dispatch, list, user]);
+  
+  
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2  rounded-full hover:bg-gray-200 transition"
+        className="relative p-2 rounded-full hover:bg-gray-200 transition"
       >
         <FaBell className="text-purple-500 w-5 h-5" />
         {unreadCount > 0 && (
@@ -111,7 +150,6 @@ function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown แจ้งเตือน */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -121,20 +159,16 @@ function NotificationBell() {
             className="absolute right-0 mt-3 w-80 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
           >
             <div className="p-4 border-b">
-              <h4 className="text-lg font-semibold text-gray-700">
-                การแจ้งเตือน
-              </h4>
+              <h4 className="text-lg text-center font-semibold text-gray-700">การแจ้งเตือน</h4>
             </div>
 
             <div className="max-h-64 overflow-y-auto">
               {list.length === 0 ? (
-                <p className="text-center p-3 text-gray-500">
-                  ไม่มีการแจ้งเตือน
-                </p>
+                <p className="text-center p-3 text-gray-500">ไม่มีการแจ้งเตือน</p>
               ) : (
                 list.map((n) => (
                   <motion.div
-                    key={n._id} // ใช้ key ที่ไม่ซ้ำ
+                    key={n._id}
                     className="p-3 flex justify-between items-center border-b hover:bg-gray-100 transition"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

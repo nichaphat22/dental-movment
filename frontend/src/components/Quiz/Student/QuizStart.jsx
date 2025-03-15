@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import quizService from "../../../utils/quizService";
 import QuizResults from "./QuizResults";
+import { useSelector } from "react-redux";
 
 const QuizStart = () => {
   const { id } = useParams();
@@ -12,6 +13,8 @@ const QuizStart = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+  const user = useSelector(state => state.auth.user);
+  const roleData = useSelector(state => state.auth.roleData)
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -35,20 +38,34 @@ const QuizStart = () => {
     });
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (currentQuestionIndex < quiz.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // คำนวณคะแนนโดยตรง
+      // คำนวณคะแนน
       const totalScore = answers.reduce((acc, answer, index) => {
         return answer === quiz.questions[index].correctAnswer ? acc + 1 : acc;
       }, 0);
-
-      navigate(`/quiz/${id}/result`, {
-        state: { quiz, answers, score: totalScore },
-      });
+  
+      const resultData = {
+        student: roleData, // ควรเป็น ObjectId
+        quiz: id, // ควรเป็น ObjectId
+        score: totalScore,
+      };
+  
+      console.log("📤 ส่งข้อมูลไปที่ Backend:", resultData); // ✅ Debug ดูค่าที่ส่ง
+  
+      try {
+        await quizService.submitResult(resultData);
+        navigate(`/quiz/${id}/result`, {
+          state: { quiz, answers, score: totalScore },
+        });
+      } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดขณะส่งคะแนน:", error.response?.data || error);
+      }
     }
   };
+  
 
   const handlePrevQuestion = () => {
     if (currentQuestionIndex > 0) {

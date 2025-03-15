@@ -184,89 +184,96 @@ const QuizEdit = () => {
   };
 
   // เพิ่มการจัดการไฟล์รูปภาพ
-  // const handleImageUpload = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file && file.type.startsWith("image/")) {
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       setImage(reader.result); // บันทึก Base64 ของภาพ
-  //     };
-  //     reader.readAsDataURL(file);
-  //   } else {
-  //     toast.error("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น!", {
-  //       position: "top-right",
-  //       autoClose: 2000,
-  //       theme: "light",
-  //       transition: Flip,
-  //     });
-  //   }
-  // };
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImage(reader.result); // บันทึก Base64 ของภาพ
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast.error("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น!", {
+        position: "top-right",
+        autoClose: 2000,
+        theme: "light",
+        transition: Flip,
+      });
+    }
+  };
 
   const handleSave = async () => {
     // ตรวจสอบข้อมูลก่อนที่จะบันทึก
     if (!quiz.title.trim() || !quiz.description.trim()) {
-      alert("Title and Description cannot be empty.");
+      Swal.fire("Error", "Title and Description cannot be empty.", "error");
       return;
     }
-
+  
     if (!quiz.questions.length) {
-      alert("Quiz must have at least one question.");
+      Swal.fire("Error", "Quiz must have at least one question.", "error");
       return;
     }
-
+  
     for (const question of quiz.questions) {
       if (!question.question.trim()) {
-        alert("All questions must have text.");
+        Swal.fire("Error", "All questions must have text.", "error");
         return;
       }
-
+  
       if (
         !question.choices.length ||
         question.choices.some((opt) => !opt.trim())
       ) {
-        alert("Each question must have at least one choice with valid text.");
+        Swal.fire(
+          "Error",
+          "Each question must have at least one choice with valid text.",
+          "error"
+        );
         return;
       }
-
+  
       if (
         question.correctAnswer === undefined ||
         question.correctAnswer < 0 ||
         question.correctAnswer >= question.choices.length
       ) {
-        alert("Correct answer must be a valid choice index.");
+        Swal.fire(
+          "Error",
+          "Correct answer must be a valid choice index.",
+          "error"
+        );
         return;
       }
     }
-
+  
     try {
-      // อัปเดตข้อมูลควิซ
-      await quizService.updateQuiz(id, {
+      const quizData = {
         title: quiz.title,
         description: quiz.description,
-      });
-
-      // ลบคำถามที่มีสถานะ deleted
-      const deletedQuestions = quiz.questions.filter(
-        (question) => question.deleted
-      );
-      for (const question of deletedQuestions) {
-        if (question._id) {
-          await quizService.deleteQuestion(id, question._id);
+        teacher: quiz.teacher,
+        questions: quiz.questions.map((q) => ({
+          _id: q._id || undefined,
+          question: q.question,
+          choices: q.choices,
+          image: q.image,
+          correctAnswer: q.correctAnswer,
+          answerExplanation: q.answerExplanation || "",
+          deleted: q.deleted || false,
+        })),
+      };
+  
+      try {
+        await quizService.updateQuiz(id, quizData);
+      } catch (error) {
+        console.error("Error updating quiz or questions:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data); // ดูข้อความผิดพลาดจากเซิร์ฟเวอร์
         }
+        Swal.fire("Failed to update quiz or questions.", "", "error");
       }
-
-      // เพิ่มหรืออัปเดตคำถาม
-      const activeQuestions = quiz.questions.filter((q) => !q.deleted);
-      for (const question of activeQuestions) {
-        if (question._id) {
-          // อัปเดตคำถามเดิม
-          await quizService.updateQuestion(id, question._id, question);
-        } else {
-          // สร้างคำถามใหม่
-          await quizService.createQuestion(id, question);
-        }
-      }
-
+      
+  
+      // แจ้งผลลัพธ์
       const result = await Swal.fire({
         title: "Do you want to save the changes?",
         icon: "warning",
@@ -275,19 +282,21 @@ const QuizEdit = () => {
         confirmButtonText: "Save",
         denyButtonText: `Don't save`,
       });
-
+  
       if (result.isConfirmed) {
         Swal.fire("Saved!", "", "success");
-        navigate("/ListQuiz");
+        navigate("/ListQuiz-teacher");
       } else if (result.isDenied) {
         Swal.fire("Changes are not saved", "", "info");
-        navigate("/ListQuiz");
+        navigate("/ListQuiz-teacher");
       }
     } catch (error) {
       console.error("Error updating quiz or questions:", error);
       Swal.fire("Failed to update quiz or questions.", "", "error");
     }
   };
+  
+  
 
   const handleFieldChange = (field, value) => {
     setQuiz({ ...quiz, [field]: value });
@@ -306,7 +315,7 @@ const QuizEdit = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // ถ้าผู้ใช้กดยืนยันให้เปลี่ยนเส้นทาง
-        navigate("/ListQuiz");
+        navigate("/ListQuiz-teacher");
       }
     });
   };
@@ -398,7 +407,9 @@ const QuizEdit = () => {
             <div className="mb-6 p-4 focus-within:border-l-4 focus-within:border-purple-600 rounded-md bg-slate-50 drop-shadow-md relative transition">
               {/* Question Input */}
               <div className="flex items-center mb-4 mt-2">
-                <span className="pr-4 py-2 mt-3 text-sm md:text-base ">{qIndex + 1}.</span>
+                <span className="pr-4 py-2 mt-3 text-sm md:text-base ">
+                  {qIndex + 1}.
+                </span>
                 <Input
                   variant="static"
                   color="blue-gray"
@@ -458,7 +469,9 @@ const QuizEdit = () => {
               {question.choices.map((choice, oIndex) => (
                 <div key={oIndex}>
                   <label className="flex mb-2">
-                    <span className="pr-4 pl-4 md:pl-8 py-2 text-sm md:text-base ">{oIndex + 1}.</span>
+                    <span className="pr-4 pl-4 md:pl-8 py-2 text-sm md:text-base ">
+                      {oIndex + 1}.
+                    </span>
                     <textarea
                       value={choice}
                       onChange={(e) => {
@@ -495,7 +508,9 @@ const QuizEdit = () => {
               </div>
               {/* Correct Answer */}
               <label>
-                <span className="text-sm md:text-base ">เลือกคำตอบที่ถูกต้อง:</span>
+                <span className="text-sm md:text-base ">
+                  เลือกคำตอบที่ถูกต้อง:
+                </span>
                 <select
                   value={question.correctAnswer}
                   onChange={(e) =>

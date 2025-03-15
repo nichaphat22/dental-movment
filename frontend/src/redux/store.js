@@ -5,7 +5,7 @@ import authReducer from './authSlice';
 const store = configureStore({
     reducer: {
         notifications: notificationReducer,
-        auth: authReducer
+        auth: authReducer,
 
     },
 });

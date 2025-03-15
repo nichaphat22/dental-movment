@@ -10,10 +10,13 @@ const resultSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
     },
-    score: { type: Number, required: true }, // คะแนนที่ได้
+    score: { 
+      type: Number, 
+      required: true 
+    }, // คะแนนที่ได้
     createdAt: { type: Date, default: Date.now }
   },
-  { timeseries: true }
+  {  timestamps: true }
 );
 
 const Result = mongoose.model("Result", resultSchema);

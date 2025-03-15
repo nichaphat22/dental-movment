@@ -23,6 +23,7 @@ const quizSchema = new mongoose.Schema(
     teacher: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Teacher",
+      required: true,
     },
     createdAt: { type: Date, default: Date.now },
   },
