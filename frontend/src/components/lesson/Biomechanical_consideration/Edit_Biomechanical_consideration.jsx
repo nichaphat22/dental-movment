@@ -42,7 +42,7 @@ function Edit_Biomechanical_consideration() {
 
   useEffect(() => {
     if (id) {
-      axios.get(`/api/animation/getAnimationById/${id}`)
+      axios.get(`http://localhost:8080/api/animation/getAnimationById/${id}`)
         .then(response => {
           const { Ani_name, Ani_description, Ani_animation, Ani_image } = response.data;
           setNewAnimationName(Ani_name);
@@ -158,7 +158,7 @@ if (!formData.has("Ani_name") &&
 }
 
       axios
-        .put(`/api/animation/updateAnimation/${id}`, formData, {
+        .put(`http://localhost:8080/api/animation/updateAnimation/${id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         })
 

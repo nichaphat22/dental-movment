@@ -16,16 +16,18 @@ function View_Biomechanical_consideration_Student() {
 
   const fetchAnimations = () => {
     axios
-      .get(`/api/animation/getAnimation`)
+      .get(`http://localhost:8080/api/animation/getAnimation`)
       .then((response) => {
-        setAnimations(response.data);
-        setLoading(false); // Set loading to false once data is fetched
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setLoading(false); // Set loading to false in case of an error
-      });
-  };
+        console.log("API Response:", response.data); // Debugging
+      setAnimations(response.data);
+      setLoading(false); // Set loading to false once data is fetched
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      setLoading(false); // Set loading to false in case of an error
+    });
+};
+
 
   const handleImageClick = (id) => {
     navigate(`/animation/view/${id}`);
@@ -39,8 +41,16 @@ function View_Biomechanical_consideration_Student() {
       {loading ? ( // Show loading spinner while data is loading
           <div className="d-flex justify-content-center my-5" style={{}}>
             {/* animation="grow" */}
-            <Spinner animation="border" style={{color:'rgb(172, 78, 235)'}} />
-          </div>
+               <Spinner
+                                  as="span"
+                                  animation="grow"
+                                 //  size="lg"
+                                  role="status"
+                                  aria-hidden="true"
+                                  style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                                   height: '25px'}}
+                                />
+                                กำลังโหลด... </div>
         ) : (
       <Row>
         {animations.map((animation) => (

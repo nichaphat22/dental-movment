@@ -8,7 +8,7 @@ import './sidebar-mobile.css';
 const Model = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
-      <div style={{ marginTop: "65px" ,}} >
+      <div style={{ marginTop: "100px" ,}} >
         {/* Sidebar for mobile */}
         <div
           className={`sidebar-mobile ${
@@ -26,7 +26,7 @@ const Model = () => {
         {/* Main Content Area */}
         <div className="main-content" >
         {/* style={{ borderRadius: "0",background:'', maxHeight: "10vw",borderTop:'none'}} */}
-          <Frame style={{borderRadius: "0",borderTop:'none'}}>
+          <Frame >
             <ViewModel />
           </Frame>
   

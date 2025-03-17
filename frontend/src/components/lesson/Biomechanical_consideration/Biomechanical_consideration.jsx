@@ -52,7 +52,7 @@ if (!Ani_name  || !Ani_description  || !Ani_animation || !Ani_image) {
     setUploading(true);
 
     try {
-      const response = await axios.post('/api/animation/saveAnimation',
+      const response = await axios.post('http://localhost:8080/api/animation/saveAnimation',
         formData,
         {
           headers: {

@@ -10,7 +10,7 @@ import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 moment.locale('th'); // ตั้งค่าเป็นภาษาไทย
 
-const NotiChat = ({ chat, user }) => {
+const NotiChat = ({ chat, user,isActive }) => {
   const { recipientUser } = useFetchRecipientUser(chat, user);
   const navigate = useNavigate();
 
@@ -39,7 +39,7 @@ const NotiChat = ({ chat, user }) => {
 // ฟังก์ชันในการคลิกเพื่อทำให้การแจ้งเตือนเป็น "อ่านแล้ว"
 // ✅ ฟังก์ชันเมื่อกดที่แชท
 const handleClick = async (id) => {
-  console.error("id", id);
+  // console.error("id", id);
   // ตรวจสอบว่า latestMessage มีค่าหรือไม่ และข้อความยังไม่ได้อ่าน|| id !== user._id
   // if (!latestMessage || !id  ) {
   if (!id  ) {
@@ -48,20 +48,45 @@ const handleClick = async (id) => {
       return;
   }
 
+  // try {
+  //     // เรียกใช้งาน markMessageAsRead เพื่ออัปเดตสถานะการอ่าน
+  //     console.log("Marking message as read for sender:", id);
+  //     await markMessageAsRead(id, latestMessage.isRead);
+
+  //     // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
+  //     setNotificationsAsRead(id);
+  // } catch (error) {
+  //     console.error("❌ Error marking message as read:", error);
+  // }
   try {
-      // เรียกใช้งาน markMessageAsRead เพื่ออัปเดตสถานะการอ่าน
-      console.log("Marking message as read for sender:", id);
-      await markMessageAsRead(id, latestMessage.isRead);
+    // ตรวจสอบว่า latestMessage และ chat มีค่าหรือไม่
+    if (!latestMessage || typeof latestMessage.isRead === "undefined") {
+        console.log("latestMessage is undefined or isRead is undefined, skipping marking message as read.");
+        
+        // ตรวจสอบว่า chat และ chat._id มีค่าก่อนนำทาง
+        if (chat && chat._id) {
+            navigate(`/chat/${chat._id}`);
+        }
+        return; // ออกจากฟังก์ชันเพื่อป้องกันการรันโค้ดถัดไป
+    }
 
-      // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
-      setNotificationsAsRead(id);
-  } catch (error) {
-      console.error("❌ Error marking message as read:", error);
-  }
+    // เรียกใช้งาน markMessageAsRead เพื่ออัปเดตสถานะการอ่าน
+    await markMessageAsRead(id, latestMessage.isRead);
 
-  // นำทางไปยังหน้าของแชท
-  navigate(`/chat/${id}`);
+    // อัปเดตการแจ้งเตือนเมื่อข้อความถูกอ่านแล้ว
+    setNotificationsAsRead(id);
+} catch (error) {
+    console.error("❌ Error marking message as read:", error);
+}
+
+// ตรวจสอบอีกครั้งว่า chat มีค่า และ _id ไม่เป็น undefined ก่อนนำทาง
+if (chat && chat._id) {
+    navigate(`/chat/${chat._id}`);
+}
+
+
 };
+// console.log('chat',chat._id)
 
 const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
 
@@ -69,7 +94,7 @@ const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
     <Stack
       direction="horizontal"
       gap={1}
-      className="user-card-noti align-items-center p-2 justify-content-between"
+      className={` user-card-noti align-items-center p-2 justify-content-between ${isActive ? "active-chat" : ""}`}
       role="button"
       onClick={() => handleClick(recipientUser?._id)} // ส่ง chat.senderId ไปที่ handleClick
     >
@@ -86,8 +111,8 @@ const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
   {latestMessage && (
     <span
       style={{
-        fontWeight: hasUnreadMessages ? "bold" : "normal",
-        color: hasUnreadMessages ? "#000" : "#888",
+        fontWeight: hasUnreadMessages ? "700" : "300",
+        color: hasUnreadMessages ? "#000" : "rgb(61, 61, 61) ",
       }}
     >
       {latestMessage?.file ? (
@@ -111,18 +136,16 @@ const unreadMessages = unreadChatsCount(notifications, recipientUser?._id);
                   {unreadMessages} <span style={{color: '#000',fontSize:'12px',fontWeight:'400' }}>ข้อความใหม่</span>
                 </span>
               )}
-             <div className="date">
-        {latestMessage ? (
-          moment(latestMessage?.createdAt).locale("th").calendar()
-        ) : (
-          null
-        )}
-      </div>
-          {/* Display the number of unread notifications for each chat */}
-          {/* <div className={thisUserNotifications?.length > 0 ? "this-user-notifications" : ""}>
-                        {thisUserNotifications?.length > 0 ? thisUserNotifications.length : ""}
-                    </div> */}
-        {/* <span className={isOnline ? "user-online" : ""}></span> */}
+           <div className="date">
+  {latestMessage ? (
+    moment(latestMessage?.createdAt).isSame(new Date(), 'day') 
+      ? moment(latestMessage?.createdAt).locale("th").format('HH:mm')  // ถ้าเป็นภายในวันเดียวกันให้แสดงเวลา
+      : moment(latestMessage?.createdAt).locale("th").format('D MMM')   // ถ้าเกิน 1 วันให้แสดงวันที่และเดือน
+  ) : (
+    null
+  )}
+</div>
+
       </div>
     </Stack>
   );

@@ -8,7 +8,8 @@ import NotiChat from "./NotiChat";
 import moment from "moment/min/moment-with-locales";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
-
+import { IoChatboxEllipsesOutline } from "react-icons/io5";
+import { IoChatboxEllipses } from "react-icons/io5";
 
 // import { useFetchRecipientUser } from "../../hooks/useFetchRecipient";
 moment.locale("th");
@@ -16,18 +17,28 @@ moment.locale("th");
 const Notifications = ({}) => {
   const { user } = useContext(AuthContext);  // Context to get the current user data
   const [isOpen, setIsOpen] = useState(false); // State to control visibility of the notification box
-  const { setNotifications,userChats,unreadNotifications,setUnreadNotifications,updateCurrentChat } = useContext(ChatContext);
+  const { setActiveChatId,setNotifications,userChats,unreadNotifications,setUnreadNotifications,updateCurrentChat } = useContext(ChatContext);
   
-  useEffect(() => {
-    return () => {
-        updateCurrentChat(null);
-    };
-}, [updateCurrentChat]);
+//   useEffect(() => {
+//     return () => {
+//         updateCurrentChat(null);
+//     };
+// }, [updateCurrentChat]);
+
+const handleChatClick = (chat) => {
+  try {
+    setActiveChatId(chat._id);  // Set the active chat
+    updateCurrentChat(chat);  // Update current chat in context
+  } catch (error) {
+    console.error("Error updating active chat:", error);
+  }
+};
+
   
 useEffect(() => {
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`/api/messages/notifications/unread/${user?._id}`);
+      const response = await axios.get(`http://localhost:8080/api/messages/notifications/unread/${user?._id}`);
       const notifications = response.data;  // เข้าถึงข้อมูลในโปรเปอร์ตี้ data ของ response
       const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
       setUnreadNotifications(unread);
@@ -45,13 +56,16 @@ useEffect(() => {
     // console.error("id", id);
     try {
       // อัปเดตสถานะ isRead เป็น true เมื่อคลิกที่การแจ้งเตือน
-      await axios.patch(`/api/messages/notifications/read/${user._id}`, { isRead: true });
+      await axios.patch(`http://localhost:8080/api/messages/notifications/read/${user._id}`, { isRead: true });
+
+       // ลบการแจ้งเตือนที่อ่านแล้วจากฐานข้อมูล
+       await axios.delete(`http://localhost:8080/api/messages/notifications/DeleteUserRead/${user._id}`);
   
       // ปรับปรุงการแจ้งเตือนใน state หลังจากการอัปเดต
       setIsOpen(!isOpen);  // Toggle visibility of notification box
       // setUnreadNotifications([]); // ลบการแจ้งเตือนที่ยังไม่ได้อ่านจาก state
       // รีเฟรชการดึงข้อมูลใหม่
-      const response = await axios.get(`/api/messages/notifications/unread/${user._id}`);
+      const response = await axios.get(`http://localhost:8080/api/messages/notifications/unread/${user._id}`);
       const notifications = response.data; 
       const unread = notifications?.filter(notification => !notification.isRead && notification.recipientId === user._id);
       setUnreadNotifications(unread);  // อัปเดตการแจ้งเตือนใหม่
@@ -106,13 +120,15 @@ useEffect(() => {
       {isOpen && (
         <div className="notifications-box" onClick={() => setIsOpen(false)}>
           <div className="notifications-header">
-            <h3 style={{ color: "#000", textAlign: "center",fontSize:'16px' }}>แชท</h3>
+             <div className="" style={{color:'#000',justifyContent:'center',textAlign:'center',fontWeight:'400',fontSize:'18px',display:'inline-flex',alignItems:'center',marginBottom:'5px'}}><span style={{fontWeight:'400',marginRight:'5px',fontSize:'18px'}}>แชต</span> <span style={{color:'rgb(175, 131, 255)'}}><IoChatboxEllipses size={20} />
+                            </span></div>
+            {/* <h3 style={{ color: "#000", textAlign: "center",fontSize:'16px' }}>แชท</h3> */}
           </div>
 
           {userChats?.length > 0 ? (
-            <Stack className="messages-box flex-grow-0" gap={3}>
+            <Stack className="messages-box flex-grow-0" gap={0} style={{background:'#fff',borderRadius:''}}>
               {userChats.map((chat) => (
-                <div key={chat._id} onClick={() => updateCurrentChat(chat)}>
+                <div key={chat._id} onClick={() => handleChatClick(chat)}>
                   <NotiChat chat={chat} user={user} />
                 </div>
               ))}

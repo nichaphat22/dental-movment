@@ -10,7 +10,7 @@ export const useFetchRecipientUser = (chat, user) => {
     useEffect(() => {
         const getUser = async()=> {
             if(!recipientId) return null;
-            const response = await axios.get(`/api/users/find/${recipientId}`
+            const response = await axios.get(`http://localhost:8080/api/users/find/${recipientId}`
             )
 console.log('response.data',response.data)
             if(response.error) {

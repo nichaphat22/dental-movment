@@ -30,14 +30,11 @@
 }
 
 /* ปรับขนาดของเมนู dropdown เมื่อมันแสดง */
-.dwMenu.dropdown-menu.show {
-  display: block !important;
-  width: 70px !important;
-  min-width: 70px !important;
-  transform: translate3d(-10px, 37.6px, 0px);
-  font-size: 0.75rem !important;
-  padding:0 !important;
+.dwMenu{
+  display: flex;
+  justify-content: start !important;
 }
+
 
 /* ปรับตำแหน่งของ .dropdown-item ให้อยู่ตรงกลาง */
 .dropdown-item {
@@ -58,7 +55,19 @@
   border-radius: var(--bs-dropdown-item-border-radius, 0);
   z-Index:10px;
 }
+.dwMenu{
+  display:flex;
+  /* display: flex; */
+  justify-content: end !important;
+}
 
+.btEdit{
+  color:  rgb(52, 52, 52);
+}
+.btDelete{
+  color:  rgb(122, 122, 122);
+  /* background:#ff1919; */
+}
 .btEdit.dropdown-item:hover{
 background:#d2d2d2;
 
@@ -138,7 +147,8 @@ h3 .Ani_name {
     /* color:#000; */
     font-size: 1rem;
     /* margin-top: 8px; */
-   
+    display: flex;
+    justify-content: start !important;
     
     /* text-align:start;/ */
 }
@@ -277,9 +287,13 @@ video {
 
 .animationid .img_ani{
   display:block;
-    border-radius: 5px 5px 0 0 !important; 
+  margin:auto;
+  /* margin-to */
+  /* left:0;
+  right:0; */
+    border-radius: 0 !important; 
     cursor: pointer;
-      height: 140px !important;
+      height: 150px !important;
       /* max-width: 250px !important; */
       width: 100% !important;
 
@@ -301,47 +315,37 @@ video {
   margin-bottom:30px;
 }
 .ani {
-  width: 100%;  /* ป้องกันขยายเกินขนาด Col */
+  max-width: 100%;  /* ป้องกันขยายเกินขนาด Col */
   margin: auto; /* จัดให้อยู่กึ่งกลาง */
-  padding-bottom: 15px;
-  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  padding: 8px;
+  box-shadow: 0 0 10px 3px rgba(203, 203, 203, 0.33) !important;
   /* border-radius: 10px; */
   transition: transform 0.3s ease;
   background: white;
-  border-radius: 5px; 
+  /* border-radius: 7px;  */
 
 }
 .ani:hover {
   transform: scale(1.075);
 }
-/* @media (min-width: 1024px) {
-  .ani {
-    width: calc(100% / 3 - 20px); /* แบ่ง 3 คอลัมน์ */
-    /* margin: auto; 
-  }
-} */ 
 
 .upload-status {
     font-weight: bold;
   }
   
-  /* .uploading {
-    color: yellow;
-  }
-  
-  .completed {
-    color: green;
-  }
-   */
-   /* .row{
- margin: 20px;
-   } */
-
 .nameandbt{
   display: flex;
-  justify-content: space-between;
-  margin:0 10px 0 10px;
+  justify-content: start !important;
+  font-weight:500 !important;
+/* padding-top:3px; */
+  margin:0 0 0 5px;
 }
+
+/* .nameandbt{
+  display: flex;
+  justify-content: center;
+  font-weight:500 !important;
+} */
 
 .bt{
   float:right !important;

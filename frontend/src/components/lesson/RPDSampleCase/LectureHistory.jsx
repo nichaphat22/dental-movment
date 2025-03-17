@@ -30,7 +30,7 @@ const LectureHistory = () => {
         console.error('No userLectureID provided'); // ตรวจสอบว่า ID ผู้ใช้ถูกส่งมา
         return;
       }
-      const response = await axios.get(`/api/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
+      const response = await axios.get(`http://localhost:8080/api/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
       setLectures(response.data); // ตั้งค่าข้อมูลบรรยายใน state
     } catch (error) {
       console.error('Error fetching lectures:', error); // จัดการข้อผิดพลาด
@@ -69,7 +69,7 @@ const LectureHistory = () => {
           try {
             
     // try {
-      await axios.delete(`/api/lecture/lectures/${id}`); // ลบบรรยายตาม ID
+      await axios.delete(`http://localhost:8080/api/lecture/lectures/${id}`); // ลบบรรยายตาม ID
       fetchLectures(user._id); // ดึงข้อมูลบรรยายใหม่หลังจากลบ
   //  / แสดงข้อความสำเร็จหลังจากการลบ
            Swal.fire("ลบสำเร็จ!", "รูปภาพถูกลบเรียบร้อยแล้ว", "success");
@@ -90,7 +90,7 @@ const LectureHistory = () => {
   };
 
   return (
-    <div className="lecture-history" style={{position:'relative',top:'70px',}}>
+    <div className="lecture-history" style={{position:'relative',}}>
              <ToastContainer  />  
       <h1 className="title-h1-lect" style={{}}>Lecture History</h1>
       <div className="lecture-thumbnails" style={{ display: 'flex', flexWrap: 'wrap', textAlign: 'center', justifyContent: 'center',width:'100%',margin:'auto' }}>
@@ -129,8 +129,8 @@ const LectureHistory = () => {
                   right: '3px'  ,   
                   zIndex: '10'   ,     
                   cursor: 'pointer'     ,
-                  background:'rgba(232, 232, 232, 0.49)',
-                  borderRadius:'50%'
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  borderRadius:'5px'
               
                 // float:'right'
               }}

@@ -26,7 +26,7 @@ function View_Animation() {
 
   const fetchAnimation = () => {
     axios
-      .get(`/api/animation/getAnimationById/${id}`)
+      .get(`http://localhost:8080/api/animation/getAnimationById/${id}`)
       .then((response) => {
         setAnimation(response.data);
         setLoading(false); 

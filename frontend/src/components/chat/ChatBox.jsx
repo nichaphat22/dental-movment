@@ -18,12 +18,15 @@ import './Chat.css';
 import moment from 'moment/min/moment-with-locales';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { MdCancel } from "react-icons/md";
+import { Card, Button, Row, Col,Container,Spinner,Dropdown, ButtonGroup,  } from 'react-bootstrap';
+import { PiPaperPlaneRightFill } from "react-icons/pi";
+
 moment.locale('th');
 const ChatBox = ({ chat, }) => {
     const { user } = useContext(AuthContext);
     const { currentChat, markMessageAsRead, setCurrentChat, messages, isMessagesLoading, sendTextMessage, setNotificationsAsRead } = useContext(ChatContext);
     const { recipientUser } = useFetchRecipientUser(currentChat, user, chat);
-
+    // const [loading, setLoading] = useState(true); // Loading state
     const [textMessage, setTextMessage] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -109,11 +112,29 @@ const ChatBox = ({ chat, }) => {
     };
 
     if (!recipientUser) {
-        return <p style={{ textAlign: "center", width: "100%" }}>ยังไม่ได้เลือกแชท...</p>;
+        return  <div style={{ display:'flex',float:'',textAlign: "center",justifyContent:'center', color:'rgb(111, 111, 111)',maxWidth:'100vw',
+          float: 'none', // ทำให้ไม่ลอยไปด้านใด
+          margin: '0 auto', // ทำให้พารากราฟมี margin อัตโนมัติจากซ้ายและขวา
+          color: 'rgb(172, 78, 235)',
+         }}>ยังไม่ได้เลือกแชท...</div>
     }
 
     if (isMessagesLoading) {
-        return <p style={{ textAlign: "center", width: "100%" }}>กำลังโหลดแชท...</p>;
+        return   <div className=""
+        style={{display:'flex',float:'',textAlign: "center",justifyContent:'center', color:'rgb(111, 111, 111)',maxWidth:'100vw',
+          float: 'none', // ทำให้ไม่ลอยไปด้านใด
+          margin: '0 auto', // ทำให้พารากราฟมี margin อัตโนมัติจากซ้ายและขวา
+          color: 'rgb(172, 78, 235)',}}
+        ><Spinner
+        as="span"
+        animation="grow"
+       //  size="lg"
+        role="status"
+        aria-hidden="true"
+        style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+         height: '25px'}}
+      />
+      กำลังโหลด...</div> 
     }
 
 
@@ -145,9 +166,13 @@ const ChatBox = ({ chat, }) => {
             onClick={() => handleClick(recipientUser._id)} // Click handler for image
         >
             <div className="chat-header">
-                <strong>
+                <strong style={{ display:'inline-flex', alignItems: 'center' }}>
+                <LazyLoadImage className="chat-header-profile"
+                style={{width:'37px', height:'37px' ,borderRadius:'50%',marginRight:'10px'}}
+            src={recipientUser?.img} ></LazyLoadImage>
                   {/* {recipientUser.fname} {recipientUser.lname} */}
-                  {recipientUser.name}
+                <span style={{fontWeight:'300',fontSize:'22px'}}>{recipientUser.name}</span>  
+
                 </strong>
             </div>
 
@@ -243,8 +268,8 @@ const ChatBox = ({ chat, }) => {
                 <InputEmoji
                     value={textMessage}
                     onChange={setTextMessage}
-                    borderColor="#DADADA"
-                    background="#F2F2F2"
+                    borderColor="none"
+                    background="#eef1f8"
                 />
                 <label htmlFor="file-upload" style={{ cursor: "pointer", marginRight: "5px" }}>
                     <input
@@ -255,9 +280,9 @@ const ChatBox = ({ chat, }) => {
                         ref={fileInputRef}
                         style={{ display: 'none' }}
                     />
-                    <MdOutlineAttachFile size={'28'} style={{color:'#000'}}/>
+                    <MdOutlineAttachFile size={'28'} style={{color:'#8567f6',marginRight:'5px'}}/>
                 </label>
-                <button className="send-button" onClick={handleSendMessage} style={{color:'#fff', backgroundColor:'rgb(125, 26, 167)',padding:'10px 15px',borderRadius:'7px'}}>ส่ง</button>
+                <button className="send-button" onClick={handleSendMessage} style={{color:'#fff', fontSize:'14px',backgroundColor:'#8567f6',padding:'9px 12px',borderRadius:'7px',boxShadow: 'rgba(17, 17, 26, 0.1) 0px 4px 16px, rgba(17, 17, 26, 0.1) 0px 8px 24px, rgba(17, 17, 26, 0.1) 0px 16px 56px'}}><PiPaperPlaneRightFill size={22}/></button>
             </Stack>
 
            

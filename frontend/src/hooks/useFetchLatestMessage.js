@@ -14,7 +14,7 @@ export const useFetchLatestMessage = (chat) => {
 
             try {
                 // Sending GET request to fetch messages for the given chat
-                const response = await axios.get(`/api/messages/${chat._id}`);
+                const response = await axios.get(`http://localhost:8080/api/messages/${chat._id}`);
 
                 // Check if there's an error in the response
                 if (response?.data?.error) {

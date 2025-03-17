@@ -4,30 +4,44 @@
         /* width: 100% !important; */
         /* max-height: calc(100vh) !important;  */
     }
-    .messages-box1 {
+    /* .messages-box1 {
         display: none;
-    }
+    } */
     .align-items-start{
         /* max-width: calc(100vh) !important; */
     }
     .messages.vstack.gap-3{
         font-size: 13px;
     }
-   
-    
+    .user-card .text-content {
+        width: 7rem  !important;
+        font-size: 0.7rem  !important;
+        margin-left:0.5rem  !important;
+      }
+      .user-card .text-content .name,
+      .user-card .text-content .text{
+        font-size: 0.8rem  !important;
+      }
+      .me-2 img{
+        width: 35px !important; 
+        height: 35px !important;
+    }
+    .user-card .date{
+        font-size: 0.65rem  !important;
+    }
     
 }
-@media (max-width: 830px) {
+/* @media (max-width: 830px) {
     em-emoji-picker {
         max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
         /* max-height: 300px !important; ลดความสูงของป็อปอัป */
-    }
-    .react-emoji-picker--wrapper{
+    /* } */
+    /* .react-emoji-picker--wrapper{ */
         /* left:0px; */
-        bottom:0!important;
-    }
+        /* bottom:0!important; */
+    /* } */
     
-}
+/* } */ 
 
 @media (min-width: 640px)  and (max-width: 767px) {
     em-emoji-picker {
@@ -44,6 +58,9 @@
 } */
 
   @media (max-width: 578px) {
+    /* .messages-box1 {
+        display: none;
+    } */
     .react-emoji-picker--wrapper em-emoji-picker { 
         max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
         /* max-height: 300px !important;  */
@@ -54,6 +71,11 @@
         /* bottom:-35px !important; */
         /* top:-1px; */
     }
+    .chat-header{
+        font-size: 16px !important;
+        font-weight: 300 !important;
+        
+      }
   }   
     .flex.flex-center.flex-middle {
         width:25px !important;
@@ -77,17 +99,63 @@ width:152px !important;
     .messages-box + .chat-box {
         display: block;
     }
+
 }
 
 @media (max-width: 767px) {
     .align-items-start {
         /* max-height: calc(100vh) !important; */
     }
-  }
+   .messages-box1 {
+        display: none;
+   }
+
+    }
   
   
 @media (min-width: 831px)  and (max-width: 1200px) {
     .align-items-start {
         /* max-height: calc(100vh) !important; */
     }
+
 }
+
+.active-chat{
+    /* border:2px solid #000; */
+    border-left: 5px solid  #9d87f1 !important;
+    border-radius: 10px !important;
+    /* rgb(125, 26, 167) */
+    background-color:#fff!important;
+    /* background-color:rgb(211, 217, 222) !important;  */
+    /* box-shadow: rgb(201, 201, 201) 0px 0px 0.25em, rgb(234, 234, 234) 0px 0.25em 1em !important; */
+}
+.active-chat .name {
+    /* color: #ffffff !important; เปลี่ยนเป็นสีขาว */
+    /* font-weight: bold; ทำให้ชื่อหนาขึ้น */
+}
+
+.active-chat .text-lastmessage {
+    color:rgb(61, 61, 61) !important; 
+    /* font-weight: bold; ทำให้ชื่อหนาขึ้น */
+}
+
+
+.active-chat:hover  {
+    /* background-color:rgb(125, 26, 167) !important;  */
+}
+
+
+.active-chat:hover .text-lastmessage{
+/* color:#959595 !important; */
+    /* background-color:rgba(145, 145, 145, 0.2); */
+  }
+
+.active-chat:hover .name{ 
+    /* color:#000 !important; */
+        /* background-color:rgba(145, 145, 145, 0.2); */
+      }
+/* .user-card {
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+} */

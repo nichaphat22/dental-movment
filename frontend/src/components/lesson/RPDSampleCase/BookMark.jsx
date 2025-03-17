@@ -28,7 +28,7 @@ function BookMark() {
     }
 
     try {
-      const response = await axios.get(`/api/bookmark/${user._id}`);
+      const response = await axios.get(`http://localhost:8080/api/bookmark/${user._id}`);
   
       // ตรวจสอบว่า response มีข้อมูลบุ๊คมาร์คหรือไม่
       if (!response.data) {
@@ -137,7 +137,7 @@ function BookMark() {
     // if (confirmDelete) {
       try {
         // Send a DELETE request with the correct modelId
-        await axios.delete(`/api/bookmark/remove-bookmark/${user._id}/${modelId}`);
+        await axios.delete(`http://localhost:8080/api/bookmark/remove-bookmark/${user._id}/${modelId}`);
         
         // Update UI to remove the model using modelId
         setBookmarkedModels(prevModels => prevModels.filter(model => model.id !== modelId)); // ใช้ model.id แทน model.name
@@ -152,7 +152,7 @@ function BookMark() {
     <div className="Content" style={{ backgroundColor: "#fff" }}>
       <h1 className="title-h1">รายการโปรด</h1>
       {/* <div className="grid-container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}> */}
-      <Container className="container-model">
+      <Container className="container">
       <Row >
         {bookmarkedModels.map((model) => (
          

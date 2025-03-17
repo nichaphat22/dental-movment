@@ -43,7 +43,7 @@ export const AuthContextProvider = ({ children }) => {
 
         try {
             const response = await axios.post(
-                `/api/users/register`,
+                `http://localhost:8080/api/users/register`,
                 registerInfo
             );
 
@@ -69,7 +69,7 @@ export const AuthContextProvider = ({ children }) => {
     
         try {
             const response = await axios.post(
-                `/api/users/login`, 
+                `http://localhost:8080/api/users/login`, 
                 loginInfo // อย่าลืมตรวจสอบว่า loginInfo มีข้อมูลครบถ้วนไหม เช่น email และ password
             );
     
@@ -95,7 +95,7 @@ export const AuthContextProvider = ({ children }) => {
 
     const loginWithGoogle = async (googleUser) => {
         try {
-            const response = await axios.post(`/api/users/google-login`, {
+            const response = await axios.post(`http://localhost:8080/api/users/google-login`, {
                 tokenId: googleUser.tokenId,
             });
     
@@ -115,7 +115,7 @@ export const AuthContextProvider = ({ children }) => {
         try {
             const { roleRef, email, token } = user;
     
-            const chatResponse = await axios.post(`/api/chats`, {
+            const chatResponse = await axios.post(`http://localhost:8080/api/chats`, {
                 email,
                 roleRef,
                 token,

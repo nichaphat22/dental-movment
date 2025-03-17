@@ -87,7 +87,7 @@ const ViewRPDSampleCase = () => {
 
   const fetchBookmarks = async (userId) => {
     try {
-      const response = await axios.get(`/api/bookmark/${userId}`);
+      const response = await axios.get(`http://localhost:8080/api/bookmark/${userId}`);
       setClickedBookmark(response.data || {});
     } catch (error) {
       console.error("Error fetching bookmarks:", error);
@@ -100,6 +100,7 @@ const ViewRPDSampleCase = () => {
       state: { selectedModel: model },
     });
   };
+
 
   const handleBookmarkClick = async (userId, modelId) => {
     if (!userId) {
@@ -115,7 +116,7 @@ const ViewRPDSampleCase = () => {
     setClickedBookmark(updatedBookmarks);
   
     try {
-      await axios.post(`/api/bookmark/${userId}`, {
+      await axios.post(`http://localhost:8080/api/bookmark/${userId}`, {
         userId,
         bookmarks: updatedBookmarks,
       });
@@ -125,7 +126,6 @@ const ViewRPDSampleCase = () => {
       console.error("Error updating bookmarks:", error);
     }
   };
-
   const deleteFileFromStorage = async (fileUrl) => {
     try {
       console.log("fileUrl",fileUrl);

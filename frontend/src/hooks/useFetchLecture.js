@@ -8,7 +8,7 @@ export const useFetchLecture = (lectureId) => {
   useEffect(() => {
     const getLectures = async () => {
       try {
-        const response = await axios.get(`/api/lectures/${lectureId}`);
+        const response = await axios.get(`http://localhost:8080/api/lectures/${lectureId}`);
         setLatestLecture(response.data);
       } catch (error) {
         console.error('Error fetching lecture:', error);

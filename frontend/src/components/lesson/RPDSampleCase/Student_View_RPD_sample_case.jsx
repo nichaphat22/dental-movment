@@ -9,6 +9,9 @@ import axios from 'axios';
 // import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 // import { HiPlusSm } from "react-icons/hi";
+import { Card, Button, Row, Col,Container } from 'react-bootstrap';
+import bk1 from '../../../../public/bookmark1.png'
+import bk from '../../../../public/bookmark.png'
 
 const Student_View_RPD_sample_case = () => {
   const [models, setModels] = useState([]);
@@ -18,107 +21,104 @@ const Student_View_RPD_sample_case = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const modelsRef = ref(database, "models/");
-        const snapshot = await get(modelsRef);
+// const database = getDatabase(); // Firebase Database instance
+useEffect(() => {
+  const fetchModels = async () => {
+    try {
+      const modelsRef = ref(database, "models/");
+      const snapshot = await get(modelsRef);
 
-        if (snapshot.exists()) {
-          const modelsData = await Promise.all(Object.values(snapshot.val()).map(async (model) => {
-            let imageUrl = '';
-            try {
-              const imageRef = storageRef(storage, model.imageUrl);
-              imageUrl = await getDownloadURL(imageRef);
-            } catch (error) {
-              console.error('Error fetching image URL:', error);
-            }
+      if (snapshot.exists()) {
+        const modelsData = await Promise.all(Object.values(snapshot.val()).map(async (model) => {
+          let imageUrl = '';
+          try {
+            const imageRef = storageRef(storage, model.imageUrl);
+            imageUrl = await getDownloadURL(imageRef);
+          } catch (error) {
+            console.error('Error fetching image URL:', error);
+          }
 
-            return {
-              id: model.id,
-              name: model.name,
-              url: model.url,
-              patternUrl: model.patternUrl,
-              imageUrl: imageUrl
-            };
-          }));
-          setModels(modelsData);
-        } else {
-          console.warn("No models found in database.");
-        }
-      } catch (error) {
-        console.error("Error fetching models:", error);
+          return {
+            id: model.id, // เปลี่ยนเป็น id
+            name: model.name,
+            url: model.url,
+            patternUrl: model.patternUrl,
+            imageUrl: imageUrl
+          };
+        }));
+        setModels(modelsData);
+      } else {
+        console.warn("No models found in database.");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching models:", error);
+    }
+  };
 
+  fetchModels();
+
+  if (location.state?.selectedModel) {
+    setSelectedModel(location.state.selectedModel);
+  }
+
+  const query = new URLSearchParams(location.search);
+  setSearchTerm(query.get('search') || '');
+
+  const refreshInterval = setInterval(() => {
     fetchModels();
+  }, 60000); // Refresh every 60 seconds
+
+  return () => clearInterval(refreshInterval);
+}, [location.state, location.search]);
+
+useEffect(() => {
+  if (user?._id) {
+    fetchBookmarks(user._id);
+  }
+}, [user]);
+
+const fetchBookmarks = async (userId) => {
+  try {
+    const response = await axios.get(`http://localhost:8080/api/bookmark/${userId}`);
+    setClickedBookmark(response.data || {});
+  } catch (error) {
+    console.error("Error fetching bookmarks:", error);
+  }
+};
+
+const handleModelClick = (model) => {
+  setSelectedModel(model);
+  navigate(`/Model/${model.id}/view`, { // ใช้ id แทนชื่อ
+    state: { selectedModel: model },
+  });
+};
 
 
+const handleBookmarkClick = async (userId, modelId) => {
+  if (!userId) {
+    console.error("Invalid userId:", userId);
+    return;
+  }
 
-    if (location.state?.selectedModel) {
-      setSelectedModel(location.state.selectedModel);
-    }
-
-    const query = new URLSearchParams(location.search);
-    setSearchTerm(query.get('search') || '');
-
-    const refreshInterval = setInterval(() => {
-      fetchModels();
-    }, 60000); // Refresh every 60 seconds
-
-    return () => clearInterval(refreshInterval); // Clear interval on component unmount
-  }, [location.state, location.search]);
-
-  useEffect(() => {
-    if (user?._id) {
-      fetchBookmarks(user._id);
-    }
-  }, [user]); // ✅ ใช้ useEffect เพื่อดึงบุ๊คมาร์คเมื่อ user เปลี่ยนแปลง
-
-  const fetchBookmarks = async (userId) => {
-    try {
-      const response = await axios.get(`/api/bookmark/${userId}`);
-  
-      console.log("Response from API:", response.data); // ดูโครงสร้างข้อมูลที่กลับมา
-  
-      // ✅ ใช้ response.data ตรง ๆ เพราะมันคือ bookmarks
-      setClickedBookmark(response.data || {});
-    } catch (error) {
-      console.error("Error fetching bookmarks:", error);
-    }
+  const updatedBookmarks = {
+    ...clickedBookmark,
+    [modelId]: !clickedBookmark[modelId], // ใช้ id แทนชื่อ
   };
-  
-  const handleModelClick = (model) => {
-    setSelectedModel(model);
-    navigate(`/Model/${model.name}/view`, {
-      state: { selectedModel: model },
+
+  setClickedBookmark(updatedBookmarks);
+
+  try {
+    await axios.post(`http://localhost:8080/api/bookmark/${userId}`, {
+      userId,
+      bookmarks: updatedBookmarks,
     });
-  };
 
-  const handleBookmarkClick = async (userId, modelName) => {
-    if (!userId) {
-      console.error("Invalid userId:", userId);
-      return;
-    }
+    fetchBookmarks(userId);
+  } catch (error) {
+    console.error("Error updating bookmarks:", error);
+  }
+};
   
-    const updatedBookmarks = {
-      ...clickedBookmark,
-      [modelName]: !clickedBookmark[modelName],
-    };
-  
-    setClickedBookmark(updatedBookmarks); // อัปเดต UI ทันที
-  
-    try {
-      await axios.post(`/api/bookmark/${userId}`, {
-        userId,
-        bookmarks: updatedBookmarks,
-      });
-  
-      fetchBookmarks(userId); // ✅ โหลดค่าบุ๊คมาร์คใหม่จาก API หลังจากอัปเดต
-    } catch (error) {
-      console.error("Error updating bookmarks:", error);
-    }
-  };
   
   const handleSearch = () => {
     navigate(`/?search=${searchTerm}`);
@@ -139,37 +139,52 @@ const Student_View_RPD_sample_case = () => {
   </button>
 </div>
 
-      <div className="grid-container" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+    
+  <Container className="container-model">
+    <Row >
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
-          <div className="modelrow" key={model.name} style={{ maxWidth: '220px' }}>
-            <div className="modelbtw">
+        //  <div className="grid-contaioner">
+         <Col xs={12} sm={6} md={6} lg={3} xl={3} className="mb-4" key={model.id} style={{  }}>
+            <div className="modelbtw  h-100">
               <div className="modelname">
+                 <button 
+                  title="บันทึกเป็นรายการโปรด"
+                  className="bookmark" onClick={() => handleBookmarkClick(user._id, model.id)}>
+                    <img
+                      className="img-bookmark"
+                      src={clickedBookmark[model.id] ? bk : bk1 }
+                      alt="bookmark"
+                      style={{minWidth:'28px',minHeight:'28px',height:'28px',width:'28px'}}
+                    />
+                  </button>
                 <img
-                className="img-model"
+                  className="img-model"
                   src={model.imageUrl}
                   alt={model.name}
                   onClick={() => handleModelClick(model)}
-                  style={{ cursor: 'pointer', width: '100%', height: 'auto',boxShadow:'none' }}
+                  style={{ clear:'both',cursor: 'pointer', width: '100%', height: '18vh',}}
                 />
-                <div className="model-container" style={{ columnCount: '2', justifyContent: 'space-between' }}>
-                  <span style={{ marginLeft: '10px', fontSize: "0.85rem", color: "#000", fontWeight: '500',maxWidth:'180px' }}>
+                <div className="dd h-100" style={{height:'100px'}}>
+                <div className="detail-model  h-100" style={{display:'flex',justifyContent:'space-between',flexDirection:'column',}}>
+                <div className="model-container-view " style={{ height:'100px', }}>
+                  <span className="modelName-span " style={{ margin: '10px 0 10px 0', fontSize: "0.85rem", color: "#000", fontWeight: '500',wordBreak:'break-all'}}>
+                  
+                  {/* maxWidth:'100%'  */}
                     {model.name}
                   </span>
-                  <button className="bookmark" onClick={() => handleBookmarkClick(user._id,model.name)}>
-                    <img
-                    className="img-model"
-                      src={clickedBookmark[model.name] ? '/bookmark.png' : '/bookmark1.png'}
-                      alt="bookmark"
-                      width="30"
-                      height="30"
-                    />
-                  </button>
+                 
                 </div>
               </div>
+              </div>
+              </div>
+              
+              
             </div>
-          </div>
+          </Col>
+          // </div>
         ))}
-      </div>
+        </Row>
+        </Container>
     </div>
   );
 };
