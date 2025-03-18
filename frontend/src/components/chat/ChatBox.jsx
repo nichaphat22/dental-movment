@@ -171,7 +171,7 @@ const ChatBox = ({ chat, }) => {
                 style={{width:'37px', height:'37px' ,borderRadius:'50%',marginRight:'10px'}}
             src={recipientUser?.img} ></LazyLoadImage>
                   {/* {recipientUser.fname} {recipientUser.lname} */}
-                <span style={{fontWeight:'300',fontSize:'22px'}}>{recipientUser.name}</span>  
+                <span style={{fontWeight:'300',fontSize:'20px'}}>{recipientUser.name}</span>  
 
                 </strong>
             </div>

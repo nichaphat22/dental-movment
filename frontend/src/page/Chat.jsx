@@ -57,7 +57,7 @@ const Chat = () => {
                     right: 0,
                 }}>
             <Stack className="messages-box1 flex-grow-0 "> 
-                <div className="" style={{background:'#eef1f8',justifyContent:'',color:'#000',marginLeft:'',fontSize:'22.5px',display:'inline-flex',alignItems:'center' ,padding:'0.85rem', }}><span style={{fontWeight:'400',marginRight:'4px'}} >แชต</span> <span><IoChatboxEllipses style={{color:'#9d87f1',}} size={28}/>
+                <div className="" style={{border: '1px solid #DADADA',borderBottom:  '1px solid rgba(216, 216, 216, 0.9)', boxShadow: 'rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em',background:'#fff',justifyContent:'',color:'',marginLeft:'',fontSize:'25px',display:'inline-flex',alignItems:'center' ,padding:'0.7rem', }}><span style={{fontWeight:'350',color:'#a894f3',marginRight:'2px'}} >แชต</span> <span><IoChatboxEllipses style={{color:'#d3c8ff',}} size={30}/>
                 </span></div>
     {isUserChatsLoading && <p></p>}
     {userChats?.map((chat) => (

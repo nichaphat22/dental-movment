@@ -62,19 +62,28 @@
 }
 
 .btEdit{
-  color:  rgb(52, 52, 52);
+  color:  rgb(0, 0, 0);
+  background: rgb(247, 243, 255);
+  margin:6px 4px;
+  padding:5px 8px;
+  border-radius:5px;
+ box-shadow: rgba(0, 0, 0, 0.1) 0.5px 1px 1px 1px;
 }
 .btDelete{
-  color:  rgb(122, 122, 122);
-  /* background:#ff1919; */
+  color:  rgb(50, 50, 50);
+  background: rgb(247, 243, 255);
+  margin:6px 4px;
+  padding:5px 8px;
+  border-radius:5px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0.5px 1px 1px 1px;
 }
-.btEdit.dropdown-item:hover{
-background:#d2d2d2;
+.btEdit:hover{
+  background: rgb(226, 222, 232);
 
 }
 
-.btDelete.dropdown-item:hover{
-  background:#ff1919;
+.btDelete:hover{
+  background: rgb(226, 222, 232);
   }
   .btEdit.dropdown-item, .btDelete.dropdown-item{
     padding:5px;
@@ -143,11 +152,12 @@ LazyLoadImage:hover {
 textarea{
     color: rgba(108,117,125,1)
 }
-h3 .Ani_name {
+.Ani_name {
     /* color:#000; */
-    font-size: 1rem;
+    flex-grow: 1 !important;
+    /* font-size: 1rem; */
     /* margin-top: 8px; */
-    display: flex;
+    /* display: flex; */
     justify-content: start !important;
     
     /* text-align:start;/ */
@@ -335,10 +345,11 @@ video {
   
 .nameandbt{
   display: flex;
-  justify-content: start !important;
+  /* justify-content: start !important; */
   font-weight:500 !important;
 /* padding-top:3px; */
-  margin:0 0 0 5px;
+  margin:10px 2px 0 2px;
+    justify-content: space-around;
 }
 
 /* .nameandbt{

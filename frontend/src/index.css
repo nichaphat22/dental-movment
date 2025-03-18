@@ -119,6 +119,7 @@ box-shadow: rgba(83, 83, 83, 0.18) 0px 0px 0.15em, rgba(138, 133, 138, 0.12) 0px
   max-height: 100vh;
   /* overflow-y: auto; */
   background:rgb(255, 255, 255);
+  border: 1px solid #DADADA;
   /* border-radius: 10px; */
   /* border: 1px solid #DADADA  ; */
   box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;
@@ -155,6 +156,8 @@ box-shadow: rgba(83, 83, 83, 0.18) 0px 0px 0.15em, rgba(138, 133, 138, 0.12) 0px
   /* flex-direction: column; */
   overflow-x: hidden; 
   background: #eef1f8;
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;
+  border: 1px solid #DADADA;
 }
 
 

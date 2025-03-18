@@ -15,6 +15,7 @@ import Swal from "sweetalert2";
 import { VscKebabVertical } from "react-icons/vsc";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { CiEdit } from "react-icons/ci";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 function View_Biomechanical_consideration() {
   const [animations, setAnimations] = useState([]);
@@ -137,7 +138,7 @@ function View_Biomechanical_consideration() {
           <CiEdit size={20}/>
         </button>
         <button className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
-        <RiDeleteBin6Line size={19}/>
+        <RiDeleteBinLine size={19}/>
           </button>
       </div></div>
                     {/* </div> */}

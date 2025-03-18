@@ -6,12 +6,15 @@ import AR_RPD_sample_case from './AR_RPD_sample_case';
 import { Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { ImCross } from "react-icons/im";
+import { IoMdClose } from "react-icons/io";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 function ARScene() {
   const [patterns, setPatterns] = useState([]);
   const [isARActive, setIsARActive] = useState(true);
   const navigate = useNavigate();
   const [scale, setScale] = useState(1);
+  const [modelVisible, setModelVisible] = useState(false);
 
   useEffect(() => {
     const fetchModelData = async () => {
@@ -26,7 +29,7 @@ function ARScene() {
               patternUrl: model.patternUrl,
               modelUrl: model.url,
             }));
-            
+
           setPatterns(modelsArray);
         } else {
           console.log('No data available');
@@ -38,7 +41,7 @@ function ARScene() {
 
     fetchModelData();
   }, []); // ไม่ต้องใช้ useMemo อีกต่อไป
-  console.log("pattern",patterns);
+  console.log("pattern", patterns);
   const handleClose = () => {
     setIsARActive(false); // ปิด AR ก่อน
 
@@ -101,6 +104,51 @@ function ARScene() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+  const [cameraSettings, setCameraSettings] = useState({
+    fov: 100,
+    aspect: window.innerWidth / window.innerHeight,
+    near: 0.1,
+    far: 10
+  });
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        const track = stream.getVideoTracks()[0];
+        const settings = track.getSettings();
+
+        // อัปเดตค่ากล้องให้ตรงกับอุปกรณ์
+        setCameraSettings((prev) => ({
+          ...prev,
+          aspect: settings.aspectRatio || prev.aspect,
+          fov: settings.focalLength ? (2 * Math.atan(36 / (2 * settings.focalLength)) * (180 / Math.PI)) : prev.fov
+        }));
+
+        // หยุดใช้กล้องหลังจากดึงข้อมูลแล้ว
+        track.stop();
+      })
+      .catch((err) => console.error("Error accessing camera:", err));
+  }, []);
+  useEffect(() => {
+    console.log("Number of patterns loaded:", patterns.length);
+  }, [patterns]);
+
+
+  const onMarkerFound = (pattern) => {
+    console.log("Marker detected:", pattern.patternUrl);
+    if (!modelVisible) {
+      setModelVisible(true);  // Only update if model isn't already visible
+    }
+  };
+
+  const onMarkerLost = (pattern) => {
+    console.log("Marker lost:", pattern.patternUrl);
+    if (modelVisible) {
+      setModelVisible(false);  // Only update if model is currently visible
+    }
+  };
+
+
   return (
     <div>
       {isARActive ? (
@@ -114,36 +162,41 @@ function ARScene() {
             width: '100vw',
             height: '100vh',
           }}
+          gl={{ antialias: true }}
           onCreated={({ gl }) => {
             gl.setSize(window.innerWidth, window.innerHeight);
-            gl.setPixelRatio(window.devicePixelRatio);
-          
-            console.log(gl.info.memory);
-            console.log(gl.info.render);
+            gl.setPixelRatio(window.devicePixelRatio); // ใช้ค่าความละเอียดของอุปกรณ์
           }}
+          camera={cameraSettings} // ใช้ค่ากล้องที่อัปเดตจากอุปกรณ์
           
-          camera={{
-            position: [0, 0, 10],
-            fov: 75,
-            near: 0.1,
-            far: 1000
-          }}
         >
           <ambientLight intensity={0.5} />
           <directionalLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={0.5} />
+          <pointLight position={[2, 2, 2]} intensity={0.5} />
 
           {patterns.map((pattern, index) => (
             <ARMarker
               key={index}
               debug={true}
-              params={{ smooth: false }}
+              params={{
+                smooth: true,
+                smoothCount: 5,   // ลดจำนวนเฟรมที่ใช้ในการคำนวณ
+                smoothTolerance: 0.05,  // ลดค่าความทนทานเพื่อให้การหมุนเร็วขึ้น
+                minConfidence: 0.1 // เพิ่มความแม่นยำในการตรวจจับมาร์กเกอร์
+              }} // ปรับค่าความมั่นใจ
               type={'pattern'}
               patternUrl={pattern.patternUrl}
-              onMarkerFound={() => console.log("Marker detected:", pattern.patternUrl)}
-              onMarkerLost={() => console.log("Marker lost:", pattern.patternUrl)}
+              // onMarkerFound={() => setModelVisible(true)}
+              // onMarkerLost={() => setTimeout(() => setModelVisible(true), 1000)}  // อย่าลบโมเดลออก
+              onMarkerFound={() => onMarkerFound(pattern)}  // Marker found handler
+              onMarkerLost={() => onMarkerLost(pattern)}    // Marker lost handler
             >
-              <AR_RPD_sample_case modelUrl={pattern.modelUrl} scale={scale} />
+              
+              <AR_RPD_sample_case modelUrl={pattern.modelUrl} scale={scale} 
+                position={[0, 1, 0]}
+              rotation={[ 1.2, 0, 0]} 
+               
+              />
             </ARMarker>
           ))}
         </ARCanvas>
@@ -155,10 +208,10 @@ function ARScene() {
         className='bt-cross'
         variant="primary"
         onClick={handleClose} // ใช้ฟังก์ชัน handleClose
-        style={{ position: 'absolute', top: '10px', right: '8px', zIndex: 10000 }}
+        style={{ background: ' rgb(166, 84, 249)', borderColor: '', position: 'absolute', padding: '8px', top: '10px', right: '8px', zIndex: 10000, boxShadow: 'rgb(0, 0, 0) 0px 50px 100px -20px, rgba(0, 0, 0, 0.38) 0px 30px 60px -30px, rgb(27, 11, 62) 0px -2px 6px 0px inset' }}
       >
-        <span style={{ color: '#000', fontWeight: '100', fontSize: '1.5rem' }}>
-          <ImCross />
+        <span style={{ color: '#fff', fontWeight: '300', fontSize: '1.7rem' }}>
+          <IoMdClose />
         </span>
       </Button>
     </div>
