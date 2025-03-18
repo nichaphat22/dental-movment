@@ -53,7 +53,7 @@ const MenuProfile = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-200 transition"
       >
-        <img src={img} alt="Profile" className="w-8 h-8 hover:transform-none" />
+        <img src={img} alt="Profile" className="w-8 h-8 rounded-full hover:transform-none" />
       </button>
 
       <AnimatePresence>
@@ -70,7 +70,7 @@ const MenuProfile = () => {
                   <img
                     src={img}
                     alt="Profile"
-                    className="w-10 h-10 hover:transform-none shadow-none"
+                    className="w-10 h-10 rounded-full hover:transform-none shadow-none"
                   />
                 </div>
                 <div className="mt-2">

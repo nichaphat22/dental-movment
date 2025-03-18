@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import {API} from "../../api/api";
 import { GoX } from "react-icons/go";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -19,6 +21,42 @@ const AddUser = ({ isOpen, onClose }) => {
   const [type, setType] = useState("card");
   const currentYear = new Date().getFullYear() + 543;
   const years = Array.from({ length: 20 }, (_, i) => currentYear - i);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("student");
+  const [message, setMessage] = useState("");
+  const [studentID, setStudentID] = useState("");
+  const token = localStorage.getItem("token"); // หรือดึงจาก Context/Auth State
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/api/auth/addUser",
+        {
+          name,
+          email,
+          role,
+          studentID,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ส่ง token ไปใน request
+          },
+        }
+      );
+
+      setMessage(`✅ ${res.data.message}`);
+      setName("");
+      setEmail("");
+      setRole("student");
+      setStudentID("");
+    } catch (error) {
+      setMessage(`❌ ${error.response?.data?.message || "Error occurred"}`);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30">
@@ -56,19 +94,26 @@ const AddUser = ({ isOpen, onClose }) => {
           >
             {/* Form สำหรับเพิ่มรายชื่อ */}
             <TabPanel value="card" className="p-0">
-              <form className="mt-6 flex flex-col gap-4">
+              {message && <p className="mb-4 text-red-600">{message}</p>}
+              <form
+                className="mt-6 flex flex-col gap-4"
+                
+              >
                 <div>
                   <Typography
                     variant="small"
                     color="blue-gray"
                     className="mb-2 font-medium"
                   >
-                    ชื่อ
+                    ชื่อ:
                   </Typography>
                   <input
                     type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="กรอกชื่อ..."
                     className="border w-full p-2 rounded-md"
+                    required
                   />
                 </div>
                 <div>
@@ -81,45 +126,12 @@ const AddUser = ({ isOpen, onClose }) => {
                   </Typography>
                   <input
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="..."
                     className="border w-full p-2 rounded-md"
+                    required
                   />
-                </div>
-                <div className="flex justify-between">
-                  <div>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="mb-2 font-medium"
-                    >
-                      section
-                    </Typography>
-                    <input
-                      type="number"
-                      name="sec"
-                      className="w-full border p-2 rounded"
-                    />
-                  </div>
-                  <div>
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="mb-2 font-medium"
-                    >
-                      ปีการศึกษา
-                    </Typography>
-                    <select className="border w-full p-2.5 rounded-md max-h-48 overflow-y-auto">
-                      {years.map((year) => (
-                        <option
-                          key={year}
-                          value={year}
-                          className="flex items-center gap-2"
-                        >
-                          {year}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
                 <div>
                   <Typography
@@ -127,34 +139,36 @@ const AddUser = ({ isOpen, onClose }) => {
                     color="blue-gray"
                     className="mb-2 font-medium"
                   >
-                    role
+                    รหัสนักศึกษา:
                   </Typography>
-
-                  <div className="flex justify-between space-x-1 text-center">
-                  <div className="w-full p-1 border rounded-2xl shadow-inner cursor-pointer hover:bg-indigo-50">
-                    <input type="radio" className=" hidden" />
-                    นักศึกษา
-                  </div>
-                  <div className="w-full p-1 border rounded-2xl shadow-inner cursor-pointer hover:bg-indigo-50">
-                    <input type="radio" className=" hidden" />
-                    บุคคลภายนอก
-                  </div>
-                  </div>
-                  
+                  <input
+                    type="text"
+                    value={studentID}
+                    onChange={(e) => setStudentID(e.target.value)}
+                    placeholder="กรอกรหัสนักศึกษา..."
+                    className="border w-full p-2 rounded-md"
+                    required
+                  />
                 </div>
+                
+                 
+                
+               
               </form>
-               {/* Buttons */}
-               <div className='flex justify-center mt-4'>
-                    <button className='bg-gray-500 text-white px-4 py-2 rounded mr-2' onClick={onClose}>
-                        ยกเลิก
-                    </button>
-                    <button
-                        className="px-4 py-2 rounded  bg-blue-500 text-white"
-                    
-                    >
-                        บันทึก
-                    </button>
-                </div>
+              {/* Buttons */}
+              <div className="flex justify-center mt-4">
+                <button
+                  className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
+                  onClick={onClose}
+                >
+                  ยกเลิก
+                </button>
+                <button
+                onClick={handleSubmit} 
+                className="px-4 py-2 rounded  bg-blue-500 text-white">
+                  บันทึก
+                </button>
+              </div>
             </TabPanel>
 
             {/* Form สำหรับเพิ่มรายชื่อจาก Excel */}

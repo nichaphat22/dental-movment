@@ -1,5 +1,96 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
+/* ซ่อนสามเหลี่ยมของ Dropdown */
+.no-arrow:after {
+  display: none;
+  background:none;
+}
+.no-arrow:active{
+  /* display: none; */
+  background:none;
+}
+
+.no-arrow:hover{
+  color:#000;
+  background:none;
+}
+.no-arrow:action{
+  color:#000;
+  background:none;
+}
+
+
+.no-arrow.dropdown-toggle.btn.btn-primary {
+ background:none;
+ color:#000;
+ border:none;
+ margin-right:0;
+ margin-top:10px;
+ padding:0;
+}
+
+/* ปรับขนาดของเมนู dropdown เมื่อมันแสดง */
+.dwMenu.dropdown-menu.show {
+  display: block !important;
+  width: 70px !important;
+  min-width: 70px !important;
+  transform: translate3d(-10px, 37.6px, 0px);
+  font-size: 0.75rem !important;
+  padding:0 !important;
+}
+
+/* ปรับตำแหน่งของ .dropdown-item ให้อยู่ตรงกลาง */
+.dropdown-item {
+  display: flex;  
+  
+               /* ใช้ flexbox เพื่อจัดตำแหน่ง */
+  justify-content: center;     /* จัดเนื้อหากลางตามแนวนอน */
+  align-items: center;         /* จัดเนื้อหากลางตามแนวตั้ง */
+  width: 100%;                 /* ให้เต็มความกว้าง */
+  padding: 0;
+  font-weight: 400;
+  color: var(--bs-dropdown-link-color);
+  text-align: center;          /* จัดข้อความตรงกลาง */
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+  border-radius: var(--bs-dropdown-item-border-radius, 0);
+  z-Index:10px;
+}
+
+.btEdit.dropdown-item:hover{
+background:#d2d2d2;
+
+}
+
+.btDelete.dropdown-item:hover{
+  background:#ff1919;
+  }
+  .btEdit.dropdown-item, .btDelete.dropdown-item{
+    padding:5px;
+      }
+
+  
+    
+    .scroll.flex-grow.padding-lr div {
+     
+    }
+    
+:root {
+  --padding: 10px;
+  --sidebar-width: 250px;
+}
+
+
+      
+section#root.flex.flex-column{
+  width: 300px !important;
+}
+.scroll.flex-grow.padding-lr div{
+  width: 270px !important;
+}
+
 .Frame div {
     margin-top: 10px;
 }
@@ -9,26 +100,32 @@ h1 {
 }
 
 .title-h1 {
-    margin: 20px 0 10px 20px;
+    margin: 20px 0 10px 20px !important;
     font-size:1.8rem;
   }
 
 .title {
     margin: 10px 0 20px 20px;
+    font-size:1.2rem;
 }
 h3 {
     text-align: start;
-    margin-top: 10px;
+    /* margin-top: 10px; */
+    margin:10px 0 5px 0;
+    color:#000;
+    white-space: nowrap;        /* บังคับให้ข้อความอยู่ในบรรทัดเดียว */
+  overflow: hidden;           /* ซ่อนข้อความที่เกินขอบ */
+  text-overflow: ellipsis; 
 }
 .description {
     margin: 0 0;
 }
-img {
+LazyLoadImage {
     border-radius: 5px;
     /* border: 1px solid #6e6e6e; */
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.25); 
 }
-img:hover {
+LazyLoadImage:hover {
     transform: scale(1.1); /* ขยายขนาดรูปภาพ */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* เพิ่มเงา */
     transition: transform 0.2s ease, box-shadow 0.2s ease; /* เพิ่มความลื่นไหลในการแสดงผล */
@@ -37,18 +134,19 @@ img:hover {
 textarea{
     color: rgba(108,117,125,1)
 }
-.Ani_name {
+h3 .Ani_name {
     /* color:#000; */
     font-size: 1rem;
     /* margin-top: 8px; */
-    color:#000;
-    margin:8px 5px 5px 5px 
-    /* text-align:center; */
+   
+    
+    /* text-align:start;/ */
 }
 .lebel-bio{
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     color:#000;
-    font-weight:450;
+    font-weight:400;
+    margin-bottom:7px;
 }
 .choose-file{
     font-size:0.8rem;
@@ -107,11 +205,15 @@ video {
 }
 
 .AnimationName {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: bold;
     padding-top: 20px;
     text-align: center;
     /* padding-bottom: 10px; */
+}
+
+#animationVideo{
+  width:85%;
 }
 .viewvdo {
     
@@ -122,10 +224,16 @@ video {
   }
 
   .ani_descrip{
-    text-indent: 70px;
+    font-size: 1rem;
+    text-indent: 50px;
+    text-align: justify;
     margin:5px 20px 20px 20px;
     color:#000;
+    white-space: pre-wrap; /* รองรับ \n และช่องว่าง */
+  word-wrap: break-word;
+  white-space: pre-line;
     /* width: 50vw; */
+    /* hyphens: auto; */
     
   }
 
@@ -141,11 +249,11 @@ video {
 } */
 .add-button{
     color: rgb(255, 255, 255);
-  background-color: rgb(9, 162, 22);
+  background-color: rgb(145, 54, 205);
   /* border-color: rgb(9, 162, 22); */
   padding: 7px 15px;
   margin-top: 20px;
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3); 
   border: none;
 }
@@ -155,7 +263,7 @@ video {
     /* border-color: #dbdbdb; */
     padding: 7px 15px;
     margin-top: 20px;
-    border-radius: 8px;
+    border-radius: 5px;
     margin-right:20px;
     box-shadow: 0 3px 5px rgba(0, 0, 0, 0.3); 
     border: none;
@@ -167,19 +275,51 @@ video {
   
 }
 
-.viewAnimation img{
+.animationid .img_ani{
+  display:block;
+    border-radius: 5px 5px 0 0 !important; 
     cursor: pointer;
+      height: 140px !important;
+      /* max-width: 250px !important; */
+      width: 100% !important;
+
+   box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.075);
    
 }
 
-.viewAnimation img:hover {
-    transform:scale(1.05);
+.animationid .img_ani:hover {
+    /* transform:scale(1.02); */
     /* z-index: 2; */
-    box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 0 12px 10px rgba(0, 0, 0, 0.05); */
+    /* transform: scale(1.05); */
 }
-.animationid {
-    
+
+.d-flex.justify-content-center.my-5{
+  margin-top: 50px !important;
 }
+.animationid{
+  margin-bottom:30px;
+}
+.ani {
+  width: 100%;  /* ป้องกันขยายเกินขนาด Col */
+  margin: auto; /* จัดให้อยู่กึ่งกลาง */
+  padding-bottom: 15px;
+  box-shadow: 0 0 5px 2px rgba(0, 0, 0, 0.075);
+  /* border-radius: 10px; */
+  transition: transform 0.3s ease;
+  background: white;
+  border-radius: 5px; 
+
+}
+.ani:hover {
+  transform: scale(1.075);
+}
+/* @media (min-width: 1024px) {
+  .ani {
+    width: calc(100% / 3 - 20px); /* แบ่ง 3 คอลัมน์ */
+    /* margin: auto; 
+  }
+} */ 
 
 .upload-status {
     font-weight: bold;
@@ -193,6 +333,77 @@ video {
     color: green;
   }
    */
-   .row{
+   /* .row{
  margin: 20px;
-   }
+   } */
+
+.nameandbt{
+  display: flex;
+  justify-content: space-between;
+  margin:0 10px 0 10px;
+}
+
+.bt{
+  float:right !important;
+  align-items: end !important;
+background:none !important;
+color: #000;
+}
+.bt:hover{
+  float:right !important;
+  align-items: end !important;
+background:none !important;
+color: #000;
+}
+
+.button-remove-ani{
+  justify-items: center;
+  /* justify-content: center; */
+  height:25px;
+  width:35px;
+  color:rgb(255, 255, 255);
+  /* border:2px solid #ff4040 !important; */
+  /* border:none !important; */
+background:rgb(250, 9, 9) !important;
+margin:0 !important;
+font-size:12px !important;
+padding:3px !important;
+/* transition: transform 0.2s ease; */
+border-radius:5px;
+
+}
+
+.button-remove-ani:hover{
+  color:rgb(255, 255, 255);
+  background:rgb(226, 0, 0)!important;
+  /* transform: scale(1.1); */
+  /* border:2px solid #ff4040 !important; */
+  /* background: #ff4040 !important; */
+}
+
+.button-edit-ani{
+  justify-items: center;
+  /* border */
+  height:25px;
+  width:35px;
+  color:rgb(255, 255, 255);
+  /* border:2px solidrgb(41, 41, 41) !important; */
+  background-color: rgba(19, 19, 19, 0.8)!important;  
+  margin:0 !important;
+  font-size:12px !important;
+  padding:3px !important;
+  /* transition: transform 0.2s ease; */
+  border-radius:5px;
+}
+.button-edit-ani:hover{
+  /* color:rgb(255, 255, 255); */
+  /* transform: scale(1.1); */
+  background:rgba(0, 0, 0, 0.8) !important; 
+  /* background: #ffb819 !important;  */
+}
+
+
+.text-manage{
+  white-space: pre-wrap; /* รองรับ \n และช่องว่าง */
+  word-wrap: break-word;
+}

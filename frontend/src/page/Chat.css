@@ -1,0 +1,93 @@
+/* Hide ChatBox on mobile and only show UserChat */
+@media (max-width: 830px) {
+    .chat-box {
+        /* width: 100% !important; */
+        /* max-height: calc(100vh) !important;  */
+    }
+    .messages-box1 {
+        display: none;
+    }
+    .align-items-start{
+        /* max-width: calc(100vh) !important; */
+    }
+    .messages.vstack.gap-3{
+        font-size: 13px;
+    }
+   
+    
+    
+}
+@media (max-width: 830px) {
+    em-emoji-picker {
+        max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
+        /* max-height: 300px !important; ลดความสูงของป็อปอัป */
+    }
+    .react-emoji-picker--wrapper{
+        /* left:0px; */
+        bottom:0!important;
+    }
+    
+}
+
+@media (min-width: 640px)  and (max-width: 767px) {
+    em-emoji-picker {
+        max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
+        /* max-height: 300px !important; ลดความสูงของป็อปอัป */
+    }
+    .react-emoji-picker--wrapper{
+        /* left:0; */
+        bottom: 0 !important;
+    }
+  }
+  /* .react-emoji-picker--wrapper {
+    
+} */
+
+  @media (max-width: 578px) {
+    .react-emoji-picker--wrapper em-emoji-picker { 
+        max-width: 352px !important; /* ลดความกว้างของป็อปอัป */
+        /* max-height: 300px !important;  */
+    }
+    .react-emoji-picker--wrapper{
+        left:0 !important;
+        bottom: 0 !important;
+        /* bottom:-35px !important; */
+        /* top:-1px; */
+    }
+  }   
+    .flex.flex-center.flex-middle {
+        width:25px !important;
+        height:25px !important;
+    }
+    
+    .flex.flex-column{
+
+    }
+    section#root.flex.flex-column{
+width:152px !important;
+    }
+    .scroll.flex-grow.padding-lr div{
+        width:152px !important;
+
+    }
+  /* } */
+  
+/* Display ChatBox when UserChat is clicked */
+@media (min-width: 768px) {
+    .messages-box + .chat-box {
+        display: block;
+    }
+}
+
+@media (max-width: 767px) {
+    .align-items-start {
+        /* max-height: calc(100vh) !important; */
+    }
+  }
+  
+  
+@media (min-width: 831px)  and (max-width: 1200px) {
+    .align-items-start {
+        /* max-height: calc(100vh) !important; */
+    }
+}

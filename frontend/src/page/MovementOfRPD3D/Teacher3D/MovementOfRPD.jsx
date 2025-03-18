@@ -15,7 +15,7 @@ const MovementOfRPD = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

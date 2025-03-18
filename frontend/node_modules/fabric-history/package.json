@@ -1,0 +1,33 @@
+{
+  "name": "fabric-history",
+  "version": "2.0.0",
+  "description": "Undo and redo implementations on fabric.js",
+  "main": "src/index.min.js",
+  "scripts": {
+    "minify": "uglifyjs --compress --mangle -o src/index.min.js -- src/index.js ",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alimozdemir/fabric-history.git"
+  },
+  "dependencies": {
+    "fabric": "^5.3.0"
+  },
+  "keywords": [
+    "fabric",
+    "fabricjs",
+    "history",
+    "undo",
+    "redo"
+  ],
+  "author": "Alim Ozdemir <alm.ozdmr@gmail.com> (http://alimozdemir.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alimozdemir/fabric-history/issues"
+  },
+  "homepage": "https://github.com/alimozdemir/fabric-history#readme",
+  "devDependencies": {
+    "uglify-js": "^3.17.4"
+  }
+}

@@ -14,9 +14,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: function () {
-        return !this.googleId; // ถ้าใช้ Google Login ไม่ต้องใช้รหัสผ่าน
-      },
+      required: false,
     },
     name: {
       type: String,

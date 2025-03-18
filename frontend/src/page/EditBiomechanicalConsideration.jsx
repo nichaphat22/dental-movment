@@ -15,7 +15,7 @@ const EditBiomechanicalConsideration = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

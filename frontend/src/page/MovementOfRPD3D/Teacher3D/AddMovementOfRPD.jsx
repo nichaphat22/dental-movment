@@ -16,7 +16,7 @@ const AddMovementOfRPD = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

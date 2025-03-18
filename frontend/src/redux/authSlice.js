@@ -32,7 +32,8 @@ const authSlice = createSlice({
         }
 
         state.token = action.payload; // ✅ ย้ายมาหลังจากเช็ค Token หมดอายุแล้ว
-        
+        // localStorage.setItem("token", action.payload);
+
         if (decodedToken && decodedToken.id) {
           state.user = {
             _id: decodedToken.id,
@@ -59,7 +60,7 @@ const authSlice = createSlice({
       state.img = null; // ✅ เคลียร์รูปโปรไฟล์เมื่อ logout
       localStorage.removeItem("token");
       localStorage.removeItem("teacherId");
-      return { ...initialState };
+      // return { ...initialState };
     },
   
   },

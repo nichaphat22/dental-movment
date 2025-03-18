@@ -17,7 +17,7 @@ const LeverTeacher = () => {
           </Frame>
   
           {/* ChatBox */}
-          <ChatBox />
+          {/* <ChatBox /> */}
         </div>
       </div>
     );

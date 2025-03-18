@@ -3,6 +3,8 @@ import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import View_Animation from "../components/lesson/Biomechanical_consideration/View_Animation";
 import ChatBox from "../components/Noti";
+// import ChatBox from "../components/Noti";
+import './sidebar-mobile.css'; 
 
 const ViewBiomechanicalConsideration = () => {
   return (
@@ -16,7 +18,7 @@ const ViewBiomechanicalConsideration = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

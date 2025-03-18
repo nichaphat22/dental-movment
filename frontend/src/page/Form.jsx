@@ -1,6 +1,6 @@
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
-import Formm from "../components/Formm"
+// import Formm from "../components/Formm"
 
 const Form =() => {
   return(

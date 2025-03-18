@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { GoPeople, GoRepo } from "react-icons/go";
+import { GoPeople, GoRepo,GoClock} from "react-icons/go";
 import { PiClipboardTextDuotone } from "react-icons/pi";
 import {
   MdLogout,
@@ -52,8 +52,9 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
         <hr className="my-2 border-gray-300 border-3 rounded-md" />
         <MenuItem
           isExpanded={isExpanded}
-          icon={<MdLogout className="h-6 w-6" />}
-          text="ออกจากระบบ"
+          icon={<GoClock className="h-6 w-6" />}
+          text="การเข้าใช้งาน"
+          
         />
       </ul>
 

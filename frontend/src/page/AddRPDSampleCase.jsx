@@ -15,7 +15,7 @@ const AddRPDSampleCase = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

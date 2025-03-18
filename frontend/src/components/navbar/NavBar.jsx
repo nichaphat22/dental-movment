@@ -11,22 +11,30 @@ import {
   HiSearch,
   HiOutlineBell,
 } from "react-icons/hi";
+import { HiOutlineArrowLongRight } from "react-icons/hi2";
 // import GoogleLogin from "../GoogleLoginButton";
 import MenuProfile from "../Profile/MenuProfile";
 import NotificationBell from "../Notification/NotificationBell";
 import "../../tailwind.css";
+// import { useContext, useState } from 'react';
+// import { Link, useNavigate } from 'react-router-dom';
+// import { AuthContext } from '../../context/AuthContext';
+// import { HiOutlineMenu, HiOutlineX, HiOutlineBell } from 'react-icons/hi';
+// import GoogleLogin from "../GoogleLoginButton";
+// import MenuProfile from '../Profile/MenuProfile';
+// import '../../tailwind.css';
+import Notifications from "../chat/Notifications";
 
 const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLessonDropdownOpen, setIsLessonDropdownOpen] = useState(false);
   // const { user, logoutUser, loginWithGoogle } = useContext(AuthContext);
   const user = useSelector((state) => state.auth.user);
-  const img = useSelector(state => state.auth.img);
+  const img = useSelector((state) => state.auth.img);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   console.log(img);
-
 
   const handleLogout = () => {
     dispatch(logout()); // เคลียร์ Redux State
@@ -153,6 +161,13 @@ const NavBar = () => {
                 >
                   รายการโปรด
                 </Link>
+                <Link
+                  to="/bookmark-teacher"
+                  className="text-purple-600 group flex items-center"
+                >
+                  Online Learning
+                  <HiOutlineArrowLongRight className="ml-1.5 text-xl transition-transform duration-300 group-hover:translate-x-2 group-hover:-rotate-45" />
+                </Link>
               </>
             )}
           </div>
@@ -160,27 +175,18 @@ const NavBar = () => {
           {/* User Profile (Right Aligned) */}
           <div className="ml-auto flex items-center">
             {user ? (
-              <div className="relative flex items-center space-x-3">
+              <div className="relative flex items-center space-x-1">
+                <Notifications />
                 <NotificationBell />
                 <MenuProfile />
-                {/* <button onClick={() => setOpenProfile(!openProfile)}>
-                  <img
-                    src={img}
-                    alt="Profile"
-                    width="38"
-                    height="38"
-                    className="rounded-full cursor-pointer"
-                  />
-                  {openProfile && <MenuProfile />}
-                </button> */}
               </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className="text-gray-800 hover:text-purple-600"
+                  className="text-purple-600 font-bold"
                 >
-                  Login
+                  Google Login
                 </Link>
               </div>
             )}

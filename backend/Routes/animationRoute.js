@@ -7,8 +7,13 @@ const {
     updateAnimation,
     deleteAnimation} = require("../Controllers/animationController")
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
-
+// const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 50 * 1024 * 1024,  // ขนาดไฟล์สูงสุด 50MB
+    },
+  });
 
 router.get("/getAnimation", getAnimation);
 router.get("/getAnimationById/:_id", getAnimationById);

@@ -3,22 +3,75 @@ import axios from "axios";
 const BASE_URL = "http://localhost:8080/api/quiz";
 
 const quizService = {
+// <<<<<<< HEAD
   getAllQuiz: () => axios.get(`${BASE_URL}/`), // ดึงควิซทั้งหมด
   getQuizById: (id) => axios.get(`${BASE_URL}/${id}`), // ดึงควิซตาม ID
   createQuiz: (quizData) => axios.post(`${BASE_URL}/addQuiz`, quizData), // สร้างควิซใหม่
   updateQuiz: (id, quizData) => axios.put(`${BASE_URL}/${id}`, quizData),
+// =======
+//   getAllQuiz: () => axios.get(`/api/quiz/`), // ดึงควิซทั้งหมด
+//   getQuizById: (id) => axios.get(`/api/quiz/${id}`), // ดึงควิซตาม ID
+//   createQuiz: (quizData) => axios.post(`/api/quiz/addQuiz`, quizData), // สร้างควิซใหม่
+//   updateQuiz: async (id, quizData) => {
+//     try {
+//       // อัปเดตควิซ
+//       const updatedQuiz = await axios.put(`/api/quiz/${id}`, quizData);
+      
+//       // หากมีการอัปเดตคำถามในควิซ
+//       if (quizData.questions) {
+//         // ลบคำถามที่ถูกลบในคำถามใหม่
+//         const currentQuestions = await axios.get(`/api/quiz/${id}/questions`);
+//         const currentQuestionIds = currentQuestions.data.map(q => q._id);
+// >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
 
 
+// <<<<<<< HEAD
   deleteQuiz: async (id) => {
     try {
+// =======
+//         for (const questionId of questionsToDelete) {
+//           await axios.delete(`/api/quiz/${id}/questions/${questionId}`);
+//         }
+
+//         // อัปเดตหรือเพิ่มคำถามใหม่
+//         for (const question of quizData.questions) {
+//           if (question._id) {
+//             // อัปเดตคำถามที่มีอยู่
+//             await axios.put(`/api/quiz/${id}/questions/${question._id}`, question);
+//           } else {
+//             // เพิ่มคำถามใหม่
+//             await axios.post(`/api/quiz/${id}/questions`, question);
+//           }
+//         }
+//       }
+
+//       return updatedQuiz;
+//     } catch (error) {
+//       console.error("Error updating quiz:", error);
+//       throw error;
+//     }
+//   }, // อัปเดตควิซ
+//   deleteQuiz: async (id) => {
+//     try {
+//       // เรียกดูคำถามที่เกี่ยวข้องกับควิซก่อนลบ
+//       const response = await axios.get(`/api/quiz/${id}/questions`);
+//       const questions = response.data;
+  
+//       // ลบคำถามที่เกี่ยวข้องทั้งหมด
+//       for (const question of questions) {
+//         await axios.delete(`/api/quiz/${id}/questions/${question._id}`);
+//       }
+  
+// >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
       // ลบควิซ
-      return await axios.delete(`${BASE_URL}/${id}`);
+      return await axios.delete(`/api/quiz/${id}`);
     } catch (error) {
       console.error('Error deleting quiz or related questions:', error);
       throw error;
     }
   },
 
+// <<<<<<< HEAD
   // เพิ่มคำถามใหม่
   createQuestion: (quizId, questionData) => {
     return axios.post(`${BASE_URL}/${quizId}/questions`, questionData); // เพิ่มคำถามในควิซ
@@ -47,6 +100,19 @@ const quizService = {
 
   
 
+// =======
+//   // Question services
+//   getQuestionsByQuizId: (quizId) =>
+//     axios.get(`/api/quiz/${quizId}/questions`), // ดึงคำถามทั้งหมดในควิซ
+//   getQuestionById: (quizId, questionId) =>
+//     axios.get(`/api/quiz/${quizId}/questions/${questionId}`), // ดึงคำถามตาม ID
+//   createQuestion: (quizId, questionData) =>
+//     axios.post(`/api/quiz/${quizId}/questions`, questionData), // เพิ่มคำถาม
+//   updateQuestion: (quizId, questionId, questionData) =>
+//     axios.put(`/api/quiz/${quizId}/questions/${questionId}`, questionData), // อัปเดตคำถาม
+//   deleteQuestion: (quizId, questionId) =>
+//     axios.delete(`/api/quiz/${quizId}/questions/${questionId}`), // ลบคำถาม
+// >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
 };
 
 export default quizService;

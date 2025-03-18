@@ -7,7 +7,7 @@ function Vdo3D_List() {
 
     useEffect(() => {
         // ดึงข้อมูลวิดีโอจาก API หรือฐานข้อมูล
-        axios.get("http://localhost:8080/api/animation3D/getAnimation3D")
+        axios.get("/api/animation3D/getAnimation3D")
             .then(response => {
                 setAnimations(response.data);
             })

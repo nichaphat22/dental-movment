@@ -3,8 +3,7 @@ const mongoose = require('mongoose')
 
 const studentSchema = new mongoose.Schema(
 {
-
-    yearLevel : {
+    studentID : {
         type : String,
         default : null
     },

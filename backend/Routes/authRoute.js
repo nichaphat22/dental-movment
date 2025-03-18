@@ -4,6 +4,8 @@ require("dotenv").config();
 const authController = require("../Controllers/authController");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/userModel");
+const Student = require("../Models/studentModel");
+const Teacher = require("../Models/teacherModel");
 const { verifyToken } = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -64,5 +66,60 @@ router.get("/user", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+//เพิ่มผู้ใช้
+router.post("/addUser", verifyToken, async (req, res) => {
+  try {
+    const { email, name, role, studentID, img } = req.body; 
+
+  if(!email || !name) {  
+    return res.status(400).json({ message: "กรุณากรอกข้อมูล email และ name ให้ครบ" });
+  }
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(400).json({ message: "อีเมลนี้มีอยู่ในระบบแล้ว"});
+  }
+
+  const profileImage = img || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+
+  const userRole = role || "student";
+
+  const user = new User({ email, name, role: userRole, img: profileImage});
+  await user.save();
+
+  if (userRole === "student") {
+    console.log("🟢 Creating Student Profile...");
+    const student = await Student.create({ 
+      user: user._id,
+      studentID: studentID || "",
+    });
+    user.roleData = student._id;
+    user.roleRef = "Student";
+    
+  } else if (userRole === "teacher") {
+    console.log("🟢 Creating Teacher Profile...");
+    const teacher = await Teacher.create({ 
+      user: user._id 
+    });
+    user.roleData = teacher._id;
+    user.roleRef = "Teacher";
+  }
+
+  await user.save();
+  console.log("✅ User Created:", user);
+
+  return res.status(201).json({
+    message: "เพิ่มผู้ใช้สำเร็จ",
+    user,
+  });
+    
+  } catch (error) {
+    console.error("❌ Error Adding User:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์" });
+  }
+  
+})
 
 module.exports = router;

@@ -17,7 +17,7 @@ import Login from "./page/loginSuccess/Loginn";
 import Register from './page/loginSuccess/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './page/Home';
-import "bootstrap/dist/css/bootstrap.min.css"
+
 import { Container } from "react-bootstrap"
 import NavBar from "./components/navbar/NavBar"
 import HomeTeacher from "./page/HomeTeacher"
@@ -106,6 +106,7 @@ function App () {
       {/* <NavBar /> */}
 
       <Container className="text-secondary">
+        
         <Routes>
         <Route 
           path="/" 
@@ -120,6 +121,7 @@ function App () {
 
         
           <Route path="/register" element={user ? <Chat /> :<Register />} />
+
           <Route path="/login" element={user ? <Navigate to="/"/>:<Login />} />
           {/* <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>
           <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} /> */}
@@ -185,54 +187,7 @@ function App () {
 
               {/* <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/> */}
           </Route>
-{/* 
-          {user && user.role === 'teacher' && (
-            <>
-              <Route path='/dashboard' element={<DashboardTeacher/>: <Login />}/>
-              <Route path="/lesson" element={<HomeTeacher /> : <Login />}/>
-              <Route path="/Edit-RPD/:name/edit" element={user ? <EditRPDSampleCase /> : <Login />} />
-              <Route path="/Add-RPD" element={user ? <AddRPDSampleCase /> : <Login />} />
-              <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
-              <Route path="/Model/:name/view" element={user ? <Model /> : <Login />} />
-              <Route path="/animation/view/:id" element={user ? <ViewBiomechanicalConsideration /> : <Login />} />
-              <Route path="/Edit-Biomechanical-consideration/:id" element={user ? <EditBiomechanicalConsideration /> : <Login />} />
-              <Route path="/Biomechanical-consideration" element={user ? <BiomechanicalConsideration /> : <Login />} />
-              <Route path="/Add-Biomechanical-consideration" element={user ? <AddBiomechanicalConsideration /> : <Login />} />
-              <Route path="/Edit-MovementOfRPD/:name/edit" element={user ? <Edit_MovementOfRPD /> : <Login />} />
-              <Route path="/Possible-Movement-Of-RPD" element={user ? <PossibleMovementOfRPDTeacher/> : <Login/>}/>
-              <Route path="/MovementOfRPD" element={user ? <MovementOfRPD /> : <Login />} />
-              <Route path="/Add-MovementOfRPD" element={user ? <AddMovementOfRPD /> : <Login />} />
-              <Route path="/animation3d/:name/view" element={user ? <ViewMovementOfRPD /> : <Login />} />
-              <Route path="/Form" element={user ? <Form /> : <Login />} />
-              <Route path="/ListQuiz" element={user ? <QuizList/>: <Login />}/>
-              <Route path='/Add-Quiz' element={user? <CreateQuizT/>: <Login/>}/> 
-              <Route path='/quiz/:id' element={user? <DetailQ/>: <Login/>}/> 
-              <Route path='/quiz/:id/edit' element={user? <EditQuiz/>: <Login/>}/> 
-              <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/>
 
-            </>
-          )}
-
-          {user && user.role === 'student' && (
-            <>
-              <Route path='/dashboard' element={user ?<DashboardStudent/>: <Login />}/>
-              <Route path="/lesson" element={user ? <HomeStudent />: <Login />} />
-              <Route path="/ListQuiz" element={user ? <ListQuiz/>: <Login />}/>
-              <Route path='/Quiz/:id/start' element={user ? <QuizStart/> : <Login/>}/>
-              <Route path='/quiz/:id/result' element={user? <Result/>: <Login/>}/> 
-
-              <Route path='/Quiz/:id' element={user ? <QuizDetail/> : <Login/>}/>
-              <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} />
-              <Route path="/Model/:name/view" element={user ? <Model /> : <Login />} />
-              <Route path="/animation/view/:id" element={user ? <ViewBiomechanicalConsideration /> : <Login />} />
-              <Route path="/Biomechanical-consideration" element={user ? <BiomechanicalConsiderationStudent /> : <Login />} />
-              <Route path="/animation3d/:name/view" element={user ? <ViewMovementOfRPD /> : <Login />} />
-              <Route path="/Possible-Movement-Of-RPD" element={user ? <PossibleMovementOfRPDStudent/> : <Login/>}/>
-              <Route path="/MovementOfRPD" element={user ? <MovementOfRPDStudent /> : <Login />} />
-              <Route path='/notification/' element={user? <NotificationBell/>: <Login/>}/>
-            </>
-            
-          )} */}
           
               {/* Fallback for undefined routes */}
               <Route path="*" element={<Navigate to="/login" />} />

@@ -1,7 +1,7 @@
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import BookMark from "../components/lesson/RPDSampleCase/BookMark";
-import ChatBox from "../components/Noti";
+// import ChatBox from "../components/Noti";
 
 const Bookmark = () => {
     return ( 
@@ -9,7 +9,7 @@ const Bookmark = () => {
            <Frame >
            <BookMark/>
            </Frame>
-           <ChatBox/>
+           {/* <ChatBox/> */}
         </div>
 
      );
