@@ -810,6 +810,7 @@ border-radius:5px;
   left: 0;
   right: 0;
   bottom: 0;
+  border-radius:0!important;
 }
 
 .ar-Scene canvas{

@@ -6,19 +6,22 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
 import { IoIosSearch } from "react-icons/io";
 import axios from 'axios';
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
+import { useSelector } from "react-redux";
 // import { HiPlusSm } from "react-icons/hi";
-import { Card, Button, Row, Col,Container } from 'react-bootstrap';
+// import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import bk1 from '../../../../public/bookmark1.png'
 import bk from '../../../../public/bookmark.png'
+import { Card, Button, Row, Col, Container, Spinner, Dropdown, ButtonGroup, } from 'react-bootstrap';
 
 const Student_View_RPD_sample_case = () => {
   const [models, setModels] = useState([]);
   const [clickedBookmark, setClickedBookmark] = useState({});
   const [selectedModel, setSelectedModel] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const { user } = useContext(AuthContext);
+  // const { user } = useContext(AuthContext);
+  const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
 // const database = getDatabase(); // Firebase Database instance
@@ -79,7 +82,7 @@ useEffect(() => {
 
 const fetchBookmarks = async (userId) => {
   try {
-    const response = await axios.get(`http://localhost:8080/api/bookmark/${userId}`);
+    const response = await axios.get(`${baseUrl}/bookmark/${userId}`);
     setClickedBookmark(response.data || {});
   } catch (error) {
     console.error("Error fetching bookmarks:", error);
@@ -108,7 +111,7 @@ const handleBookmarkClick = async (userId, modelId) => {
   setClickedBookmark(updatedBookmarks);
 
   try {
-    await axios.post(`http://localhost:8080/api/bookmark/${userId}`, {
+    await axios.post(`${baseUrl}/bookmark/${userId}`, {
       userId,
       bookmarks: updatedBookmarks,
     });
@@ -139,8 +142,26 @@ const handleBookmarkClick = async (userId, modelId) => {
   </button>
 </div>
 
-    
+
   <Container className="container-model">
+  {loading ? ( // Show loading spinner while data is loading
+          <div className="d-flex justify-content-center my-5" style={{}}>
+            {/* animation="grow" */}
+           <Spinner
+                      as="span"
+                      animation="grow"
+                     //  size="lg"
+                      role="status"
+                      aria-hidden="true"
+                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                       height: '25px'}}
+                    />
+                    กำลังโหลด...
+                    
+          </div>
+        ) : (
+
+          
     <Row >
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
         //  <div className="grid-contaioner">
@@ -164,8 +185,8 @@ const handleBookmarkClick = async (userId, modelId) => {
                   onClick={() => handleModelClick(model)}
                   style={{ clear:'both',cursor: 'pointer', width: '100%', height: '18vh',}}
                 />
-                <div className="dd h-100" style={{height:'100px'}}>
-                <div className="detail-model  h-100" style={{display:'flex',justifyContent:'space-between',flexDirection:'column',}}>
+                <div className="dd h-100" style={{height:'70px'}}>
+                {/* <div className="detail-model  h-100" style={{display:'flex',justifyContent:'space-between',flexDirection:'column',}}> */}
                 <div className="model-container-view " style={{ height:'100px', }}>
                   <span className="modelName-span " style={{ margin: '10px 0 10px 0', fontSize: "0.85rem", color: "#000", fontWeight: '500',wordBreak:'break-all'}}>
                   
@@ -179,11 +200,12 @@ const handleBookmarkClick = async (userId, modelId) => {
               </div>
               
               
-            </div>
+            {/* </div> */}
           </Col>
           // </div>
         ))}
         </Row>
+         )}
         </Container>
     </div>
   );

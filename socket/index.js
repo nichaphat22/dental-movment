@@ -7,9 +7,16 @@ const io = new Server(8800, {
 }
 });
 
+<<<<<<< HEAD
+
+let onlineUsers = [];
+// ✅ เปลี่ยนจาก Array เป็น Set เพื่อป้องกัน User ซ้ำ
+// let onlineUsers = new Map();
+=======
 // ใช้ Map เพื่อเก็บ userId -> socketId ของทั้ง sender และ recipient
 const socketMap = new Map();
 
+>>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
 
 io.on("connection", (socket) => {
     console.log("New connection", socket.id);
@@ -24,6 +31,34 @@ io.on("connection", (socket) => {
         socketMap.set(userId, socket.id);
         socket.userId = userId; // ผูก userId กับ socket
 
+<<<<<<< HEAD
+  // Sending message
+  socket.on("sendMessage", (message) => {
+    const user = onlineUsers.find(
+      (user) => user.userId === message.recipientId
+    );
+
+    if (user) {
+      io.to(user.socketId).emit("getMessage", message);
+      io.to(user.socketId).emit("getNotification", {
+        senderId: message.senderId,
+        isRead: false,
+        date: new Date(),
+      });
+    }
+  });
+
+  //แจ้งเตือนทั่วไป
+  socket.on("sendNotification", (data) => {
+    console.log("sending notification:", data);
+    io.emit("newNotification", data);
+    
+  });
+
+  // Disconnection
+  socket.on("disconnect", () => {
+    onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
+=======
         console.log(`✅ User added: ${userId} -> ${socket.id}`);
         console.log("📌 Current socket map:", Array.from(socketMap.entries()));
     });
@@ -38,6 +73,7 @@ io.on("connection", (socket) => {
         // หา socket ของผู้รับ
         const recipientSocketId = socketMap.get(message.recipientId);
         const senderSocketId = socketMap.get(message.senderId); // ✅ เก็บค่า sender ไว้ด้วย
+>>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
 
         console.log(`📩 Message from ${message.senderId} to ${message.recipientId}`);
         console.log("Sender Socket ID:", senderSocketId);

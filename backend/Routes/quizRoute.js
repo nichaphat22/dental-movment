@@ -11,6 +11,9 @@ const {
   getQuestionById,
   updateQuestion,
   deleteQuestion,
+  submitResult,
+  getQuizResults
+  
 } = require("../Controllers/quizController");
 
 // Quiz routes
@@ -26,5 +29,11 @@ router.get("/:quizId/questions/:questionId", getQuestionById); // ดึงค�
 router.post("/:quizId/questions", createQuestion); // เพิ่มคำถามในควิซ
 router.put("/:quizId/questions/:questionId", updateQuestion); // อัปเดตคำถาม
 router.delete("/:quizId/questions/:questionId", deleteQuestion); // ลบคำถาม
+
+
+//result 
+router.post('/submitResult', submitResult);
+router.get('/results/:studentId', getQuizResults);
+
 
 module.exports = router;

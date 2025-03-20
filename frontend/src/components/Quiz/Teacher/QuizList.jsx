@@ -6,6 +6,9 @@ import { CiEdit, CiTrash } from "react-icons/ci";
 import Swal from "sweetalert2";
 import { toast,Flip, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Progress, Typography } from "@material-tailwind/react"
+import { HiOutlineClipboard } from "react-icons/hi";
+import { PiClipboardTextDuotone } from "react-icons/pi";
 
 
 const QuizList = () => {
@@ -15,17 +18,17 @@ const QuizList = () => {
 
   useEffect(() => {
     if (location.state && location.state.success) {
-      toast.success(location.state.message || 'Quiz created successfully!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Flip,
-      });
+      // toast.success(location.state.message || 'Quiz created successfully!', {
+      //   position: "top-right",
+      //   autoClose: 3000,
+      //   hideProgressBar: false,
+      //   closeOnClick: false,
+      //   pauseOnHover: true,
+      //   draggable: true,
+      //   progress: undefined,
+      //   theme: "light",
+      //   transition: Flip,
+      // });
     }
   }, [location.state]); // เพิ่ม dependency array เพื่อให้ run เมื่อ state เปลี่ยนแปลงเท่านั้น
   
@@ -52,16 +55,18 @@ const QuizList = () => {
   }, []);
 
   const handleQuizClick = (id) => {
-    navigate(`/quiz/${id}`);
+    navigate(`/quiz-teacher/${id}`);
     console.log(id);
   };
 
   const handleEditQuiz = (id) => {
-    navigate(`/quiz/${id}/edit`);
+    navigate(`/quiz-teacher/${id}/edit`);
     console.log(id);
   };
 
   const handleDeleteQuiz = (id) => {
+    console.log("Deleting Quiz ID:", id); // ตรวจสอบว่า id ถูกต้อง
+  
     Swal.fire({
       title: "ยืนยันการลบ",
       text: "คุณแน่ใจหรือไม่ว่าต้องการลบแบบทดสอบนี้? การกระทำนี้ไม่สามารถย้อนกลับได้",
@@ -92,62 +97,61 @@ const QuizList = () => {
       }
     });
   };
+  
 
   return (
-    <div className="relative grid grid-cols-1 gap-6 mt-4 m-10 lg:m-48">
-      <ToastContainer  />             
+    <div className="relative grid grid-cols-1 gap-6 mt-4 sm:m-4 md:m-10 lg:m-60 cursor-pointer">
+      {/* <ToastContainer  />              */}
       {quizzes.length > 0 ? (
         quizzes.map((quiz) => (
           <div
             key={quiz._id}
-            className="relative p-4 mb-4 bg-white border rounded-xl shadow-sm hover:bg-gray-100 cursor-pointer"
+            className="relative p-2 md:p-4 bg-white md:hover:border-b-4 md:hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl transition hover:-translate cursor-pointer duration-300 ease-in-out transform hover:scale-x-105"
           >
-            {/* ปุ่มแก้ไขและลบ */}
-            <CiTrash
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDeleteQuiz(quiz._id);
-              }}
-              className="absolute top-4 right-4 text-xl cursor-pointer text-gray-500 hover:text-red-500"
-            />
-            <CiEdit
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEditQuiz(quiz._id);
-              }}
-              className="absolute top-4 right-10 text-xl cursor-pointer text-gray-500 hover:text-blue-500"
-            />
-
+            <div className="mb-2">
+              {/* ปุ่มแก้ไขและลบ */}
+                <CiTrash
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteQuiz(quiz._id);
+                  }}
+                  className="absolute top-4 right-4 text-sm md:text-xl cursor-pointer text-gray-500 hover:text-red-500"
+                />
+                <CiEdit
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEditQuiz(quiz._id);
+                  }}
+                  className="absolute top-4 right-9 md:right-10 sm md:text-xl cursor-pointer text-gray-500 hover:text-blue-500"
+                />
+            </div>
+            
             {/* คอนเทนต์หลัก */}
             <div className="flex" onClick={() => handleQuizClick(quiz._id)}>
-              {quiz.image ? (
-                <img
-                  src={quiz.image}
-                  alt={quiz.title}
-                  className="w-40 h-40 rounded-md"
-                />
-              ) : (
-                <img
-                  src={defaultImage}
-                  alt="Quiz"
-                  className="w-40 h-40 object-cover rounded-md shadow-none"
-                />
-              )}
-
-              <div className="ml-8 flex flex-col justify-between w-full mt-4">
+             
+              <div className=" flex flex-col justify-between w-full px-2 lg:px-4">
                 <div>
                   {/* ชื่อแบบทดสอบ */}
-                  <h3 className="text-lg font-medium text-indigo-500 cursor-pointer">
+                  <div className="flex items-center m-2 space-x-2 md:space-x-6 ">
+                  <PiClipboardTextDuotone className="text-xl md:text-3xl  lg:text-4xl text-purple-600 mt-2 flex-shrink-0"/>
+                  <h3 className="text-sm md:text-xl lg:text-2xl font-bold text-gray-700 cursor-pointer break-words whitespace-normal">
                     {quiz.title}
                   </h3>
+                  </div>
+                  
 
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-600 lg:pl-2 ml-9 mb:ml-14 lg:ml-16 md:mt-2 mb-2">
                     จำนวนข้อ: {quiz.questions?.length || 0}
                   </p>
+                  {/* <p>
+                  ผู้สร้าง: {quiz.teacher?.user?.name || 'No teacher assigned'}
+                  </p> */}
                 </div>
 
+              
+
                 {/* วันที่สร้าง */}
-                <div className="mt-4 text-sm text-gray-600 text-end">
+                <div className="mt-2 md:mt-4 text-xs md:text-sm mb-2 text-gray-600 text-end">
                   วันที่สร้าง:{" "}
                   {new Date(quiz.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",

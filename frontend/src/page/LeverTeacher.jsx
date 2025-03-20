@@ -2,31 +2,17 @@ import React, { useState } from "react";
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import View_LeverTeacher from "../components/lesson/Biomechanical_consideration/View_LeverTeacher";
-// import ChatBox from "../components/Noti";
-import './sidebar-mobile.css'; 
+import ChatBox from "../components/Noti";
 
 const LeverTeacher = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
-      <div style={{ marginTop: "100px" }} >
-        {/* Sidebar for mobile */}
-        <div
-          className={`sidebar-mobile ${
-            isSidebarOpen ? "sidebar-open" : "sidebar-closed"
-        }`}
-        >
+      <div className="mt-[100px] flex" >
           <NavBarLeft />
-        </div>
-  
-
-        {/* Desktop NavBarLeft */}
-        <div className="sidebar-desktop">
-          <NavBarLeft />
-        </div>
+       
   
         {/* Main Content Area */}
-        <div className="main-content">
-          <Frame style={{top:50}}>
+        <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
+          <Frame className="overflow-auto">
             <View_LeverTeacher />
           </Frame>
   

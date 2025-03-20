@@ -6,17 +6,9 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './RPD_sample_case.css';
 import { FaPen, FaEraser, FaTrash } from "react-icons/fa"; // Import icons
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 import { IoIosSave } from "react-icons/io";
-// import { SlNote } from "react-icons/sl";
-import { RiStickyNoteAddFill } from "react-icons/ri";
-// import { fabric } from 'fabric';
-
-import { FaUndoAlt } from "react-icons/fa";
-// import Text from './Text'
-import { FaRedoAlt } from "react-icons/fa";
-// import Text from './Text';
 import { RxText } from "react-icons/rx";
 import { FaBold } from "react-icons/fa6";
 import { FiItalic } from "react-icons/fi";
@@ -47,6 +39,7 @@ import InputNumber from 'rc-input-number';
 
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
+
 
 const ViewModel = () => {
   const location = useLocation();
@@ -736,7 +729,7 @@ const ViewModel = () => {
     };
 
     try {
-      const response = await axios.post(`http://localhost:8080/api/lecture`, canvasData);
+      const response = await axios.post(`${baseUrl}/lecture`, canvasData);
       console.log("Image and notes saved successfully:", response.data);
       toast.success("บันทึกรูปภาพเสร็จสิ้น!", { autoClose: 1500 });
     } catch (error) {
@@ -1239,10 +1232,27 @@ const ViewModel = () => {
         <div className="bt-mode" style={{
         }}>
           
-     
+          {loading ? ( // Show loading spinner while data is loading
+          <div className="d-flex justify-content-center my-5" style={{}}>
+            {/* animation="grow" */}
+           <Spinner
+                      as="span"
+                      animation="grow"
+                     //  size="lg"
+                      role="status"
+                      aria-hidden="true"
+                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                       height: '25px'}}
+                    />
+                    กำลังโหลด...
+                    
+          </div>
+        ) : (
+
+          
   
           <div className='containerRef' ref={containerRef} style={{ zIndex: 5,width:'100%'}}>  </div>
-
+        )}
           {showCanvas &&
             <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5,width:'100%' }} />
           }

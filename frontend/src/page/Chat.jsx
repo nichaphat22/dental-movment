@@ -3,7 +3,7 @@ import { ChatContext } from "../context/ChatContext";
 import { Container, Stack } from "react-bootstrap";
 import UserChat from "../components/chat/UserChat";
 import { AuthContext } from "../context/AuthContext";
-import PotentialChats from "../components/chat/PotentialChats";
+// import PotentialChats from "../components/chat/PotentialChats";
 import ChatBox from "../components/chat/ChatBox";
 // import Notifications from "../components/chat/Notifications";
 import "bootstrap/dist/css/bootstrap.min.css"
@@ -43,8 +43,11 @@ const Chat = () => {
     };
 
     return (
-        <Container style={{
-            marginTop: '75px', padding: '0 0 0 0',
+        <div  style={{
+            position: 'relative',  // กำหนดให้ container นี้เป็น "root" ของการจัดตำแหน่ง
+            height: '100vh',
+            width: '100%'}}>
+        <Container style={{ padding: '0 0 0 0',
             alignItems: "center",
             justifyContent: "center",
         }}>
@@ -52,12 +55,14 @@ const Chat = () => {
             {userChats?.length < 1 ? null : (
                 <Stack direction="horizontal" gap={0} className="align-items-start" style={{
                     width: "98%", maxWidth: "100%", margin: 'auto', height: '90vh',
-                    position: 'fixed',
+                    position: 'absolute',
                     left: 0,
                     right: 0,
+                    bottom:0,
+                    // zIndex:50,
                 }}>
             <Stack className="messages-box1 flex-grow-0 "> 
-                <div className="" style={{border: '1px solid #DADADA',borderBottom:  '1px solid rgba(216, 216, 216, 0.9)', boxShadow: 'rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em',background:'#fff',justifyContent:'',color:'',marginLeft:'',fontSize:'25px',display:'inline-flex',alignItems:'center' ,padding:'0.7rem', }}><span style={{fontWeight:'350',color:'#a894f3',marginRight:'2px'}} >แชต</span> <span><IoChatboxEllipses style={{color:'#d3c8ff',}} size={30}/>
+                <div className="" style={{borderRadius:'10px 10px 0 0',border: '1px solid #DADADA',borderBottom:  '1px solid rgba(216, 216, 216, 0.9)', boxShadow: 'rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em',background:'#9d87f1',justifyContent:'',color:'',marginLeft:'',fontSize:'25px',display:'inline-flex',alignItems:'center' ,padding:'0.7rem', }}><span style={{fontWeight:'350',color:'#e6dfff',marginRight:'4px'}} >แชต</span> <span><IoChatboxEllipses style={{color:'#e6dfff',}} size={30}/>
                 </span></div>
     {isUserChatsLoading && <p></p>}
     {userChats?.map((chat) => (
@@ -75,7 +80,8 @@ const Chat = () => {
                 </Stack>
             )}
         </Container>
-    );
+        </div>
+  );
 }
 
 export default Chat;

@@ -4,7 +4,7 @@ import "./Biomechanical_consideration.css";
 import { useNavigate } from "react-router-dom";
 // import {   } from "react-bootstrap";
 import { Card, Button, Row, Col,Container,Spinner,Dropdown, ButtonGroup,  } from 'react-bootstrap';
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { HiPlusSm } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
@@ -27,7 +27,7 @@ function View_Biomechanical_consideration() {
   }, []);
 
   const fetchAnimations = () => {
-    axios.get('http://localhost:8080/api/animation/getAnimation')
+    axios.get(`${baseUrl}/animation/getAnimation`)
       .then((response) => {
           console.log("API Response:", response.data); // Debugging
         setAnimations(response.data);
@@ -59,7 +59,7 @@ function View_Biomechanical_consideration() {
       if (result.isConfirmed) {
         try {
           axios
-            .delete(`http://localhost:8080/api/animation/deleteAnimation/${id}`)
+            .delete(`${baseUrl}/animation/deleteAnimation/${id}`)
             .then((response) => {
               setAnimations(animations.filter((animation) => animation._id !== id));
             });
@@ -112,8 +112,11 @@ function View_Biomechanical_consideration() {
                        height: '25px'}}
                     />
                     กำลังโหลด...
+                    
           </div>
         ) : (
+
+          
           <Row>
             {animations.map((animation) => (
               <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={animation._id}>

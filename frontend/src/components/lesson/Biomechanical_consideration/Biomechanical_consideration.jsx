@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./Biomechanical_consideration.css";
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2"; // นำเข้า SweetAlert2
 // import { toast, Flip, ToastContainer } from "react-toastify";
@@ -11,6 +11,7 @@ import { Button, Input, } from '@chakra-ui/react';
 import { RxCross2 } from "react-icons/rx";
 import { HiUpload } from "react-icons/hi"
 import { TbFile } from "react-icons/tb";
+// import { baseUrl } from "../utils/services";
 
 function BiomechanicalConsideration() {
   const [Ani_name, setAniName] = useState("");
@@ -52,7 +53,7 @@ if (!Ani_name  || !Ani_description  || !Ani_animation || !Ani_image) {
     setUploading(true);
 
     try {
-      const response = await axios.post('http://localhost:8080/api/animation/saveAnimation',
+      const response = await axios.post(`${baseUrl}/animation/saveAnimation`,
         formData,
         {
           headers: {

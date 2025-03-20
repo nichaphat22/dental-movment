@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-// import { baseUrl, getRequest } from "../utils/services";
+import { baseUrl, getRequest } from "../utils/services";
 import axios from 'axios';
 export const useFetchRecipientUser = (chat, user) => {
     const [recipientUser, setRecipientUser] = useState(null);
@@ -10,9 +10,9 @@ export const useFetchRecipientUser = (chat, user) => {
     useEffect(() => {
         const getUser = async()=> {
             if(!recipientId) return null;
-            const response = await axios.get(`http://localhost:8080/api/users/find/${recipientId}`
+            const response = await axios.get(`${baseUrl}/users/find/${recipientId}`
             )
-console.log('response.data',response.data)
+// console.log('response.data',response.data)
             if(response.error) {
                 return setError(error);
             }

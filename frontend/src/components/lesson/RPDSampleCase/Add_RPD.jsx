@@ -337,7 +337,7 @@ const handleSaveModel = async (event) => {
       type="file"
       id="model-file"
       onChange={(e) => handleFileChange(e, setFileModel)} 
-      accept=".obj,.gltf,.glb" // กำหนดชนิดไฟล์ที่รองรับ
+      accept=".obj,.gltf,.glb,.stl" // กำหนดชนิดไฟล์ที่รองรับ
       display="none" // ซ่อน input
       name="model-file" 
       // required

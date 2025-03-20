@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ImCross } from "react-icons/im";
 import { IoMdClose } from "react-icons/io";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
+import { useMemo } from 'react';
 function ARScene() {
   const [patterns, setPatterns] = useState([]);
   const [isARActive, setIsARActive] = useState(true);
@@ -40,11 +40,16 @@ function ARScene() {
     };
 
     fetchModelData();
-  }, []); // ไม่ต้องใช้ useMemo อีกต่อไป
-  console.log("pattern", patterns);
+  }, []);
+
+  // ใช้ useMemo เพื่อหลีกเลี่ยงการคำนวณซ้ำซ้อน
+  const memoizedPatterns = useMemo(() => patterns, [patterns]);
+
+  console.log("pattern", memoizedPatterns);
+
   const handleClose = () => {
     setIsARActive(false); // ปิด AR ก่อน
-
+  
     setTimeout(() => {
       if (window.history.length > 1) {
         navigate(-1);
@@ -52,26 +57,26 @@ function ARScene() {
         window.close();
       }
     }, 300); // ให้เวลา ARCanvas ถูกปิดก่อนเปลี่ยนหน้า
-
+  
     // 🔥 ปิดกล้องจริง ๆ
     const mediaStream = document.querySelector('video')?.srcObject;
     if (mediaStream) {
       mediaStream.getTracks().forEach((track) => track.stop()); // หยุดกล้อง
     }
-
+  
     // 🔥 ลบวิดีโอกล้องออกจาก DOM
     const arVideo = document.getElementById('arjs-video');
     if (arVideo) {
       arVideo.srcObject = null; // ปิดสตรีมกล้อง
       arVideo.remove(); // ลบออกจาก DOM
     }
-
+  
     // 🔥 ลบ ARCanvas ออกจาก DOM
     const arCanvas = document.querySelector('canvas');
     if (arCanvas) {
       arCanvas.remove();
     }
-
+  
     // ทำนุบำรุงการปล่อยทรัพยากร (dispose)
     const disposeResources = () => {
       // ลบ ARMarker และ ARCanvas
@@ -80,9 +85,10 @@ function ARScene() {
         marker.dispose(); // ถ้ามี dispose method
       });
     };
-
+  
     disposeResources();
   };
+  
 
   useEffect(() => {
     // ตรวจสอบขนาดหน้าจอ
@@ -90,9 +96,9 @@ function ARScene() {
       const windowWidth = window.innerWidth;
 
       if (windowWidth < 1024) {
-        setScale(0.028);  // เล็กลงสำหรับหน้าจอเล็กกว่า 1024px
+        setScale(0.025);  // เล็กลงสำหรับหน้าจอเล็กกว่า 1024px
       } else {
-        setScale(0.04);   // ปรับขนาดสำหรับหน้าจอที่ใหญ่กว่า
+        setScale(0.035);   // ปรับขนาดสำหรับหน้าจอที่ใหญ่กว่า
       }
     };
 
@@ -104,36 +110,37 @@ function ARScene() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { max: 1280 },
+        height: { max: 720 }
+      }
+    })
+    .then((stream) => {
+      const videoElement = document.querySelector('video');
+      if (videoElement) {
+        videoElement.srcObject = stream; // ผูกสตรีมกับวิดีโอ
+      }
+    })
+    .catch((err) => {
+      console.error("Error accessing camera:", err); // จัดการข้อผิดพลาด
+    });
+  }, []);
+  
+  useEffect(() => {
+    console.log("Number of patterns loaded:", patterns.length);
+  }, [patterns]);
+  
   const [cameraSettings, setCameraSettings] = useState({
-    fov: 100,
+    fov: 50,
     aspect: window.innerWidth / window.innerHeight,
     near: 0.1,
     far: 10
   });
-
-  useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then((stream) => {
-        const track = stream.getVideoTracks()[0];
-        const settings = track.getSettings();
-
-        // อัปเดตค่ากล้องให้ตรงกับอุปกรณ์
-        setCameraSettings((prev) => ({
-          ...prev,
-          aspect: settings.aspectRatio || prev.aspect,
-          fov: settings.focalLength ? (2 * Math.atan(36 / (2 * settings.focalLength)) * (180 / Math.PI)) : prev.fov
-        }));
-
-        // หยุดใช้กล้องหลังจากดึงข้อมูลแล้ว
-        track.stop();
-      })
-      .catch((err) => console.error("Error accessing camera:", err));
-  }, []);
-  useEffect(() => {
-    console.log("Number of patterns loaded:", patterns.length);
-  }, [patterns]);
-
-
+  
+  
   const onMarkerFound = (pattern) => {
     console.log("Marker detected:", pattern.patternUrl);
     if (!modelVisible) {
@@ -147,7 +154,18 @@ function ARScene() {
       setModelVisible(false);  // Only update if model is currently visible
     }
   };
-
+  useEffect(() => {
+    const handleResize = () => {
+      setCameraSettings({
+        ...cameraSettings,
+        aspect: window.innerWidth / window.innerHeight,
+      });
+    };
+  
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [cameraSettings]);
+  
 
   return (
     <div>
@@ -162,13 +180,14 @@ function ARScene() {
             width: '100vw',
             height: '100vh',
           }}
+          camera={cameraSettings} // Using the camera settings here
           gl={{ antialias: true }}
           onCreated={({ gl }) => {
             gl.setSize(window.innerWidth, window.innerHeight);
             gl.setPixelRatio(window.devicePixelRatio); // ใช้ค่าความละเอียดของอุปกรณ์
           }}
-          camera={cameraSettings} // ใช้ค่ากล้องที่อัปเดตจากอุปกรณ์
-          
+         
+        
         >
           <ambientLight intensity={0.5} />
           <directionalLight intensity={0.5} />
@@ -182,7 +201,7 @@ function ARScene() {
                 smooth: true,
                 smoothCount: 5,   // ลดจำนวนเฟรมที่ใช้ในการคำนวณ
                 smoothTolerance: 0.05,  // ลดค่าความทนทานเพื่อให้การหมุนเร็วขึ้น
-                minConfidence: 0.1 // เพิ่มความแม่นยำในการตรวจจับมาร์กเกอร์
+                minConfidence: 0.5 // เพิ่มความแม่นยำในการตรวจจับมาร์กเกอร์
               }} // ปรับค่าความมั่นใจ
               type={'pattern'}
               patternUrl={pattern.patternUrl}

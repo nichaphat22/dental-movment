@@ -27,7 +27,7 @@ const UserChat = ({ chat, user, isActive }) => {
   const hasUnreadMessages = latestMessage && latestMessage.senderId === recipientUser?._id && !latestMessage.isRead;
 
 
-  console.log('chat', chat._id)
+  // console.log('chat', chat._id)
 
   // const unreadMessages = unreadMessageCount(messages);
 

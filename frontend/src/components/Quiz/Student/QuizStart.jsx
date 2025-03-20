@@ -1,48 +1,71 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import quizService from '../../../utils/quizService';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import quizService from "../../../utils/quizService";
+import QuizResults from "./QuizResults";
+import { useSelector } from "react-redux";
 
 const QuizStart = () => {
-  const { id } = useParams(); // id ของควิซที่เลือก
+  const { id } = useParams();
   const navigate = useNavigate();
-  
 
-  const [quiz, setQuiz] = useState(null); // สำหรับเก็บข้อมูลควิซ
-  const [answers, setAnswers] = useState([]); // สำหรับเก็บคำตอบที่ผู้ใช้เลือก
+  const [quiz, setQuiz] = useState(null);
+  const [answers, setAnswers] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
-  
+  const user = useSelector(state => state.auth.user);
+  const roleData = useSelector(state => state.auth.roleData)
 
   useEffect(() => {
-    // ดึงข้อมูลควิซจาก API
     const fetchQuiz = async () => {
       try {
         const response = await quizService.getQuizById(id);
         setQuiz(response.data.quiz);
-        setAnswers(new Array(response.data.quiz.questions.length).fill(null)); // กำหนดค่าเริ่มต้นของคำตอบเป็น null
+        setAnswers(new Array(response.data.quiz.questions.length).fill(null));
       } catch (error) {
-        console.error('Error fetching quiz:', error);
+        console.error("Error fetching quiz:", error);
       }
     };
 
     fetchQuiz();
   }, [id]);
 
-  const handleAnswerChange = (index) => {
-    const updatedAnswers = [...answers];
-    updatedAnswers[currentQuestionIndex] = index; // เก็บคำตอบที่เลือก
-    setAnswers(updatedAnswers);
+  const handleAnswerChange = (choiceIndex) => {
+    setAnswers((prevAnswers) => {
+      const updatedAnswers = [...prevAnswers];
+      updatedAnswers[currentQuestionIndex] = choiceIndex;
+      return updatedAnswers;
+    });
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     if (currentQuestionIndex < quiz.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      calculateScore();
-      setShowResults(true);
+      // คำนวณคะแนน
+      const totalScore = answers.reduce((acc, answer, index) => {
+        return answer === quiz.questions[index].correctAnswer ? acc + 1 : acc;
+      }, 0);
+  
+      const resultData = {
+        student: roleData, // ควรเป็น ObjectId
+        quiz: id, // ควรเป็น ObjectId
+        score: totalScore,
+      };
+  
+      console.log("📤 ส่งข้อมูลไปที่ Backend:", resultData); // ✅ Debug ดูค่าที่ส่ง
+  
+      try {
+        await quizService.submitResult(resultData);
+        navigate(`/quiz/${id}/result`, {
+          state: { quiz, answers, score: totalScore },
+        });
+      } catch (error) {
+        console.error("❌ เกิดข้อผิดพลาดขณะส่งคะแนน:", error.response?.data || error);
+      }
     }
   };
+  
 
   const handlePrevQuestion = () => {
     if (currentQuestionIndex > 0) {
@@ -63,41 +86,45 @@ const QuizStart = () => {
   if (!quiz) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="text-gray-600 text-lg">Loading...</div>
+        Loading...
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center items-center">
-      <div className="p-6 bg-white rounded-lg shadow-md max-w-4xl w-full">
-        {!showResults ? (
+    <div className="mb-4">
+      <h1 className="text-center mb-4 text-xl md:text-2xl text-purple-600 font-bold mx-10">
+        ชื่อแบบทดสอบ: {quiz.title}
+      </h1>
+      <div className="flex justify-center items-center ">
+        <div className="bg-white rounded-lg shadow-md max-w-5xl w-full md:mx-10">
           <div>
-            <h2 className="text-3xl font-bold text-gray-700 mb-4 text-center">
-              {quiz.questions[currentQuestionIndex].question}
-            </h2>
-
-            {/* ตรวจสอบว่าในคำถามมีรูปภาพหรือไม่ */}
+            <div className="bg-purple-50 p-4 rounded-t-md">
+              <h2 className="text-gray-700 text-center text-sm md:text-base">
+                {currentQuestionIndex + 1}.{" "}
+                {quiz.questions[currentQuestionIndex].question}
+              </h2>
+            </div>
+            {/* แสดงรูปภาพถ้ามีในคำถาม */}
             {quiz.questions[currentQuestionIndex].image && (
-              <div className="flex justify-center text-center mb-4">
+              <div className="flex justify-center text-center mt-3 mb-3">
                 <img
                   src={quiz.questions[currentQuestionIndex].image}
                   alt={`Question ${currentQuestionIndex + 1}`}
-                  className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
+                  className="max-w-60 max-h-40 md:max-h-48 object-cover border rounded-md shadow"
                 />
               </div>
             )}
-
-            <hr />
-            <div className="mb-6 p-4 border rounded-md bg-gray-50 shadow-sm mt-4">
-              {quiz?.questions?.[currentQuestionIndex]?.choices ? (
-                quiz.questions[currentQuestionIndex].choices.map((choice, index) => (
-                  <div key={index} className="mb-4">
+            <div className="mb-6 p-4">
+              {quiz.questions[currentQuestionIndex].choices.map(
+                (choice, index) => (
+                  <div key={index} className="mb-2 md:mx-10">
                     <label
-                      className={`flex items-center space-x-3 p-3 border rounded-md cursor-pointer hover:bg-indigo-50 
-                        ${answers[currentQuestionIndex] === index
-                          ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-gray-300'}`}
+                      className={`flex items-center p-2.5 border rounded-md cursor-pointer hover:bg-gray-100 ${
+                        answers[currentQuestionIndex] === index
+                          ? "border-indigo-500 bg-purple-100"
+                          : "border-gray-300"
+                      }`}
                     >
                       <input
                         type="radio"
@@ -105,90 +132,65 @@ const QuizStart = () => {
                         value={index}
                         checked={answers[currentQuestionIndex] === index}
                         onChange={() => handleAnswerChange(index)}
-                        className="form-radio h-5 w-5 text-indigo-500"
+                        className="mr-2"
                       />
-                      <span
-                        className={`text-gray-800 text-sm ${
-                          answers[currentQuestionIndex] === index ? 'font-semibold' : ''
-                        }`}
-                      >
+                      <span className="text-gray-600 text-xs md:text-sm font-normal">
                         {choice}
                       </span>
                     </label>
                   </div>
-                ))
-              ) : (
-                <p className="text-gray-600">ไม่มีตัวเลือกคำตอบสำหรับคำถามนี้</p>
+                )
               )}
             </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-6">
-              <button
-                onClick={handlePrevQuestion}
-                disabled={currentQuestionIndex === 0}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50"
-              >
-                ย้อนกลับ
-              </button>
-              <button
-                onClick={handleNextQuestion}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                {currentQuestionIndex === quiz.questions.length - 1 ? 'เสร็จสิ้น' : 'ถัดไป'}
-              </button>
-            </div>
           </div>
-        ) : (
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-purple-500 mb-4">
-              คะแนนที่ได้: {score}/{quiz.questions.length}
-            </h2>
-            <div className="space-y-4 text-left">
-              {quiz.questions.map((question, index) => (
-                <div key={index} className="p-4 border rounded-md bg-gray-50 shadow-sm">
-                  <h4 className="font-bold text-gray-800">{`${index + 1}: ${question.question}`}</h4>
-                  {/* แสดงรูปภาพถ้ามีในหน้า Review */}
-                  {question.image && (
-                    <div className="flex justify-center text-center my-4">
-                      <img
-                        src={question.image}
-                        alt={`Question ${index + 1}`}
-                        className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
-                      />
-                    </div>
-                  )}
-                  <p className="text-gray-600">
-                    <strong>คำตอบที่เลือก: </strong>
-                    {answers[index] !== null
-                      ? question.choices[answers[index]]
-                      : 'ไม่ได้เลือกคำตอบ'}
-                  </p>
-                  <p
-                    className={`text-gray-600 ${
-                      answers[index] === question.correctAnswer ? 'text-green-600' : 'text-red-600'
-                    }`}
-                  >
-                    <strong>คำตอบที่ถูกต้อง: </strong>
-                    {question.choices[question.correctAnswer]}
-                  </p>
-                  <p className="text-gray-500">
-                    <strong>อธิบายคำตอบ: </strong>
-                    {question.answerExplanation || '-'}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => navigate('/ListQuiz')}
-              className="mt-6 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              กลับหน้าหลัก
-            </button>
-          </div>
-        )}
+        </div>
       </div>
+      <div className="flex justify-between md:mx-44 mt-10 md:mt-12 text-xs md:text-sm">
+        <div>
+          <button
+            onClick={handlePrevQuestion}
+            disabled={currentQuestionIndex === 0}
+            className="  px-4 py-2 bg-gray-200 text-gray-700  rounded hover:bg-gray-300 disabled:opacity-50"
+          >
+            ย้อนกลับ
+          </button>
+        </div>
+        {/* Pagination Buttons */}
+        <div className="flex justify-center items-center space-x-3">
+          {quiz.questions.map((_, index) => {
+            const isCurrent = index === currentQuestionIndex;
+            const isAnswered = answers[index] !== null;
 
+            return (
+              <button
+                key={index}
+                onClick={() => setCurrentQuestionIndex(index)}
+                className={`w-6 h-6 flex items-center justify-center rounded-full text-white text-xs font-semibold transition-all
+          ${
+            isCurrent
+              ? "bg-orange-500"
+              : isAnswered
+              ? "bg-purple-500"
+              : "bg-gray-300"
+          }`}
+              >
+                {index + 1}
+                {/* {isCurrent && index === 1 && <span className="absolute -mt-4">🐛</span>} */}
+              </button>
+            );
+          })}
+        </div>
+        <div>
+          <button
+            onClick={handleNextQuestion}
+            className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+          >
+            {currentQuestionIndex === quiz.questions.length - 1
+              ? "เสร็จสิ้น"
+              : "ถัดไป"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

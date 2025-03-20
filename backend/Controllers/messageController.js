@@ -134,32 +134,46 @@ const notificationUserRead = async (req, res) => {
     }
 };
 
-// ลบการแจ้งเตือนที่ถูกอ่านแล้ว
 const notificationDeleteUserRead = async (req, res) => {
     const { recipientId } = req.params;
+    console.log('Deleting notifications for recipientId:', recipientId); // เพิ่มการ log ที่นี่
     try {
-      const deletedNotifications = await notificationChatModel.deleteMany(
-        { recipientId, isRead: true }
-      );
-  
-      res.status(200).json({ message: "Deleted read notifications", deletedNotifications });
+        const deletedNotifications = await notificationChatModel.deleteMany(
+            { recipientId, isRead: true }
+        );
+        res.status(200).json({ message: "Deleted read notifications", deletedNotifications });
     } catch (err) {
-      res.status(500).json({ error: err.message });
+        res.status(500).json({ error: err.message });
     }
-  };
+};
+
   
+
 
 // getMessages
 const getMessages = async (req, res) => {
     const { chatId } = req.params;
 
     try {
+        // ตรวจสอบว่ามี chatId หรือไม่
+        if (!chatId) {
+            return res.status(400).json({ error: 'chatId is required' });
+        }
+
+        // ค้นหาข้อความในฐานข้อมูลตาม chatId
         const messages = await messageModel.find({ chatId });
+
+        // หากไม่พบข้อความ ให้ส่งข้อความว่าไม่มีข้อความ
+        if (messages.length === 0) {
+            return res.status(200).json({ message: 'No messages found' });
+        }
+
+        // ส่งข้อความทั้งหมดที่พบ
         res.status(200).json(messages);
-    }catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    };
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
 // const getMessages = async (req, res) => {

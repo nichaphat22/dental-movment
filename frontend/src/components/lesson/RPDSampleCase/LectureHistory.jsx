@@ -2,16 +2,17 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import LectureModal from './LectureModal';
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { RxCross2 } from "react-icons/rx";
-import { Card, Button, Row, Col,Container } from 'react-bootstrap';
+// import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-
+import { useSelector } from 'react-redux';
+import { Card, Button, Row, Col, Container, Spinner, Dropdown, ButtonGroup, } from 'react-bootstrap';
 
 const LectureHistory = () => {
   // Hook สำหรับการนำทาง
@@ -23,6 +24,10 @@ const LectureHistory = () => {
   // Context สำหรับดึงข้อมูลผู้ใช้ที่ล็อกอิน
   const { user } = useContext(AuthContext);
 
+  console.log("User from Redux:", user);
+  console.log(selectedLecture);
+  
+
   // ฟังก์ชันสำหรับดึงข้อมูลบรรยายจากเซิร์ฟเวอร์
   const fetchLectures = async (userLectureID) => {
     try {
@@ -30,7 +35,7 @@ const LectureHistory = () => {
         console.error('No userLectureID provided'); // ตรวจสอบว่า ID ผู้ใช้ถูกส่งมา
         return;
       }
-      const response = await axios.get(`http://localhost:8080/api/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
+      const response = await axios.get(`${baseUrl}/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
       setLectures(response.data); // ตั้งค่าข้อมูลบรรยายใน state
     } catch (error) {
       console.error('Error fetching lectures:', error); // จัดการข้อผิดพลาด
@@ -39,7 +44,7 @@ const LectureHistory = () => {
   
   // ใช้ useEffect เพื่อตรวจสอบและดึงข้อมูลเมื่อ component ถูกเรนเดอร์
   useEffect(() => {
-    if (user?._id) {
+    if (user && user?._id) {
       fetchLectures(user._id); // ดึงข้อมูลบรรยายตาม ID ของผู้ใช้
     } else {
       console.error('User ID is not available'); // ข้อความเมื่อ ID ผู้ใช้ไม่มี
@@ -69,7 +74,7 @@ const LectureHistory = () => {
           try {
             
     // try {
-      await axios.delete(`http://localhost:8080/api/lecture/lectures/${id}`); // ลบบรรยายตาม ID
+      await axios.delete(`${baseUrl}/lecture/lectures/${id}`); // ลบบรรยายตาม ID
       fetchLectures(user._id); // ดึงข้อมูลบรรยายใหม่หลังจากลบ
   //  / แสดงข้อความสำเร็จหลังจากการลบ
            Swal.fire("ลบสำเร็จ!", "รูปภาพถูกลบเรียบร้อยแล้ว", "success");
@@ -96,6 +101,27 @@ const LectureHistory = () => {
       <div className="lecture-thumbnails" style={{ display: 'flex', flexWrap: 'wrap', textAlign: 'center', justifyContent: 'center',width:'100%',margin:'auto' }}>
         
       <Container className="container-lect" style={{}}>
+           
+      {loading ? ( // Show loading spinner while data is loading
+          <div className="d-flex justify-content-center my-5" style={{}}>
+            {/* animation="grow" */}
+           <Spinner
+                      as="span"
+                      animation="grow"
+                     //  size="lg"
+                      role="status"
+                      aria-hidden="true"
+                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                       height: '25px'}}
+                    />
+                    กำลังโหลด...
+                    
+          </div>
+        ) : (
+
+          
+  
+      
       <Row style={{ }}>
 
         {lectures.map((lecture) => (
@@ -154,6 +180,7 @@ const LectureHistory = () => {
           </Col>
         ))}
         </Row>
+         )}
         </Container>
       </div>
       {selectedLecture && <LectureModal lecture={selectedLecture} onClose={closeModal} />} 

@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Input, Textarea } from "@material-tailwind/react";
 import quizService from "../../../utils/quizService";
-import { CiMenuKebab ,CiEdit} from "react-icons/ci";
-import { HiOutlineX } from "react-icons/hi";
-import { RiDeleteBinLine } from "react-icons/ri";
+import { HiOutlineX, HiPlus } from "react-icons/hi";
 import Swal from "sweetalert2";
-import { FiImage } from "react-icons/fi"; 
-import defaultImage from "../../../../public/imgQuiz.svg";
+import {
+  GoTrash,
+  GoDuplicate,
+  GoChevronDown,
+  GoChevronUp,
+} from "react-icons/go";
+import { RiImageAddLine } from "react-icons/ri";
 
 const QuizEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [quiz, setQuiz] = useState(null);
+  const [quiz, setQuiz] = useState({
+    title: "",
+    description: "",
+    questions: [],
+  });
+  const questionRefs = useRef([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [image, setImage] = useState(); 
+  const [image, setImage] = useState();
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -31,26 +40,62 @@ const QuizEdit = () => {
     fetchQuiz();
   }, [id]);
 
-  const handleAddQuestion = () => {
+  // question
+  const handleAddQuestion = (index) => {
     const newQuestion = {
       question: "",
       choices: ["", "", "", ""],
       correctAnswer: 0,
       answerExplanation: "",
-      deleted: false, // ค่า default คือ false เพราะมันยังไม่ได้ถูกลบ
+      deleted: false,
     };
-    setQuiz({ ...quiz, questions: [...quiz.questions, newQuestion] });
+
+    //แทรกตำแหน่งคำถาม
+    const updatedQuestions = [...quiz.questions];
+    updatedQuestions.splice(index + 1, 0, newQuestion); // เพิ่มคำถามหลังตำแหน่งที่เลือก
+    setQuiz({ ...quiz, questions: updatedQuestions });
+
+    setTimeout(() => {
+      questionRefs.current[index + 1]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 100);
+  };
+
+  //add choices
+  const handleAddChoices = (qIndex) => {
+    const updatedQuestions = [...quiz.questions];
+    updatedQuestions[qIndex].choices.push("");
+    setQuiz({ ...quiz, questions: updatedQuestions });
+  };
+
+  // remove choices
+  const handleDeleteChoice = (qIndex, oIndex) => {
+    const updatedQuestions = [...quiz.questions];
+
+    //ป้องกันไม่ให้ตัวเลือกถูกลบจนเหลือ 0 ตัวเลือก
+    if (updatedQuestions[qIndex].choices.length > 1) {
+      updatedQuestions[qIndex].choices.splice(oIndex, 1);
+
+      // ถ้าคำตอบที่ถูกต้องถูกลบ ให้เปลี่ยนค่า `correctAnswer` ไปที่ตัวเลือกแรก
+      if (updatedQuestions[qIndex].correctAnswer === oIndex) {
+        updatedQuestions[qIndex].correctAnswer = 0;
+      }
+
+      setQuiz({ ...quiz, questions: updatedQuestions });
+    }
   };
 
   const handleDeleteQuestion = async (index) => {
     // แสดง SweetAlert เพื่อยืนยันการลบ
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
+      title: "คุณแน่ใจหรือไม่?",
+      text: "คุณต้องการลบคำถามนี้หรือไม่?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "No, cancel!",
+      confirmButtonText: "ลบคำถาม",
+      cancelButtonText: "ยกเลิก",
     });
 
     // ถ้าผู้ใช้ยืนยันการลบ
@@ -59,9 +104,9 @@ const QuizEdit = () => {
     }
 
     // ลบคำถามจาก UI ทันที
-    const updatedQuestions = [...quiz.questions];  // คัดลอกคำถามทั้งหมด
-    const deletedQuestion = updatedQuestions.splice(index, 1);  // ลบคำถามที่ index ที่เลือก
-    setQuiz({ ...quiz, questions: updatedQuestions });  // อัปเดต state ให้แสดงคำถามใหม่
+    const updatedQuestions = [...quiz.questions]; // คัดลอกคำถามทั้งหมด
+    const deletedQuestion = updatedQuestions.splice(index, 1); // ลบคำถามที่ index ที่เลือก
+    setQuiz({ ...quiz, questions: updatedQuestions }); // อัปเดต state ให้แสดงคำถามใหม่
 
     // ถ้าคำถามที่ถูกลบมี id (หมายถึงมันถูกบันทึกในฐานข้อมูล)
     const questionToDelete = deletedQuestion[0];
@@ -72,24 +117,26 @@ const QuizEdit = () => {
         Swal.fire("Deleted!", "The question has been removed.", "success");
       } catch (error) {
         console.error("Error deleting question:", error);
-        Swal.fire("Error!", "There was an error deleting the question.", "error");
+        Swal.fire(
+          "Error!",
+          "There was an error deleting the question.",
+          "error"
+        );
       }
     }
   };
+
   const handleQuestionImageUpload = (index, e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = () => {
-        const updatedQuestions = [...questions];
+        const updatedQuestions = [...quiz.questions];
         updatedQuestions[index].image = reader.result; // บันทึก Base64 ของรูปภาพในคำถาม
-        setQuestions(updatedQuestions);
+        setQuiz({ ...quiz, questions: updatedQuestions });
       };
       reader.readAsDataURL(file);
     } else {
-      updatedQuestions[index].image = ""; // ตั้งค่า image ให้เป็นค่าว่าง
-      setQuestions(updatedQuestions);
-
       toast.error("กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น!", {
         position: "top-right",
         autoClose: 2000,
@@ -99,7 +146,44 @@ const QuizEdit = () => {
     }
   };
 
-     // เพิ่มการจัดการไฟล์รูปภาพ
+  //สลับตำแหน่งคำถาม
+  const handleMoveUp = (index) => {
+    if (index > 0) {
+      const updatedQuestions = [...quiz.questions];
+      [updatedQuestions[index], updatedQuestions[index - 1]] = [
+        updatedQuestions[index - 1],
+        updatedQuestions[index],
+      ];
+      setQuiz({ ...quiz, questions: updatedQuestions });
+
+      setTimeout(() => {
+        questionRefs.current[index - 1]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  };
+
+  const handleMoveDown = (index) => {
+    if (index < quiz.questions.length - 1) {
+      const updatedQuestions = [...quiz.questions];
+      [updatedQuestions[index], updatedQuestions[index + 1]] = [
+        updatedQuestions[index + 1],
+        updatedQuestions[index],
+      ];
+      setQuiz({ ...quiz, questions: updatedQuestions });
+
+      setTimeout(() => {
+        questionRefs.current[index + 1]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }, 100);
+    }
+  };
+
+  // เพิ่มการจัดการไฟล์รูปภาพ
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file && file.type.startsWith("image/")) {
@@ -121,91 +205,119 @@ const QuizEdit = () => {
   const handleSave = async () => {
     // ตรวจสอบข้อมูลก่อนที่จะบันทึก
     if (!quiz.title.trim() || !quiz.description.trim()) {
-      alert("Title and Description cannot be empty.");
+      Swal.fire("Error", "Title and Description cannot be empty.", "error");
       return;
     }
-
+  
     if (!quiz.questions.length) {
-      alert("Quiz must have at least one question.");
+      Swal.fire("Error", "Quiz must have at least one question.", "error");
       return;
     }
-
+  
     for (const question of quiz.questions) {
       if (!question.question.trim()) {
-        alert("All questions must have text.");
+        Swal.fire("Error", "All questions must have text.", "error");
         return;
       }
-
-      if (!question.choices.length || question.choices.some((opt) => !opt.trim())) {
-        alert("Each question must have at least one choice with valid text.");
+  
+      if (
+        !question.choices.length ||
+        question.choices.some((opt) => !opt.trim())
+      ) {
+        Swal.fire(
+          "Error",
+          "Each question must have at least one choice with valid text.",
+          "error"
+        );
         return;
       }
-
+  
       if (
         question.correctAnswer === undefined ||
         question.correctAnswer < 0 ||
         question.correctAnswer >= question.choices.length
       ) {
-        alert("Correct answer must be a valid choice index.");
+        Swal.fire(
+          "Error",
+          "Correct answer must be a valid choice index.",
+          "error"
+        );
         return;
       }
     }
-
+  
     try {
-      // อัปเดตข้อมูลควิซ
-      await quizService.updateQuiz(id, {
+      const quizData = {
         title: quiz.title,
         description: quiz.description,
-      });
-
-      // ลบคำถามที่มีสถานะ deleted
-      const deletedQuestions = quiz.questions.filter((question) => question.deleted);
-      for (const question of deletedQuestions) {
-        if (question._id) {
-          await quizService.deleteQuestion(id, question._id);
+        teacher: quiz.teacher,
+        questions: quiz.questions.map((q) => ({
+          _id: q._id || undefined,
+          question: q.question,
+          choices: q.choices,
+          image: q.image,
+          correctAnswer: q.correctAnswer,
+          answerExplanation: q.answerExplanation || "",
+          deleted: q.deleted || false,
+        })),
+      };
+  
+      try {
+        await quizService.updateQuiz(id, quizData);
+      } catch (error) {
+        console.error("Error updating quiz or questions:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data); // ดูข้อความผิดพลาดจากเซิร์ฟเวอร์
         }
+        Swal.fire("Failed to update quiz or questions.", "", "error");
       }
-
-      // เพิ่มหรืออัปเดตคำถาม
-      const activeQuestions = quiz.questions.filter((q) => !q.deleted);
-      for (const question of activeQuestions) {
-        if (question._id) {
-          // อัปเดตคำถามเดิม
-          await quizService.updateQuestion(id, question._id, question);
-        } else {
-          // สร้างคำถามใหม่
-          await quizService.createQuestion(id, question);
-        }
-      }
-
+      
+  
+      // แจ้งผลลัพธ์
       const result = await Swal.fire({
         title: "Do you want to save the changes?",
-        icon: 'warning',
+        icon: "warning",
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: "Save",
         denyButtonText: `Don't save`,
       });
-
+  
       if (result.isConfirmed) {
         Swal.fire("Saved!", "", "success");
-        navigate("/ListQuiz");
+        navigate("/ListQuiz-teacher");
       } else if (result.isDenied) {
         Swal.fire("Changes are not saved", "", "info");
-        navigate("/ListQuiz");
+        navigate("/ListQuiz-teacher");
       }
     } catch (error) {
       console.error("Error updating quiz or questions:", error);
       Swal.fire("Failed to update quiz or questions.", "", "error");
     }
   };
+  
+  
 
   const handleFieldChange = (field, value) => {
     setQuiz({ ...quiz, [field]: value });
   };
 
   const handleCancelEdit = () => {
-    navigate("/ListQuiz");
+    Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: "การยกเลิกจะไม่บันทึกข้อมูลที่คุณแก้ไขไว้!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ใช่, ยกเลิก",
+      cancelButtonText: "ไม่, กลับไปแก้ไข",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // ถ้าผู้ใช้กดยืนยันให้เปลี่ยนเส้นทาง
+        navigate("/ListQuiz-teacher");
+      }
+    });
   };
 
   const handleQuestionChange = (index, field, value) => {
@@ -223,11 +335,6 @@ const QuizEdit = () => {
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
-   //ลบรูปภาพ title
-   const handleRemoveImageTitle = () => {
-    setImage(null);
-  }
-
   if (isLoading) {
     return <div>Loading quiz details, please wait...</div>;
   }
@@ -238,239 +345,238 @@ const QuizEdit = () => {
 
   return (
     <div className="relative p-6 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold text-purple-500 mb-12 text-center">แก้ไขแบบทดสอบ</h1>
-
-      <div>
-        {/* <label>รูปภาพ: </label> */}
-        <div className="relative text-center flex justify-center mt-2 mb-4">
-          {image ? (
-          <>
-            <img
-            src={image || defaultImage}
-            alt="Quiz"
-            className="w-48 h-48 object-cover border shadow-none hover:transform-none"
-          />
-            <label 
-            htmlFor="file-upload"
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            title="เพิ่มรูปภาพ">
-                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
-            </label>
-            <div>
-              <button
-                onClick={handleRemoveImageTitle}
-                type="button"
-                className="absolute inline-flex size-5  text-red-600 rounded-full"
-                title="ลบรูปภาพ"
-                >
-                <HiOutlineX className="w-3 h-3" />
-              </button>
-            </div>
-          </>
-          ) : (
-            <>
-            <img 
-              src={defaultImage} 
-              alt="ภาพแบบทดสอบ"
-              className="w-48 h-48 object-cover border shadow-none" 
-            />
-            <label 
-            htmlFor="file-upload"
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            title="เพิ่มรูปภาพ">
-                <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
-            </label>
-
-            </>
-      
-          )}
-          </div>
-            {/* hidded input */}
-            <input
-              id="file-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-        />       
-      </div>
+      <h1 className="text-lg md:text-2xl lg:text-3xl font-bold text-purple-500 mb-4 text-center">
+        แก้ไขแบบทดสอบ
+      </h1>
 
       {/* Edit Quiz Title */}
-      <label className="flex sm:text-lg lg:text-2xl mb-4">
-        <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">ชื่อแบบทดสอบ:</span>
-        <input
-          type="text"
+      <div className="flex text-sm md:text-lg lg:text-xl mb-4">
+        <span className="flex-auto text-gray-500  mt-3.5  w-64 text-end md:pr-2">
+          ชื่อแบบทดสอบ:
+        </span>
+        <Input
           value={quiz.title}
           onChange={(e) => handleFieldChange("title", e.target.value)}
-          className="border-gray-200 pl-4 py-2 pr-2 w-full"
+          variant="static"
+          className="border-gray-200 text-black text-sm md:text-lg lg:text-xl pl-4 py-2 pr-2 w-full"
         />
-      </label>
+      </div>
 
       {/* Edit Quiz Description */}
-      <label className="flex justify-center sm:text-lg lg:text-2xl mb-4">
-        <span className="flex-auto font-bold text-gray-800 w-64 text-end pr-2">คำอธิบาย:</span>
+      <div className="flex text-sm md:text-lg lg:text-xl mb-4">
+        <span className="flex-auto text-gray-500 w-40  md:w-64 text-end pr-2">
+          คำอธิบาย:
+        </span>
         <textarea
           value={quiz.description}
           onChange={(e) => handleFieldChange("description", e.target.value)}
-          className="border-gray-200 border p-2 pr-2 w-full rounded"
+          className="text-black border-gray-200 border w-full rounded text-sm md:text-lg lg:text-xl min-h-32 pl-4 py-2 pr-2"
         ></textarea>
-      </label>
-
-      
+      </div>
 
       <hr className="pb-2" />
 
-      {/* Questions */}
-      {quiz.questions
-        .filter((question) => !question.deleted)
-        .map((question, qIndex) => (
-          <div className="relative mt-8 mb-6 p-4 border rounded-md bg-gray-50 shadow-sm lg:text-xl" key={qIndex}>
-            <HiOutlineX onClick={() => handleDeleteQuestion(qIndex)}  title="ลบคำถาม" className="absolute top-2 right-2 text-xl cursor-pointer text-red-600 w-4 h-4" />
-            {/* Question Input */}
-            <label className="flex mb-4 mt-2">
-              <span className="pr-4 py-2">{qIndex + 1}.</span>
-              <input
-                type="text"
-                value={question.question}
-                onChange={(e) => handleQuestionChange(qIndex, "question", e.target.value)}
-                className="border border-none border-b-pink-200 w-full py-2 pr-2 pl-4"
+      <div className="relative">
+        {/* Questions */}
+        {quiz.questions.map((question, qIndex) => (
+          <div key={qIndex} ref={(el) => (questionRefs.current[qIndex] = el)}>
+            <div className="flex justify-end mb-1 space-x-2">
+              <GoChevronUp
+                onClick={() => handleMoveUp(qIndex)}
+                className="cursor-pointer text-gray-600 rounded-sm transition-all 
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
               />
-            </label>
-            {/* เพิ่มแก้ไขลบรูปภาพ */}
-            <label>รูปภาพคำถาม</label>
-            <div className="relative text-center flex justify-center mt-2 mb-4">
-              {question.image ? (
-                <>
-                <img
-                  src={question.image} // แสดงรูปภาพที่อัปโหลด
-                  alt={`Question ${qIndex  + 1}`}
-                  className="max-w-80 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
-                  />
-                  <label 
-                    htmlFor={`file-imgQ-${qIndex}`}
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                    title="เพิ่มรูปภาพ"
-                  >
-                    <FiImage className="w-16 h-16 text-gray-800 opacity-70 hover:text-gray-500"/>
-                  </label>
-                  <div>
-                    <button
-                      onClick={() => {
-                        const updatedQuestions = [...quiz.questions];
-                        updatedQuestions[qIndex].image = null; // ตั้งค่าเป็น null เพื่อเคลียร์รูปภาพ
-                        handleQuestionChange(qIndex, "image", null);
-                      }}
-                      className="absolute inline-flex size-5  text-red-600 rounded-full"
-                      title="ลบรูปภาพ"
-                    >
-                      <HiOutlineX className="w-3 h-3" />
-                    </button>
-                  </div>
-                  </>
-              ) : (
-                <>
-                <div className="w-40 h-40 flex items-center justify-center border border-dashed text-gray-500">
-                      <FiImage className="w-10 h-10" /> {/* ไอคอนรูปภาพ */}
-                </div>
-                <label 
-                  htmlFor={`file-imgQ-${qIndex}`}
-                  className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                  title="เพิ่มรูปภาพ"
-                  >
-                    <FiImage className="w-10 h-10 text-gray-800 opacity-70 hover:text-gray-500"/>
-                </label>
-                </>
-                 
-              )}
+              <GoChevronDown
+                onClick={() => handleMoveDown(qIndex)}
+                className="cursor-pointer text-gray-600 rounded-sm transition-all 
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
+              />
+              <GoTrash
+                onClick={() => handleDeleteQuestion(qIndex)}
+                title="ลบคำถาม"
+                className="cursor-pointer text-gray-600 rounded-sm transition-all 
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
+              />
+              <GoDuplicate
+                onClick={() => handleAddQuestion(qIndex)}
+                title="เพิ่มคำถาม"
+                className="cursor-pointer text-gray-600 rounded-sm transition-all 
+                             p-1 hover:p-2 hover:bg-gray-200 w-5 h-5 md:w-6 md:h-6"
+              />
             </div>
-            <input
+            <div className="mb-6 p-4 focus-within:border-l-4 focus-within:border-purple-600 rounded-md bg-slate-50 drop-shadow-md relative transition">
+              {/* Question Input */}
+              <div className="flex items-center mb-4 mt-2">
+                <span className="pr-4 py-2 mt-3 text-sm md:text-base ">
+                  {qIndex + 1}.
+                </span>
+                <Input
+                  variant="static"
+                  color="blue-gray"
+                  placeholder="พิมพ์คำถาม..."
+                  value={question.question}
+                  onChange={(e) =>
+                    handleQuestionChange(qIndex, "question", e.target.value)
+                  }
+                  className="p-1 text-sm md:text-base  focus:!bg-gray-50 focus:!rounded-t-md text-black"
+                />
+                {/* เพิ่มแก้ไขลบรูปภาพ */}
+                <label
+                  htmlFor={`file-imgQ-${qIndex}`}
+                  className="ml-2 mt-3 cursor-pointer text-gray-300 rounded-full transition-all 
+                            p-2 hover:p-4 md:hover:bg-gray-100"
+                >
+                  <RiImageAddLine className="text-gray-600 w-5 h-5 md:w-6 md:h-6" />
+                </label>
+              </div>
+
+              <div className="relative text-center flex justify-center mt-2 mb-2">
+                {question.image ? (
+                  <>
+                    <img
+                      src={question.image} // แสดงรูปภาพที่อัปโหลด
+                      alt={`Question ${qIndex + 1}`}
+                      className="max-w-75 max-h-48 object-cover border rounded-none hover:transform-none shadow-none"
+                    />
+
+                    <div>
+                      <button
+                        onClick={() => {
+                          const updatedQuestions = [...quiz.questions];
+                          updatedQuestions[qIndex].image = null; // ตั้งค่าเป็น null เพื่อเคลียร์รูปภาพ
+                          handleQuestionChange(qIndex, "image", null);
+                        }}
+                        className="absolute inline-flex size-5  text-red-600 rounded-full"
+                        title="ลบรูปภาพ"
+                      >
+                        <HiOutlineX className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
+              <input
                 id={`file-imgQ-${qIndex}`}
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleQuestionImageUpload(index, e)}
+                onChange={(e) => handleQuestionImageUpload(qIndex, e)}
                 className="hidden"
-            />
+              />
 
-            {/* Choices */}
-            {question.choices.map((choice, oIndex) => (
-              <div key={oIndex}>
-                <label className="flex mb-2">
-                  <span className="pr-4 pl-8 py-2">{oIndex + 1}.</span>
-                  <input
-                    type="text"
-                    value={choice}
-                    onChange={(e) => {
-                      const updatedChoices = [...question.choices];
-                      updatedChoices[oIndex] = e.target.value;
-                      handleQuestionChange(qIndex, "choices", updatedChoices);
-                    }}
-                    className="w-full  border border-none py-2 pl-4 pr-2"
-                  />
-                </label>
+              {/* Choices */}
+              {question.choices.map((choice, oIndex) => (
+                <div key={oIndex}>
+                  <label className="flex mb-2">
+                    <span className="pr-4 pl-4 md:pl-8 py-2 text-sm md:text-base ">
+                      {oIndex + 1}.
+                    </span>
+                    <textarea
+                      value={choice}
+                      onChange={(e) => {
+                        const updatedChoices = [...question.choices];
+                        updatedChoices[oIndex] = e.target.value;
+                        handleQuestionChange(qIndex, "choices", updatedChoices);
+                      }}
+                      className="w-full text-black text-xs md:text-base border border-none py-1 pl-4 pr-2
+                                rounded resize-none min-h-[40px] break-words whitespace-normal"
+                    />
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteChoice(qIndex, oIndex)}
+                        className="ml-4 text-red-500 p-1 hover:p-2 hover:bg-gray-200 rounded-full"
+                      >
+                        <HiOutlineX className="text-red-500 w-3 h-3 md:w-4 md:h-4" />
+                      </button>
+                    </div>
+                  </label>
+                </div>
+              ))}
+              {/* ปุ่มเพิ่มตัวเลือกคำตอบ */}
+              <div className="flex justify-center mb-4 mt-2">
+                <button
+                  type="button"
+                  onClick={() => handleAddChoices(qIndex)}
+                  title="เพิ่มตัวเลือก"
+                  // className="bg-purple-500 hover:bg-purple-400 text-white p-2 rounded "
+                  className="bg-gray-200 rounded-full p-2 hover:bg-gray-300"
+                >
+                  <HiPlus className="md:w-6 md:h-6 text-purple-500" />
+                </button>
               </div>
-            ))}
-
-            {/* Correct Answer */}
-            <label>
-              <span>เลือกคำตอบที่ถูกต้อง:</span>
-              <select
-                value={question.correctAnswer}
-                onChange={(e) => handleQuestionChange(qIndex, "correctAnswer", e.target.value)}
-                className="ml-2 border p-2 rounded mb-4"
-              >
-                {question.choices.map((_, idx) => (
-                  <option key={idx} value={idx}>
-                    ตัวเลือก {idx + 1}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <br />
-
-            {/* Answer Explanation */}
-            <label>
-              <span>คำอธิบายคำตอบ:</span>
-            </label>
-            <br />
-            <textarea
+              {/* Correct Answer */}
+              <label>
+                <span className="text-sm md:text-base ">
+                  เลือกคำตอบที่ถูกต้อง:
+                </span>
+                <select
+                  value={question.correctAnswer}
+                  onChange={(e) =>
+                    handleQuestionChange(
+                      qIndex,
+                      "correctAnswer",
+                      e.target.value
+                    )
+                  }
+                  className="ml-2 border p-2 rounded mb-4 text-black text-xs md:text-sm "
+                >
+                  {question.choices.map((_, idx) => (
+                    <option key={idx} value={idx}>
+                      ตัวเลือก {idx + 1}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <br />
+              {/* Answer Explanation */}
+              <label>
+                <span className="text-sm md:text-base ">คำอธิบายคำตอบ:</span>
+              </label>
+              <br />
+              <textarea
                 value={question.answerExplanation}
-                onChange={(e) => handleQuestionChange(qIndex, "answerExplanation", e.target.value)}
-                className="resize h-32 border-gray-200 border p-2 w-full rounded lg:text-sm"
-            ></textarea>
-
-            {/* Delete Question Button */}
-            {/* <button
-              onClick={() => handleDeleteQuestion(qIndex)}
-              className="border bg-red-500 rounded p-2 text-white mt-4"
-            >
-              ลบคำถาม
-            </button> */}
+                onChange={(e) =>
+                  handleQuestionChange(
+                    qIndex,
+                    "answerExplanation",
+                    e.target.value
+                  )
+                }
+                className="resize h-32 border-gray-200 border p-2 w-full rounded text-xs md:text-sm text-black"
+              ></textarea>
+            </div>
           </div>
         ))}
+      </div>
 
       {/* Add Question Button */}
-      <div className="text-center mt-6">
+      {/* <div className="text-center mt-6">
         <button
           onClick={handleAddQuestion}
           className="border bg-blue-500 rounded p-2 text-white"
         >
           เพิ่มคำถามใหม่
         </button>
-      </div>
+      </div> */}
 
       {/* Save and Cancel Buttons */}
-      <div className="flex justify-center mt-6">
-        <button
-          onClick={handleSave}
-          className="border bg-green-800 rounded p-2 text-white flex items-center mr-4"
-        >
-          บันทึก
-        </button>
+      <div className="flex justify-center space-x-4 mt-6 text-sm md:text-base">
         <button
           onClick={handleCancelEdit}
-          className="border bg-gray-500 rounded p-2 text-white"
+          className="border bg-gray-200 text-purple-600 p-2 mt-4 rounded flex items-center hover:bg-gray-300"
         >
+          <HiOutlineX className="w-3 h-3 md:w-4 md:h-4 mr-2" />
           ยกเลิก
+        </button>
+
+        <button
+          onClick={handleSave}
+          className="bg-purple-500 text-white p-2 mt-4 rounded flex items-center hover:bg-purple-600"
+        >
+          <HiPlus className="w-3 h-3 md:w-4 md:h-4 mr-2" />
+          บันทึก
         </button>
       </div>
     </div>

@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Biomechanical_consideration.css";
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { useNavigate } from "react-router-dom";
+// <<<<<<< HEAD
+// import { Card, Button, Row, Col } from 'react-bootstrap';
+import { useSelect } from "@material-tailwind/react";
+import { useSelector } from "react-redux";
+// =======
 import { Card, Button, Row, Col,Container,Spinner } from 'react-bootstrap';
+// >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
 
 function View_Biomechanical_consideration_Student() {
+  const user = useSelector((state) => state.auth.user);
   const [animations, setAnimations] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true); // Loading state
@@ -16,7 +23,7 @@ function View_Biomechanical_consideration_Student() {
 
   const fetchAnimations = () => {
     axios
-      .get(`http://localhost:8080/api/animation/getAnimation`)
+      .get(`${baseUrl}/animation/getAnimation`)
       .then((response) => {
         console.log("API Response:", response.data); // Debugging
       setAnimations(response.data);
@@ -29,7 +36,26 @@ function View_Biomechanical_consideration_Student() {
 };
 
 
-  const handleImageClick = (id) => {
+  const handleAction = async (
+    actionType,
+    animationId = null,
+    quizId = null
+  ) => {
+    if (!user) return;
+    try {
+      await axios.post(`${baseUrl}/recent`, {
+        userId: user._id, // ใช้ userId ที่ได้จาก useSelector
+        action: actionType,
+        animationId,
+        quizId,
+      });
+    } catch (error) {
+      console.error("Error saving action:", error);
+    }
+  }
+
+  const handleImageClick = (id,  Ani_name) => {
+    handleAction("บทเรียน", id,null ,Ani_name);
     navigate(`/animation/view/${id}`);
   };
 
@@ -69,9 +95,9 @@ function View_Biomechanical_consideration_Student() {
             
              <div className="nameandbt">
              <h3 className="Ani_name">{animation.Ani_name}</h3>
-             <sapan className="bt" style={{}}>
+             {/* <sapan className="bt" style={{}}>
        
-             </sapan>
+             </sapan> */}
              </div>
              </div>
             </div>

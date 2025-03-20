@@ -1,38 +1,25 @@
-import React, {useState} from "react";
+import React from "react";
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import View_Biomechanical_consideration from "../components/lesson/Biomechanical_consideration/View_Biomechanical_consideration";
 // import ChatBox from "../components/Noti";
-import './sidebar-mobile.css'; 
+
 const BiomechanicalConsideration = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     return (
-        <div  style={{marginTop: "100px"}} >
-          {/* Sidebar for mobile */}
-          <div
-            className={`sidebar-mobile ${
-              isSidebarOpen ? "sidebar-open" : "sidebar-closed"
-          }`}
-          >
+        <div className="mt-[100px] flex">
             <NavBarLeft />
-          </div>
-    
-          {/* Desktop NavBarLeft */}
-          <div className="sidebar-desktop">
-            <NavBarLeft />
-          </div>
-    
-          {/* Main Content Area */}
-          <div className="main-content">
-            <Frame>
-              <View_Biomechanical_consideration />
-            </Frame>
-    
-            {/* ChatBox */}
-            {/* <ChatBox /> */}
-          </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
+                <Frame className="overflow-auto">
+                    <View_Biomechanical_consideration />
+                </Frame>
+
+                {/* ChatBox */}
+                {/* <ChatBox /> */}
+            </div>
         </div>
-      );
-}
- 
+    );
+};
+
 export default BiomechanicalConsideration;

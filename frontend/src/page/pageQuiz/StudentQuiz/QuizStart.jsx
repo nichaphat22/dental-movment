@@ -1,22 +1,15 @@
-import React from 'react'
+import React from "react";
 // import Question from '../../../components/Quiz/Question'
-import SQuizStart from '../../../components/Quiz/Student/QuizStart';
-import { useSelector, useDispatch} from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-
+import SQuizStart from "../../../components/Quiz/Student/QuizStart";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function QuizStart() {
   return (
-    <div style={{marginTop: "100px"}}>
-
-
-
-      <SQuizStart/>
-
-
-      
+    <div className="mt-24">
+      <SQuizStart />
     </div>
-  )
+  );
 }
 
-export default QuizStart
+export default QuizStart;

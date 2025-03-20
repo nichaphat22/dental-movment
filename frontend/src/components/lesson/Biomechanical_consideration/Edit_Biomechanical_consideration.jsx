@@ -2,7 +2,7 @@ import React, { useEffect, useState,useRef } from "react";
 import axios from "axios";
 import "./Biomechanical_consideration.css";
 import { useParams } from "react-router-dom";
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { useNavigate } from "react-router-dom";
 import { toast, Flip, ToastContainer } from "react-toastify";
 // import { toast, Flip, ToastContainer } from "react-toastify";
@@ -42,7 +42,7 @@ function Edit_Biomechanical_consideration() {
 
   useEffect(() => {
     if (id) {
-      axios.get(`http://localhost:8080/api/animation/getAnimationById/${id}`)
+      axios.get(`${baseUrl}/animation/getAnimationById/${id}`)
         .then(response => {
           const { Ani_name, Ani_description, Ani_animation, Ani_image } = response.data;
           setNewAnimationName(Ani_name);
@@ -158,7 +158,7 @@ if (!formData.has("Ani_name") &&
 }
 
       axios
-        .put(`http://localhost:8080/api/animation/updateAnimation/${id}`, formData, {
+        .put(`${baseUrl}/animation/updateAnimation/${id}`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         })
 

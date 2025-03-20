@@ -3,6 +3,8 @@ import { get, ref, update } from 'firebase/database';
 import { uploadBytesResumable, ref as storageRef, getDownloadURL, deleteObject, listAll } from 'firebase/storage';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { database, storage } from '../../../config/firebase';
+import { Card,  Button as BootstrapButton , Row, Col, Container, Spinner, Dropdown, ButtonGroup, } from 'react-bootstrap';
+import { Button, Input, } from '@chakra-ui/react';
 // import { Button } from "@chakra-ui/react"
 // import {
 //   FileUploadList,
@@ -17,7 +19,7 @@ import Swal from "sweetalert2"; // นำเข้า SweetAlert2
 import "react-toastify/dist/ReactToastify.css";
 
 import { BsBadge3D } from "react-icons/bs";
-import { Button, Input, } from '@chakra-ui/react';
+
 import { CiFileOn } from "react-icons/ci";
 // import { HiUpload } from 'react-icons/hi';
 import { RxCross2 } from "react-icons/rx";
@@ -32,7 +34,7 @@ const Edit_RPD = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [fileUrl, setFileUrl] = useState(existingModel || ''); // เริ่มต้นด้วย URL ที่มีอยู่แล้ว
   const [fileList, setFileList] = useState([]);
-
+  const [loading, setLoading] = useState(true); // Loading state
   // const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams(); // ดึง id จาก URL
@@ -503,8 +505,27 @@ const Edit_RPD = () => {
       <div style={{ margin: '20px' }}>
         <ToastContainer />
         <h3 style={{ margin: '0', fontSize: '1.5rem', marginBottom: '15px' }}>แก้ไขโมเดล</h3>
-        {/* <i><span>หมายเหตุ : </span><span>สร้างไฟล์ Pattern และดาวน์โหลดรูปภาพ Marker ได้ที่</span><a href="https://jeromeetienne.github.io/AR.js/three.js/examples/marker-training/examples/generator.html"> สร้างไฟล์ Pattern</a></i> */}
-        {/* onSubmit={handleSaveModel} */}
+       {loading ? (
+               <Button variant="" disabled    style={{
+                display: 'flex', // ใช้ flex เพื่อให้เนื้อหาภายในจัดแนวในแนวนอน
+                background: 'none',
+                border: 'none',
+                margin: 'auto',
+                alignItems: 'center', // ทำให้สปินเนอร์และข้อความอยู่ตรงกลาง
+              }}
+            >
+               <Spinner
+                 as="span"
+                 animation="grow"
+                //  size="lg"
+                 role="status"
+                 aria-hidden="true"
+                 style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                  height: '25px'}}
+               />
+               กำลังโหลด...
+             </Button>
+            ) : (
         <form encType="multipart/form-data" onSubmit={handleSaveModel} style={{ marginTop: '15px' }}>
           <div className="modelName-display" style={{ borderRadius: '5px', padding: '20px 30px', boxShadow: 'rgba(129, 129, 129, 0.3) 0px 1px 2px 0px, rgba(202, 202, 202, 0.5) 0px 1px 3px 1px', marginBottom: '20px' }}>
             <input type="hidden" value={existingModel?.name || ''} />
@@ -539,10 +560,10 @@ const Edit_RPD = () => {
                 type="file"
                 id="model-file"
                 onChange={(e) => handleFileChange(e, 'model')}
-                accept=".obj,.gltf,.glb" // กำหนดชนิดไฟล์ที่รองรับ
+                accept=".obj,.gltf,.glb,.stl" // กำหนดชนิดไฟล์ที่รองรับ
                 display="none" // ซ่อน input
               />
-              <Button
+              <BootstrapButton
                 variant="outline"
                 size="sm"
                 style={{
@@ -557,7 +578,7 @@ const Edit_RPD = () => {
                 onClick={() => document.querySelector('#model-file').click()} // คลิก input เมื่อคลิกปุ่ม
               >
                 <HiUpload /> อัปโหลดไฟล์
-              </Button>
+              </BootstrapButton>
 
               {fileModel && (
                 <div style={{ marginTop: '10px', padding: '10px 20px', borderRadius: '5px', background: 'rgb(237, 237, 237)', width: '100%', display: 'flex', alignItems: 'center', boxShadow: 'rgba(70, 71, 75, 0.31) 0px 0px 0.2em, rgba(100, 100, 100, 0.05) 0px 0.2em 1em' }}>
@@ -712,6 +733,7 @@ const Edit_RPD = () => {
             บันทึก
           </button>
         </form>
+         )}
         {/* 
         {uploading && (
           <div style={{ marginLeft: '20px' }}>

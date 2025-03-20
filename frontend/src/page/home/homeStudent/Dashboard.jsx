@@ -8,7 +8,7 @@ const Dashboard = () => {
 
     const fetchUser = async (token) => {
         try {
-            const res = await fetch("http://localhost:8080/api/auth/profile", {
+            const res = await fetch("/api/auth/profile", {
                 headers:{
                     'Authorization':'bearer '+token,
                     'Content-Type':'application/json'

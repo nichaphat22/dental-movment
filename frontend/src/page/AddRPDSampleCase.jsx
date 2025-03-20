@@ -2,30 +2,15 @@ import React, { useState } from "react";
 import NavBarLeft from "../components/navbar/NavBarLeft";
 import Frame from "../components/Frame";
 import Add_RPD from "../components/lesson/RPDSampleCase/Add_RPD";
-// import ChatBox from "../components/Noti";
-import './sidebar-mobile.css'; 
+import ChatBox from "../components/Noti";
 const AddRPDSampleCase = () => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   return (
-    <div style={{ marginTop: "100px" }} >
-      {/* Sidebar for mobile */}
-      <div
-        className={`sidebar-mobile ${
-          isSidebarOpen ? "sidebar-open" : "sidebar-closed"
-      }`}
-      >
-        <NavBarLeft />
-      </div>
-
-      {/* Desktop NavBarLeft */}
-      <div className="sidebar-desktop">
-        <NavBarLeft />
-      </div>
+    <div className="mt-[100px] flex">
+      <NavBarLeft />
 
       {/* Main Content Area */}
-      <div className="main-content">
-      {/* padding:'0',margin:'0', backgroundColor: '#f5f5f5', */}
-        <Frame  style={{padding:'0'}}>
+      <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
+        <Frame className="overflow-auto">
           <Add_RPD />
         </Frame>
 
@@ -34,6 +19,6 @@ const AddRPDSampleCase = () => {
       </div>
     </div>
   );
-}
- 
+};
+
 export default AddRPDSampleCase;
