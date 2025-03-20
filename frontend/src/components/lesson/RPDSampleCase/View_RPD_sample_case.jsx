@@ -27,6 +27,7 @@ const ViewRPDSampleCase = () => {
   const [selectedModel, setSelectedModel] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   // const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true); // Loading state
 
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
@@ -58,11 +59,13 @@ const ViewRPDSampleCase = () => {
             };
           }));
           setModels(modelsData);
+          setLoading(false); 
         } else {
           console.warn("No models found in database.");
         }
       } catch (error) {
         console.error("Error fetching models:", error);
+        setLoading(false); 
       }
     };
 

@@ -85,6 +85,8 @@ const ViewModel = () => {
   const [showLineWidth, setShowLineWidth] = useState(false);
   // const [fontSize, setFontSize] = useState(14); // ค่าเริ่มต้นเป็น 14px
 
+const [loading, setLoading] = useState(true); // Loading state
+
 
   const [showCanvas, setShowCanvas] = useState(false);
   const [isActive, setIsActive] = useState({
@@ -206,11 +208,13 @@ const ViewModel = () => {
 
           // เริ่มด้วย animationStopped เป็น true เพื่อป้องกันการโต้ตอบทันที
           setAnimationStopped(true);
+          setLoading(false); 
         },
         undefined,
         (error) => {
           console.error('Error loading model:', error);
           alert('Failed to load the model. Please try again.');
+          setLoading(false); 
         }
       );
     }

@@ -66,6 +66,7 @@ const Edit_RPD = () => {
 
           // หากมีข้อมูลจาก model ให้ตั้งค่าผลลัพธ์ใน state
           setExistingModel(model); // ตั้งค่า state existingModel แทน
+          setLoading(false); 
           if (model?.name) {
             setName(model.name); // ตั้งชื่อโมเดลที่ดึงมาจาก Firebase
           }
@@ -83,6 +84,7 @@ const Edit_RPD = () => {
         }
       } catch (error) {
         console.error("Error fetching model data:", error);
+        setLoading(false); 
       }
     };
 

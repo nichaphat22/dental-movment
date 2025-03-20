@@ -24,6 +24,7 @@ const Student_View_RPD_sample_case = () => {
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(true); // Loading state
 // const database = getDatabase(); // Firebase Database instance
 useEffect(() => {
   const fetchModels = async () => {
@@ -50,11 +51,13 @@ useEffect(() => {
           };
         }));
         setModels(modelsData);
+        setLoading(false); 
       } else {
         console.warn("No models found in database.");
       }
     } catch (error) {
       console.error("Error fetching models:", error);
+      setLoading(false); 
     }
   };
 
