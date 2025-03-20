@@ -12,33 +12,37 @@ import AddUser from "./AddUser";
 import axios from "axios";
 import { baseUrl } from "../../utils/services";
 import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
 const TableStudent = () => {
-  // const user = useSelector(state => state.auth.user);
-  const [users, setUsers] = useState([]);
+  const [students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({
+    key: "studentID",
+    direction: "asc",
+  });
   const [searchQuery, setSearchQuery] = useState("");
-  const rowsPerpage = 5;
+
+  const rowsPerpage = 8;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedStudents, setSelectedStudents] = useState([]);
 
-  //get student
+  // Fetch students
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/users`);
-        setUsers(response.data);
+        const response = await axios.get(`${baseUrl}/auth/students`);
+        console.log(response.data);
+        setStudents(response.data); // Assuming the response data is an array of students
       } catch (error) {
         console.error("Failed to fetch users", error);
-        setUsers([]);
+        setStudents([]);
       }
     };
     fetchUsers();
   }, []);
-
-  console.log(users);
 
   useEffect(() => {
     if (isAddModalOpen) {
@@ -52,7 +56,6 @@ const TableStudent = () => {
     };
   }, [isAddModalOpen]);
 
-  //addUser
   const handleAddUser = () => {
     setIsAddModalOpen(true);
   };
@@ -69,53 +72,140 @@ const TableStudent = () => {
     };
   }, [isEditModalOpen]);
 
-  //edit
-  const handleEdit = (user) => {
-    setSelectedStudent(user);
+  const handleEdit = (student) => {
+    setSelectedStudent(student);
     setIsEditModalOpen(true);
-  };
+};
 
-  //save edit
-  const handleSave = (updatedStudent) => {
+const handleSave = (updatedStudent) => {
     setStudents((prevStudents) =>
-      prevStudents.map((student) =>
-        student.email === updatedStudent.email ? updatedStudent : student
-      )
+        prevStudents.map((student) =>
+            student._id === updatedStudent._id ? updatedStudent : student
+        )
     );
-  };
+};
 
-  // ฟังก์ชัน Sort ข้อมูล
-  // const sortedStudents = [...students]
-  const sortedUsers = [...users]
-    .filter(
-      (users) =>
-        (users?.name &&
-          users?.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (users?.email &&
-          users?.email.toLowerCase().includes(searchQuery.toLowerCase()))
-    )
+
+  // Sorting function
+  const sortedStudents = [...students]
+    .filter((student) => {
+      const studentIdMatch = student?.studentID
+        ?.toString()
+        .includes(searchQuery);
+      const nameMatch = student?.user?.name
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const emailMatch = student?.user?.email
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return studentIdMatch || nameMatch || emailMatch;
+    })
     .sort((a, b) => {
-      if (!sortConfig.key) return 0;
-      if (a[sortConfig.key] < b[sortConfig.key])
-        return sortConfig.direction === "asc" ? -1 : 1;
-      if (a[sortConfig.key] > b[sortConfig.key])
-        return sortConfig.direction === "asc" ? 1 : -1;
+      if (sortConfig.key === "studentID") {
+        if (a.studentID < b.studentID)
+          return sortConfig.direction === "asc" ? -1 : 1;
+        if (a.studentID > b.studentID)
+          return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      }
+      let aValue = a.user?.[sortConfig.key] || "";
+      let bValue = b.user?.[sortConfig.key] || "";
+      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
 
-  //ฟังก์ชันเปลี่ยนการเรียงลำดับ
   const requestSort = (key) => {
-    let direction = "asc";
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
+    let direction = "desc";
+    if (sortConfig.key === key && sortConfig.direction === "desc") {
+      direction = "asc";
     }
     setSortConfig({ key, direction });
   };
 
-  // แสดงข้อมูลตามหน้า
-  const totalPages = Math.ceil(sortedUsers.length / rowsPerpage);
+  const totalPages = Math.ceil(sortedStudents.length / rowsPerpage);
   const startIndex = (currentPage - 1) * rowsPerpage;
-  const currentUsers = sortedUsers.slice(startIndex, startIndex + rowsPerpage);
+  const currentStudents = sortedStudents.slice(
+    startIndex,
+    startIndex + rowsPerpage
+  );
+
+  useEffect(() => {
+    console.log("Updated students list:", students);
+  }, [students]);
+
+  const handleSelectStudent = (studentId) => {
+    setSelectedStudents(
+      (prevSelected) =>
+        prevSelected.includes(studentId)
+          ? prevSelected.filter((id) => id !== studentId) // เอาออกถ้ากดซ้ำ
+          : [...prevSelected, studentId] // เพิ่มเข้าไปถ้าเลือก
+    );
+  };
+
+  // soft deleted
+  const handleSoftDelete = async (studentId) => {
+    try {
+      const token = localStorage.getItem("token"); // หรือดึงจาก Redux ถ้ามี
+      if (!token) {
+        console.error("Token not found. User might not be authenticated.");
+        return;
+      }
+      await axios.put(
+        `${baseUrl}/auth/students/softDelete/${studentId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // ส่ง token ไปใน request
+          },
+        }
+      );
+      // Remove deleted student from the UI
+      setStudents((prevStudents) =>
+        prevStudents.filter((student) => student._id !== studentId)
+      );
+    } catch (error) {
+      console.error("Error deleting student:", error);
+    }
+  };
+
+  // Soft delete multiple students
+  const handleSoftDeleteMultiple = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("❌ Token not found.");
+      Swal.fire("เกิดข้อผิดพลาด", "ไม่พบโทเค็น กรุณาเข้าสู่ระบบใหม่", "error");
+      return;
+    }
+
+    try {
+      // ตรวจสอบข้อมูลที่ส่งไปก่อน
+      console.log("Deleting students with IDs: ", selectedStudents);
+
+      const response = await axios.put(
+        `${baseUrl}/auth/students/softDelete/delete-multiple`,
+        { studentIds: selectedStudents }, // ส่ง array ของ studentIds
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Update UI
+      setStudents((prevStudents) =>
+        prevStudents.filter(
+          (student) => !selectedStudents.includes(student._id)
+        )
+      );
+      setSelectedStudents([]); // Clear selection
+      Swal.fire("สำเร็จ!", "ลบหลายรายการสำเร็จ", "success");
+    } catch (error) {
+      console.error("❌ Error deleting:", error);
+      Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบหลายรายการได้", "error");
+    }
+  };
 
   return (
     <div className="p-4 w-full max-w-6xl mx-auto">
@@ -123,7 +213,7 @@ const TableStudent = () => {
       <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-2">
         <div>
           <button
-            onClick={() => handleAddUser()}
+            onClick={handleAddUser}
             className="bg-purple-600 text-white md:text-base px-4 py-2 rounded flex items-center hover:bg-purple-500 transition"
           >
             <GoPersonAdd className="w-5 h-5 mr-2" />
@@ -134,8 +224,6 @@ const TableStudent = () => {
             <AddUser
               isOpen={isAddModalOpen}
               onClose={() => setIsAddModalOpen(false)}
-              // student={selectedStudent}
-              // onSave={handleSave}
             />
           )}
         </div>
@@ -148,114 +236,116 @@ const TableStudent = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        
       </div>
+       {/* Soft Delete */}
+       {/* <div className="mt-4 flex justify-end gap-2 mb-2">
+        <button
+          onClick={handleSoftDeleteMultiple}
+          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-500"
+        >
+          ลบหลายรายการ
+        </button>
+      </div> */}
 
       {/* Table */}
       <div className="overflow-x-auto m-0">
         <table className="min-w-full border border-gray-300 text-sm">
           <thead>
-            <tr className="bg-gray-600 text-white text-center ">
-              <th className="py-2 px-4">ชื่อ</th>
-              <th className="py-2 px-4">email</th>
-              {/* <th
-                className="py-2 cursor-pointer text-left min-w-[100px]"
-                onClick={() => requestSort("sec")}
-              >
-                <div className="flex items-center justify-center space-x-1">
-                  <span>sec</span>
-                  {sortConfig.key === "sec" ? (
-                    sortConfig.direction === "asc" ? (
-                      <GoChevronUp />
-                    ) : (
-                      <GoChevronDown />
+            <tr className="bg-gray-600 text-white text-center">
+              {/* <th>
+                <input
+                  type="checkbox"
+                  onChange={(e) =>
+                    setSelectedStudents(
+                      e.target.checked ? students.map((s) => s._id) : []
                     )
-                  ) : (
-                    <GoChevronDown className="text-gray-400" />
-                  )}
-                </div>
+                  }
+                  checked={
+                    selectedStudents.length > 0 &&
+                    students.every((s) => selectedStudents.includes(s._id))
+                  }
+                />
               </th> */}
-
-              {/* <th
-                className="py-2 px-4 cursor-pointer text-left min-w-[100px]"
-                onClick={() => requestSort("year")}
-              >
-                <div className="flex items-center justify-center space-x-1">
-                  <span>ปีการศึกษา</span>
-                  {sortConfig.key === "year" ? (
-                    sortConfig.direction === "asc" ? (
-                      <GoChevronUp />
-                    ) : (
-                      <GoChevronDown />
-                    )
-                  ) : (
-                    <GoChevronDown className="text-gray-400" />
-                  )}
-                </div>
-              </th> */}
-
+              <th className="py-2 px-4">ลำดับที่</th>
               <th
-                className="py-2 px-4 cursor-pointer text-left min-w-[100px]"
-                onClick={() => requestSort("role")}
+                className="py-2 px-4"
+                onClick={() => requestSort("studentID")}
               >
-                <div className="flex items-center justify-center space-x-1">
-                  <span>role</span>
-                  {sortConfig.key === "role" ? (
-                    sortConfig.direction === "asc" ? (
-                      <GoChevronUp />
-                    ) : (
-                      <GoChevronDown />
-                    )
-                  ) : (
-                    <GoChevronDown className="text-gray-400" />
-                  )}
-                </div>
+                Student ID
               </th>
-              <th className="py-2 px-4">แก้ไข</th>
+              <th
+                className="py-2 px-4"
+                onClick={() => requestSort("user.name")}
+              >
+                ชื่อ
+              </th>
+              <th
+                className="py-2 px-4"
+                onClick={() => requestSort("user.email")}
+              >
+                Email
+              </th>
+              {/* <th className="py-2 px-4">แก้ไข</th> */}
+              <th className="py-2 px-4">ลบ</th>
             </tr>
           </thead>
           <tbody>
-            {currentUsers.length > 0 ? (
-              currentUsers.map((user, index) => (
-                <tr
-                  key={index}
-                  className="odd:bg-white even:bg-gray-50 hover:bg-gray-100 text-center text-xs md:text-sm"
-                >
-                  <td className="py-2 px-4 border">{user.name}</td>
-                  <td className="py-2 px-4 border">{user.email}</td>
-                  {/* <td className="py-2 px-2 border">{users?.sec}</td> */}
-                  {/* <td className="py-2 px-4 border">{users?.year}</td> */}
-                  <td className="py-2 px-4 border">{user.role}</td>
+            {currentStudents.length > 0 ? (
+              currentStudents.map((student, index) => (
+                <tr key={index} className="odd:bg-white even:bg-gray-50 hover:bg-gray-100 text-center text-xs md:text-sm">
+                  {/* <td className="py-2 px-4">
+                    <input
+                      type="checkbox"
+                      checked={selectedStudents.includes(student._id)}
+                      onChange={() => handleSelectStudent(student._id)}
+                    />
+                  </td> */}
+                  <td className="py-2 px-4 border">{startIndex + index + 1}</td>
+                  <td className="py-2 px-4 border">{student?.studentID || "N/A"}</td>
+                  <td className="py-2 px-4 border">{student?.user?.name || "N/A"}</td>
+                  <td className="py-2 px-4 border">{student?.user?.email || "N/A"}</td>
+                  {/* แก้ไข */}
+                  {/* <td className="py-2 px-4">
+                    <button
+                      onClick={() => handleEdit(student._id)}
+                      className="bg-yellow-500 text-white rounded px-2 py-1 hover:bg-yellow-400"
+                    >
+                      <GoPencil />
+                    </button>
+                    {isEditModalOpen && selectedStudent && (
+                      <EditStudentModel
+                        isOpen={isEditModalOpen}
+                        student={selectedStudent}
+                        onClose={() => setIsEditModalOpen(false)}
+                        onSave={handleSave}
+                      />
+                    )}
+                  </td> */}
                   <td className="py-2 px-4 border">
                     <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-500 hover:text-blue-700"
+                      onClick={() => handleSoftDelete(student._id)}
+                      className="bg-red-600 text-white rounded px-2 py-1 hover:bg-red-500"
                     >
-                      <GoPencil size={18} />
+                      ลบ
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="py-4 text-center text-gray-500">
-                  ไม่พบนักศึกษาที่ค้นหา
+                <td colSpan="6" className="text-center py-4">
+                  ไม่มีข้อมูลนักเรียน
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {isEditModalOpen && (
-        <EditStudentModel
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          student={selectedStudent}
-          onSave={handleSave}
-        />
-      )}
+
+     
 
       {/* Pagination */}
-
       <div className="flex justify-center items-center mt-4 space-x-4 text-sm md:text-base">
         <button
           className={`px-4 py-2 border rounded-md ${

@@ -39,6 +39,7 @@ import InputNumber from 'rc-input-number';
 
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
+import { Card, Button, Row, Col, Container, Spinner, Dropdown, ButtonGroup, } from 'react-bootstrap';
 
 
 const ViewModel = () => {

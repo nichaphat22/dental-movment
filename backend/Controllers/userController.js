@@ -193,7 +193,7 @@ const updateProfile = async (req, res) => {
 const getUserId = async (req, res) => {
     try {
         const { userId } = req.params;
-        console.log("UserID:", userId); // ตรวจสอบ userId
+        // console.log("UserID:", userId); // ตรวจสอบ userId
 
         const currentUser = await userModel.findById(userId);
         const roleRef = currentUser.roleRef; // ถ้าฟิลด์เป็น roleRef แทน
@@ -204,14 +204,14 @@ const getUserId = async (req, res) => {
         if (!currentUser) {
             return res.status(404).json({ message: "User not found" });
         }
-        console.log("CurrentUser:", currentUser); // ตรวจสอบ currentUser
+        // console.log("CurrentUser:", currentUser); // ตรวจสอบ currentUser
         // ตรวจสอบว่า role อยู่ใน currentUser หรือไม่
         // const role = currentUser.role; // ใช้ role จาก currentUser
         if (!roleRef) {
             return res.status(400).json({ message: "Role not found in user data" });
         }
 
-        console.log("CurrentUser Role:", roleRef); // ตรวจสอบ role
+        // console.log("CurrentUser Role:", roleRef); // ตรวจสอบ role
 
         let users;
         if (roleRef.trim().toLowerCase() === "teacher") {

@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     roleData: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "roleRef",
+      refPath: "roleRef",
     },
     roleRef: {
       type: String,
@@ -43,10 +43,7 @@ const userSchema = new mongoose.Schema(
         ref: "Notification",
       },
     ],
-    deleted_at: {
-      type: Date,
-      default: null,
-    },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,

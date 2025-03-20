@@ -130,9 +130,9 @@ const QuizList = () => {
                     <p className="text-xs text-gray-600 ml-9 md:ml-16 mb-2">
                       จำนวนข้อ: {quiz.questions?.length || 0}
                     </p>
-                    <p>
+                    {/* <p>
                       ผู้สร้าง: {quiz.teacher?.user?.name || "ไม่มีครูที่กำหนด"}
-                    </p>
+                    </p> */}
                   </div>
 
                   <div className="px-2 w-full">

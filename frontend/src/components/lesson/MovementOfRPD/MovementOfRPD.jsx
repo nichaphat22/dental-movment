@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { getDatabase, ref as dbRef, set, onValue, push } from "firebase/database";
-import { storage } from "../../../config/firebase";
+import { getDatabase, ref as dbRef, set, push } from "firebase/database";
+import { storage, database } from "../../../config/firebase";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import { FiImage, FiVideo } from "react-icons/fi";
@@ -10,46 +10,27 @@ function MovementOfRPD() {
   const [newAnimationName, setNewAnimationName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [animation3d, setAnimation3d] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const db = getDatabase();
-    const animationRef = dbRef(db, "animations/");
-
-    onValue(animationRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const animationsArray = Object.keys(data).map((key) => ({
-          id: key,
-          ...data[key],
-        }));
-        setAnimation3d(animationsArray);
-      }
-    });
-  }, []);
-
+  // Handle file and image changes
   const handleFileChange = (event) => setSelectedFile(event.target.files[0]);
   const handleImageChange = (event) => setSelectedImage(event.target.files[0]);
 
-  const handleAddAnimation3D = async () => {
+  // Function to add new animation
+  const handleAddAnimation3D = async (e) => {
+    e.preventDefault();
     if (!newAnimationName || !selectedFile || !selectedImage) {
-      Swal.fire({ icon: "warning", title: "Missing Fields", text: "กรุณาเลือกไฟล์วิดีโอและรูปภาพ" });
-      return;
-    }
-
-    if (animation3d.some((animation) => animation.name === newAnimationName)) {
-      Swal.fire({ icon: "error", title: "Duplicate Name", text: "มีโมเดลชื่อนี้อยู่แล้ว" });
+      Swal.fire({ icon: "warning", title: "กรุณาเลือกไฟล์วิดีโอและรูปภาพ" });
       return;
     }
 
     setUploading(true);
+    
     const storageRefAnim = ref(storage, `animation3d/${newAnimationName}/animation3d.mp4`);
     const storageRefImg = ref(storage, `animation3d/${newAnimationName}/image.jpg`);
-    const db = getDatabase();
-    const newAnimationRef = push(dbRef(db, "animations/"));
+    const newAnimationRef = push(dbRef(database, "animations/"));
 
     try {
       const uploadAnim = uploadBytesResumable(storageRefAnim, selectedFile);
@@ -63,7 +44,7 @@ function MovementOfRPD() {
         setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
       });
 
-      await Promise.all([uploadAnim, uploadImg]);
+      await Promise.all([uploadAnim, uploadImg]); // ✅ รอให้ไฟล์อัปโหลดเสร็จทั้งหมด
 
       const urlAnim = await getDownloadURL(uploadAnim.snapshot.ref);
       const urlImg = await getDownloadURL(uploadImg.snapshot.ref);
@@ -81,15 +62,16 @@ function MovementOfRPD() {
       setSelectedImage(null);
       setUploadProgress(0);
 
-      Swal.fire({ icon: "success", title: "Success", text: "อัปโหลดสำเร็จ!" }).then(() => {
+      Swal.fire({ icon: "success", title: "อัปโหลดสำเร็จ!" }).then(() => {
         navigate("/MovementOfRPD");
       });
     } catch (error) {
       console.error("Upload Error:", error);
-      Swal.fire({ icon: "error", title: "Error", text: "เกิดข้อผิดพลาดในการอัปโหลด" });
+      Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาดในการอัปโหลด" });
       setUploading(false);
     }
   };
+
 
   return (
     <div>

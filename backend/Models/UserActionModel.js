@@ -9,7 +9,7 @@ const UserActionSchema = new mongoose.Schema(
     },
     action: {
       type: String,
-      enum: ["ดูสื่อการสอน", "ทำแบบทดสอบ", "บทเรียน"],
+      enum: ["ดูสื่อการสอน3D", "ทำแบบทดสอบ", "บทเรียน","การเคลื่อนที่ของฟันเทียม"],
       required: true,
     },
     animationId: {

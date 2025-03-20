@@ -1,12 +1,15 @@
 const express = require("express");
 const passport = require("passport");
+const multer = require("../middleware/multer");
 require("dotenv").config();
 const authController = require("../Controllers/authController");
+const studentController = require("../Controllers/studentController");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/userModel");
 const Student = require("../Models/studentModel");
 const Teacher = require("../Models/teacherModel");
 const { verifyToken } = require("../middleware/authMiddleware");
+const upload = require("../middleware/multer");
 
 const router = express.Router();
 
@@ -51,7 +54,7 @@ router.get(
   }
 );
 
-
+//----------------------------------------------------------------------//
 router.get("/user", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
@@ -66,6 +69,9 @@ router.get("/user", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+router.post("/uploadStudent", upload.single('file'),studentController.uploadedFile);
+
 
 
 //เพิ่มผู้ใช้
@@ -82,11 +88,17 @@ router.post("/addUser", verifyToken, async (req, res) => {
     return res.status(400).json({ message: "อีเมลนี้มีอยู่ในระบบแล้ว"});
   }
 
-  const profileImage = img || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+  const profileImage = img || `https://ui-avatars.com/api/?name=${encodeURIComponent(email)}&background=random`;
 
   const userRole = role || "student";
 
-  const user = new User({ email, name, role: userRole, img: profileImage});
+  const user = new User({
+     email, 
+     name, 
+     role: userRole, 
+     img: profileImage,
+     isDeleted: false
+    });
   await user.save();
 
   if (userRole === "student") {
@@ -121,5 +133,17 @@ router.post("/addUser", verifyToken, async (req, res) => {
   }
   
 })
+
+//ดึงนักศึกษาทั้งหมด
+router.get("/students", studentController.getAllStudents)
+router.put("/students/softDelete/:studentId", studentController.softDeleteStudent);
+router.put("/students/softDelete/delete-multiple", studentController.softDeleteMultipleStudents);
+
+router.put("/students/restore",  studentController.restoreMultipleStudents);
+router.get("/students/delete",studentController.getDeletedStudents);
+
+router.delete("/students/delete/:studentId", verifyToken, studentController.deleteStudent);
+router.delete("/students/delete-multiple", verifyToken, studentController.deleteMultipleStudents);
+
 
 module.exports = router;

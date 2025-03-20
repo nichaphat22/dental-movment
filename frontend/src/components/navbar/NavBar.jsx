@@ -60,31 +60,51 @@ const NavBar = () => {
     <nav className="bg-white shadow-sm fixed w-full top-0 z-50">
       <div className="container mx-auto flex justify-between items-center py-2 px-4">
         {/* Mobile Menu Icon */}
-        <div className="lg:hidden flex items-center space-x-2">
-          <button onClick={toggleMenu}>
-            {isOpen ? (
-              <HiOutlineX className="text-3xl text-purple-600" />
-            ) : (
-              <HiOutlineMenu className="text-3xl text-purple-600" />
-            )}
-          </button>
+        <div className="lg:hidden flex justify-between items-center w-full">
+          {/* Left section: Menu button and Logo */}
+          <div className="flex items-center space-x-2">
+            <button onClick={toggleMenu}>
+              {isOpen ? (
+                <HiOutlineX className="text-3xl text-purple-600" />
+              ) : (
+                <HiOutlineMenu className="text-3xl text-purple-600" />
+              )}
+            </button>
 
-          {/* Logo */}
-          <div className="text-2xl font-bold text-purple-600">
-            <Link
-              to={
-                user?.role === "student"
-                  ? "/dashboard-student"
-                  : "/dashboard-teacher"
-              }
-            >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
-                alt="Logo"
-                width="50"
-                height="50"
-              />
-            </Link>
+            {/* Logo */}
+            <div className="text-2xl font-bold text-purple-600">
+              <Link
+                to={
+                  user?.role === "student"
+                    ? "/dashboard-student"
+                    : "/dashboard-teacher"
+                }
+              >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                  alt="Logo"
+                  width="50"
+                  height="50"
+                />
+              </Link>
+            </div>
+          </div>
+
+          {/* Right section: Notifications or Login */}
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <div className="relative flex items-center space-x-1">
+                <Notifications />
+                <NotificationBell />
+                <MenuProfile />
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link to="/login" className="text-purple-600 font-bold">
+                  Google Login
+                </Link>
+              </div>
+            )}
           </div>
         </div>
 
@@ -182,10 +202,7 @@ const NavBar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link
-                  to="/login"
-                  className="text-purple-600 font-bold"
-                >
+                <Link to="/login" className="text-purple-600 font-bold">
                   Google Login
                 </Link>
               </div>

@@ -18,6 +18,7 @@ import { database } from "../../config/firebase";
 const ListManagement = () => {
   const [students, setStudents] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
+  const [studentCount, setStudentCount] = useState(0);
   const [Animations, setAnimations] = useState([]);
   const [modelCount, setModelCount] = useState(0);
   const [animation3ds, setAnimation3ds] = useState(0);
@@ -26,8 +27,8 @@ const ListManagement = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/users/students`);
-        setStudents(response.data.students);
+        const response = await axios.get(`${baseUrl}/auth/students`);
+        setStudents(response.data); // ไม่ต้องดึง count
       } catch (error) {
         console.error("Failed to fetch students", error);
         setStudents([]);
@@ -35,6 +36,7 @@ const ListManagement = () => {
     };
     fetchStudents();
   }, []);
+
 
   //get quiz
   useEffect(() => {
