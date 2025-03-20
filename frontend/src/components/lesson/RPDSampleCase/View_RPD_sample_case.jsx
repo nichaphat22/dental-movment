@@ -6,18 +6,18 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "./RPD_sample_case.css";
 import { HiPlusSm } from "react-icons/hi";
 import { IoIosSearch } from "react-icons/io";
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import axios from 'axios';
 import { AuthContext } from '../../../context/AuthContext';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { MdEdit } from "react-icons/md";
-import { Card, Button, Row, Col,Container } from 'react-bootstrap';
+// import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 import bk1 from '../../../../public/bookmark1.png'
 import bk from '../../../../public/bookmark.png'
 import { useSelector } from "react-redux";
-
+import { Card, Button, Row, Col, Container, Spinner, Dropdown, ButtonGroup, } from 'react-bootstrap';
 
 
 
@@ -27,6 +27,7 @@ const ViewRPDSampleCase = () => {
   const [selectedModel, setSelectedModel] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   // const { user } = useContext(AuthContext);
+
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,7 +90,7 @@ const ViewRPDSampleCase = () => {
 
   const fetchBookmarks = async (userId) => {
     try {
-      const response = await axios.get(`/api/bookmark/${userId}`);
+      const response = await axios.get(`${baseUrl}/bookmark/${userId}`);
       setClickedBookmark(response.data || {});
     } catch (error) {
       console.error("Error fetching bookmarks:", error);
@@ -102,6 +103,7 @@ const ViewRPDSampleCase = () => {
       state: { selectedModel: model },
     });
   };
+
 
   const handleBookmarkClick = async (userId, modelId) => {
     if (!userId) {
@@ -117,7 +119,7 @@ const ViewRPDSampleCase = () => {
     setClickedBookmark(updatedBookmarks);
   
     try {
-      await axios.post(`/api/bookmark/${userId}`, {
+      await axios.post(`${baseUrl}/bookmark/${userId}`, {
         userId,
         bookmarks: updatedBookmarks,
       });
@@ -127,7 +129,6 @@ const ViewRPDSampleCase = () => {
       console.error("Error updating bookmarks:", error);
     }
   };
-
   const deleteFileFromStorage = async (fileUrl) => {
     try {
       console.log("fileUrl",fileUrl);
@@ -283,6 +284,27 @@ const removeModel = async (modelId, index) => {
       {/* display: 'flex', justifyContent: 'center', flexWrap: 'wrap' */}
 
   <Container className="container-model">
+       
+  {loading ? ( // Show loading spinner while data is loading
+          <div className="d-flex justify-content-center my-5" style={{}}>
+            {/* animation="grow" */}
+           <Spinner
+                      as="span"
+                      animation="grow"
+                     //  size="lg"
+                      role="status"
+                      aria-hidden="true"
+                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                       height: '25px'}}
+                    />
+                    กำลังโหลด...
+                    
+          </div>
+        ) : (
+
+          
+  
+       
     <Row >
         {models.filter(model => model.name.toLowerCase().includes(searchTerm.toLowerCase())).map((model) => (
         //  <div className="grid-contaioner">
@@ -340,6 +362,7 @@ const removeModel = async (modelId, index) => {
           // </div>
         ))}
         </Row>
+         )}
         </Container>
         </div>
   );

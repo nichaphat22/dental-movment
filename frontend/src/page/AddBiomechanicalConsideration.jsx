@@ -15,7 +15,7 @@ const AddBiomechanicalConsideration = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

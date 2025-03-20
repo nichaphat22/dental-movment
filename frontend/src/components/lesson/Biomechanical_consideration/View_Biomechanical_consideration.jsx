@@ -4,7 +4,7 @@ import "./Biomechanical_consideration.css";
 import { useNavigate } from "react-router-dom";
 // import {   } from "react-bootstrap";
 import { Card, Button, Row, Col,Container,Spinner,Dropdown, ButtonGroup,  } from 'react-bootstrap';
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { HiPlusSm } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
@@ -13,6 +13,9 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 import { VscKebabVertical } from "react-icons/vsc";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { CiEdit } from "react-icons/ci";
+import { RiDeleteBinLine } from "react-icons/ri";
 
 function View_Biomechanical_consideration() {
   const [animations, setAnimations] = useState([]);
@@ -24,7 +27,7 @@ function View_Biomechanical_consideration() {
   }, []);
 
   const fetchAnimations = () => {
-    axios.get('/api/animation/getAnimation')
+    axios.get(`${baseUrl}/animation/getAnimation`)
       .then((response) => {
           console.log("API Response:", response.data); // Debugging
         setAnimations(response.data);
@@ -56,7 +59,7 @@ function View_Biomechanical_consideration() {
       if (result.isConfirmed) {
         try {
           axios
-            .delete(`/api/animation/deleteAnimation/${id}`)
+            .delete(`${baseUrl}/animation/deleteAnimation/${id}`)
             .then((response) => {
               setAnimations(animations.filter((animation) => animation._id !== id));
             });
@@ -84,7 +87,7 @@ function View_Biomechanical_consideration() {
       <ToastContainer />
       <h1 className="title-h1">Biomechanical consideration</h1>
 
-      <div className="flex justify-between my-2 mx-4">
+      <div className="flex justify-between ">
         <div className="title ">Mechanical force</div>
         <button
           className="flex items-center bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
@@ -99,9 +102,21 @@ function View_Biomechanical_consideration() {
         {loading ? ( // Show loading spinner while data is loading
           <div className="d-flex justify-content-center my-5" style={{}}>
             {/* animation="grow" */}
-            <Spinner animation="border" style={{color:'rgb(172, 78, 235)'}} />
+           <Spinner
+                      as="span"
+                      animation="grow"
+                     //  size="lg"
+                      role="status"
+                      aria-hidden="true"
+                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                       height: '25px'}}
+                    />
+                    กำลังโหลด...
+                    
           </div>
         ) : (
+
+          
           <Row>
             {animations.map((animation) => (
               <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={animation._id}>
@@ -119,21 +134,17 @@ function View_Biomechanical_consideration() {
                       <h3 className="Ani_name" title={animation?.Ani_name}>
                         {animation?.Ani_name}
                       </h3>
-                      <Dropdown as={ButtonGroup}>
-                      <Dropdown.Toggle  id="dropdown-custom-components" className="no-arrow" >
-        <VscKebabVertical />
-      </Dropdown.Toggle>
+                      {/* <div id="dropdown-custom-components" className="no-arrow" > */}
 
-      <Dropdown.Menu className="dwMenu" >
-        <Dropdown.Item className="btEdit" onClick={() => goToEditPage(animation._id)} title="แก้ไขแอนิเมชัน">
-          แก้ไข
-        </Dropdown.Item>
-        <Dropdown.Item className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
-          ลบ
-        </Dropdown.Item>
-      </Dropdown.Menu>
-      </Dropdown>
-                    </div>
+      <div className="dwMenu" >
+        <button className="btEdit" onClick={() => goToEditPage(animation._id)} title="แก้ไขแอนิเมชัน">
+          <CiEdit size={20}/>
+        </button>
+        <button className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
+        <RiDeleteBinLine size={19}/>
+          </button>
+      </div></div>
+                    {/* </div> */}
                   </div>
                 </div>
               </Col>
@@ -146,3 +157,17 @@ function View_Biomechanical_consideration() {
 }
 
 export default View_Biomechanical_consideration;
+{/* <Dropdown as={ButtonGroup}>
+<Dropdown.Toggle  id="dropdown-custom-components" className="no-arrow" >
+<VscKebabVertical />
+</Dropdown.Toggle>
+
+<Dropdown.Menu className="dwMenu" >
+<Dropdown.Item className="btEdit" onClick={() => goToEditPage(animation._id)} title="แก้ไขแอนิเมชัน">
+แก้ไข
+</Dropdown.Item>
+<Dropdown.Item className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
+ลบ
+</Dropdown.Item>
+</Dropdown.Menu>
+</Dropdown> */}

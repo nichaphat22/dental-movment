@@ -22,7 +22,7 @@ const token = localStorage.getItem("token");
 
 // ตั้งค่า WebSocket
 // const socket = io("http://localhost:8080", { autoConnect: false });
-const socket = io("http://localhost:8080", {
+const socket = io("https://backend-dental-production.up.railway.app", {
   query: { token },
   transports: ["websocket", "polling"],
 });
@@ -137,7 +137,7 @@ function NotificationBell() {
   
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative"  ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-200 transition"
@@ -157,7 +157,8 @@ function NotificationBell() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="absolute right-0 mt-3 w-80 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
-          >
+ 
+         >
             <div className="p-4 border-b">
               <h4 className="text-lg text-center font-semibold text-gray-700">การแจ้งเตือน</h4>
             </div>

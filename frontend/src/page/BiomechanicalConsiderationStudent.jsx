@@ -14,7 +14,7 @@ const BiomechanicalConsideration = () => {
           <View_Biomechanical_consideration_Student />
         </Frame>
 
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

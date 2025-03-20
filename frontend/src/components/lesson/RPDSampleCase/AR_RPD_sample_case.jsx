@@ -1,46 +1,60 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useEffect, useState, useRef } from 'react'; 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber'; // Import useFrame from @react-three/fiber
 
-function AR_RPD_sample_case({ modelUrl, scale }) {
+function AR_RPD_sample_case({ modelUrl, scale, position = [0, 0, 0], rotation = [0, 0, 0] }) {
   const [model, setModel] = useState(null);
+  const modelRef = useRef(null); // ใช้ useRef สำหรับเก็บโมเดล
+  const loader = new GLTFLoader();
 
   useEffect(() => {
     if (modelUrl) {
       const loadModel = async () => {
-        const loader = new GLTFLoader();
         try {
           const gltf = await loader.loadAsync(modelUrl);
-          // console.log("Model loaded:", gltf);
           const loadedModel = gltf.scene;
 
           // กำหนด scale ของโมเดล
           loadedModel.scale.set(scale, scale, scale);
 
+          // กำหนดตำแหน่ง
+          loadedModel.position.set(...position);
+
+          // กำหนดการหมุน
+          loadedModel.rotation.set(...rotation);
+
+          modelRef.current = loadedModel; // ใช้ useRef แทนการใช้ state
           setModel(loadedModel);
-          // console.log("model",model);
-          console.log("Model should now be visible");
+          console.log("Model loaded at:", position);
         } catch (error) {
           console.error("Error loading model:", error);
         }
       };
+
       loadModel();
     }
 
     // Cleanup function to dispose of the model when it's no longer needed
     return () => {
-      if (model) {
-        // หากมีการใช้งานโมเดลแล้ว ให้ทำการ dispose
-        model.traverse((child) => {
+      if (modelRef.current) {
+        modelRef.current.traverse((child) => {
           if (child.isMesh) {
             child.geometry.dispose();  // Dispose geometry
             child.material.dispose();   // Dispose material
           }
         });
-        setModel(null);
+        modelRef.current = null;
       }
     };
-  }, [modelUrl, scale, model]);
+  }, [modelUrl, scale, position, rotation]);
+
+   // ใช้ useFrame เพื่อหมุนโมเดลอัตโนมัติ
+   useFrame(() => {
+    if (modelRef.current) {
+      modelRef.current.rotation.y += 0.005; // หมุน 0.01 radian ทุกๆ เฟรม
+    }
+  });
 
   return (
     <>

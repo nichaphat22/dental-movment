@@ -17,7 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <AuthContextProvider>
         {/* <div > */}
           {/* ใช้ ChakraProvider พร้อมกับค่า value */}
-          <ChakraProvider value={system} style={{ position: 'relative', zIndex: 0 }}>
+          <ChakraProvider value={system} style={{ }}>
             <App />
           </ChakraProvider>
           {/* </div> */}

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20");
 const LocalStrategy = require("passport-local");
@@ -5,7 +6,7 @@ const bcrypt = require("bcryptjs");
 const User = require("../Models/userModel");
 const Student = require("../Models/studentModel");
 const Teacher = require("../Models/teacherModel");
-require("dotenv").config();
+
 
 passport.use(
   new LocalStrategy(
@@ -35,13 +36,21 @@ passport.use(
   )
 );
 
+// console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+// console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+// console.log("GOOGLE_CALLBACK:", process.env.GOOGLE_CALLBACK);
 passport.use(
+  
   new GoogleStrategy(
+    
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK,
+      
     },
+
+
     async (accessToken, refreshToken, profile, done) => {
       try {
         console.log("✅ Google Profile:", profile);
@@ -127,7 +136,9 @@ passport.use(
         console.error("❌ Google Authentication Error:", error);
         return done(error, null);
       }
+      
     }
+    
   )
 );
 

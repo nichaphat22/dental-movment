@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Biomechanical_consideration.css";
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { useNavigate } from "react-router-dom";
 // <<<<<<< HEAD
 // import { Card, Button, Row, Col } from 'react-bootstrap';
@@ -23,16 +23,18 @@ function View_Biomechanical_consideration_Student() {
 
   const fetchAnimations = () => {
     axios
-      .get(`/api/animation/getAnimation`)
+      .get(`${baseUrl}/animation/getAnimation`)
       .then((response) => {
-        setAnimations(response.data);
-        setLoading(false); // Set loading to false once data is fetched
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-        setLoading(false); // Set loading to false in case of an error
-      });
-  };
+        console.log("API Response:", response.data); // Debugging
+      setAnimations(response.data);
+      setLoading(false); // Set loading to false once data is fetched
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      setLoading(false); // Set loading to false in case of an error
+    });
+};
+
 
   const handleAction = async (
     actionType,
@@ -41,7 +43,7 @@ function View_Biomechanical_consideration_Student() {
   ) => {
     if (!user) return;
     try {
-      await axios.post("http://localhost:8080/api/recent", {
+      await axios.post(`${baseUrl}/recent`, {
         userId: user._id, // ใช้ userId ที่ได้จาก useSelector
         action: actionType,
         animationId,
@@ -65,8 +67,16 @@ function View_Biomechanical_consideration_Student() {
       {loading ? ( // Show loading spinner while data is loading
           <div className="d-flex justify-content-center my-5" style={{}}>
             {/* animation="grow" */}
-            <Spinner animation="border" style={{color:'rgb(172, 78, 235)'}} />
-          </div>
+               <Spinner
+                                  as="span"
+                                  animation="grow"
+                                 //  size="lg"
+                                  role="status"
+                                  aria-hidden="true"
+                                  style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                                   height: '25px'}}
+                                />
+                                กำลังโหลด... </div>
         ) : (
       <Row>
         {animations.map((animation) => (
@@ -85,9 +95,9 @@ function View_Biomechanical_consideration_Student() {
             
              <div className="nameandbt">
              <h3 className="Ani_name">{animation.Ani_name}</h3>
-             <sapan className="bt" style={{}}>
+             {/* <sapan className="bt" style={{}}>
        
-             </sapan>
+             </sapan> */}
              </div>
              </div>
             </div>

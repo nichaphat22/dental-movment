@@ -16,6 +16,7 @@ import {
   Input,
   Option,
 } from "@material-tailwind/react";
+import { baseUrl } from "../../utils/services";
 
 const AddUser = ({ isOpen, onClose }) => {
   const [type, setType] = useState("card");
@@ -54,7 +55,7 @@ const AddUser = ({ isOpen, onClose }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/auth/addUser",
+        `${baseUrl}/auth/addUser`,
         {
           name,
           email,

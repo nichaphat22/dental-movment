@@ -1,13 +1,14 @@
 import axios from "axios";
+import { baseUrl } from "./services";
 
-const BASE_URL = "http://localhost:8080/api/quiz";
+// const BASE_URL = "http://localhost:8080/api/quiz";
 
 const quizService = {
 // <<<<<<< HEAD
-  getAllQuiz: () => axios.get(`${BASE_URL}/`), // ดึงควิซทั้งหมด
-  getQuizById: (id) => axios.get(`${BASE_URL}/${id}`), // ดึงควิซตาม ID
-  createQuiz: (quizData) => axios.post(`${BASE_URL}/addQuiz`, quizData), // สร้างควิซใหม่
-  updateQuiz: (id, quizData) => axios.put(`${BASE_URL}/${id}`, quizData),
+  getAllQuiz: () => axios.get(`${baseUrl}/quiz/`), // ดึงควิซทั้งหมด
+  getQuizById: (id) => axios.get(`${baseUrl}/quiz/${id}`), // ดึงควิซตาม ID
+  createQuiz: (quizData) => axios.post(`${baseUrl}/quiz/addQuiz`, quizData), // สร้างควิซใหม่
+  updateQuiz: (id, quizData) => axios.put(`${baseUrl}/quiz/${id}`, quizData),
 // =======
 //   getAllQuiz: () => axios.get(`/api/quiz/`), // ดึงควิซทั้งหมด
 //   getQuizById: (id) => axios.get(`/api/quiz/${id}`), // ดึงควิซตาม ID
@@ -64,7 +65,7 @@ const quizService = {
   
 // >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
       // ลบควิซ
-      return await axios.delete(`/api/quiz/${id}`);
+      return await axios.delete(`${baseUrl}/quiz/${id}`);
     } catch (error) {
       console.error('Error deleting quiz or related questions:', error);
       throw error;
@@ -74,28 +75,28 @@ const quizService = {
 // <<<<<<< HEAD
   // เพิ่มคำถามใหม่
   createQuestion: (quizId, questionData) => {
-    return axios.post(`${BASE_URL}/${quizId}/questions`, questionData); // เพิ่มคำถามในควิซ
+    return axios.post(`${baseUrl}/${quizId}/questions`, questionData); // เพิ่มคำถามในควิซ
   },
 
   // อัปเดตคำถาม
   updateQuestion: (quizId, questionId, questionData) => {
-    return axios.put(`${BASE_URL}/${quizId}/questions/${questionId}`, questionData); // อัปเดตคำถาม
+    return axios.put(`${baseUrl}/${quizId}/questions/${questionId}`, questionData); // อัปเดตคำถาม
   },
 
   // ลบคำถาม
   deleteQuestion: (quizId, questionId) => {
-    return axios.delete(`${BASE_URL}/${quizId}/questions/${questionId}`); // ลบคำถามจากควิซ
+    return axios.delete(`${baseUrl}/${quizId}/questions/${questionId}`); // ลบคำถามจากควิซ
   },
 
   submitResult: (resultData) => {
-    return axios.post(`${BASE_URL}/submitResult`, resultData, {
+    return axios.post(`${baseUrl}/submitResult`, resultData, {
       headers: { "Content-Type": "application/json" },
     });
   },
   
 
   getQuizResults: (studentId) => {
-    return axios.get(`${BASE_URL}/results/${studentId}`);
+    return axios.get(`${baseUrl}/results/${studentId}`);
   },
 
   

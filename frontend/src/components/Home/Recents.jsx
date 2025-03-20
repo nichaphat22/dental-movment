@@ -7,6 +7,7 @@ import "swiper/css/pagination";
 import axios from "axios";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import { baseUrl } from "../../utils/services";
 
 // Card สำหรับแสดงข้อมูลของการกระทำ
 const RecentActionCard = ({ action, handleAction }) => {
@@ -61,7 +62,7 @@ const Recents = ({ userId }) => {
   useEffect(() => {
     const fetchRecentActions = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/recent/${userId}`);
+        const res = await axios.get(`${baseUrl}/recent/${userId}`);
         setRecentActions(res.data);
       } catch (error) {
         console.error("Error fetching recent actions:", error);
@@ -76,7 +77,7 @@ const Recents = ({ userId }) => {
   // ฟังก์ชันบันทึกการกระทำ
   const handleAction = async (actionType, animationId = null, quizId = null) => {
     try {
-      await axios.post("http://localhost:8080/api/recent", {
+      await axios.post(`${baseUrl}/recent`, {
         userId,
         action: actionType,  // เช่น "ดูสื่อการสอน" หรือ "ทำแบบทดสอบ"
         animationId,  // หากมี

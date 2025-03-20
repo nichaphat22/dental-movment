@@ -48,7 +48,7 @@ const MenuProfile = () => {
 
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative" style={{zIndex:51}}  ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-200 transition"

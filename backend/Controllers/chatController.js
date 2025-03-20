@@ -3,7 +3,7 @@ const userModel = require("../Models/userModel");
 const Teacher = require("../Models/teacherModel");
 const Student = require("../Models/studentModel");
 const jwt = require('jsonwebtoken');
-const secret = process.env.JWT_SECRET_KEY; // Make sure you have this key set in your environment variables
+const secret = process.env.JWT_SECRET; // Make sure you have this key set in your environment variables
 require('dotenv').config();
 
 // create chat
@@ -30,106 +30,75 @@ require('dotenv').config();
 //         res.status(500).json(error);
 //     }
 // };
-
 const createChat = async (req, res) => {
-    const { email, token, roleRef } = req.body;
+  const {  roleRef, id } = req.body; // รับค่าจาก request body
 
-    if (!email || !token || !roleRef) {
-        return res.status(400).json({ message: "Required fields are missing" });
-    }
+//   console.log('email:', email);
+  console.log('roleRef:', roleRef);
+  console.log('id:', id);
 
-    try {
-        // Verify the token and extract user details
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  try {
+      const userId = id; // ใช้ id จาก body หรือจากข้อมูลที่ได้รับ
 
-        const user = await userModel.findOne({ _id: decoded._id });
+      // ตรวจสอบว่า userId ถูกต้องหรือไม่
+      if (!userId) {
+          return res.status(400).json({ message: "User ID not found" });
+      }
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+      // สำหรับ student, สร้างแชทกับ teachers เท่านั้น
+      if (roleRef === 'Student') {
+          const teachers = await userModel.find({ roleRef: 'Teacher' });
 
-        const userId = user._id;
-        
-        let chats = [];
+          if (!teachers.length) {
+              return res.status(404).json({ message: "No teachers found" });
+          }
 
-        // Proceed with the rest of your chat creation logic
-        // Based on the roleRef ('student' or 'teacher')
-        if (roleRef === 'student') {
-            const teachers = await userModel.find({ roleRef: 'teacher' });
-            if (teachers.length === 0) {
-                return res.status(404).json({ message: "No teachers found" });
+          // ตรวจสอบและสร้างแชทเฉพาะที่ยังไม่มีอยู่
+          const chatPromises = teachers.map(async (teacher) => {
+              if (teacher._id.toString() === userId.toString()) {
+                  return null; // ไม่ต้องสร้างแชทให้กับตัวเอง
+              }
+
+              // ตรวจสอบว่าแชทระหว่าง student กับ teacher นี้มีอยู่แล้วหรือไม่
+              const existingChat = await chatModel.findOne({
+                  members: { $all: [userId, teacher._id] },
+              });
+
+              if (existingChat) {
+                console.log(`Chat already exists: ${userId} - ${teacher._id}`);
+                return res.status(200).json({ message: "Chat already exists for student" });
             }
+            
+            
 
-            const chatPromises = teachers.map(async (teacher) => {
-                if (teacher._id.toString() === userId.toString()) {
-                    return;
-                }
+              // ถ้าไม่มีแชทที่เหมือนกันก็สร้างแชทใหม่
+              const newChat = new chatModel({
+                  members: [userId, teacher._id],
+              });
 
-                // Check if a chat already exists between this student and teacher
-                const existingChat = await chatModel.findOne({
-                    members: { $all: [userId, teacher._id] },
-                });
+              return await newChat.save();
+          });
 
-                // If no existing chat, create a new chat
-                if (!existingChat) {
-                    const newChat = new chatModel({
-                        members: [userId, teacher._id],
-                    });
-                    const savedChat = await newChat.save();
-                    chats.push(savedChat);
-                }
-            });
+          // รอให้ทุก `Promise` ทำงานเสร็จ และกรอง `null` ออก
+          const chats = (await Promise.all(chatPromises)).filter(Boolean);
 
-            await Promise.all(chatPromises);
+          console.log("Chats created:", chats);
 
-            // If chats were created, return the response
-            if (chats.length > 0) {
-                res.status(200).json({ message: "Chats created for student", chats });
-            } else {
-                // If no new chats were created (i.e., chat already exists), return a different message
-                res.status(200).json({ message: "Chat already exists for student", chats });
-            }
-        } else if (roleRef === 'teacher') {
-            const students = await userModel.find({ roleRef: 'student' });
-            if (students.length === 0) {
-                return res.status(404).json({ message: "No students found" });
-            }
+          return res.status(200).json({
+              message: chats.length > 0 ? "Chats created successfully" : "No new chats created",
+              chats: chats,
+          });
+      }
 
-            const chatPromises = students.map(async (student) => {
-                if (student._id.toString() === userId.toString()) {
-                    return;
-                }
+      return res.status(400).json({ message: "Invalid role" });
 
-                // Check if a chat already exists between this teacher and student
-                const existingChat = await chatModel.findOne({
-                    members: { $all: [student._id, userId] },
-                });
-
-                // If no existing chat, create a new chat
-                if (!existingChat) {
-                    const newChat = new chatModel({
-                        members: [student._id, userId],
-                    });
-                    const savedChat = await newChat.save();
-                    chats.push(savedChat);
-                }
-            });
-
-            await Promise.all(chatPromises);
-
-            // If chats were created, return the response
-            if (chats.length > 0) {
-                res.status(200).json({ message: "Chats created for teacher", chats });
-            } else {
-                // If no new chats were created (i.e., chat already exists), return a different message
-                res.status(200).json({ message: "Chat already exists for teacher", chats });
-            }
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error creating chat", error: error.message });
-    }
+  } catch (error) {
+      console.error("Error creating chat:", error);
+      return res.status(500).json({ message: "Internal server error" });
+  }
 };
+
+  
 
 
 

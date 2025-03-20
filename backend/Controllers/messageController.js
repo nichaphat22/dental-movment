@@ -10,37 +10,49 @@ const createMessage = async (req, res) => {
     }
 
     try {
-        // Create the message
+        // เพิ่มข้อความใหม่
         const message = new messageModel({
             chatId,
             senderId,
-            recipientId, // Use recipientId directly
+            recipientId,
             text,
             file,
             isRead: false,
         });
 
-        // Save the message to the database
         await message.save();
 
-        // Create a notification for the recipient user
+        // เพิ่ม Notification
         const notification = new notificationChatModel({
-            chatId: chatId, 
-            senderId: senderId,
-            recipientId: recipientId,
+            chatId, 
+            senderId,
+            recipientId,
             relatedMessageId: message._id,
-            // content: `${senderId} sent you a new message`, // เปลี่ยนข้อความนี้ให้แสดงชื่อผู้ส่งได้ดียิ่งขึ้น
             isRead: false,
         });
-        
+
         await notification.save();
 
+        // เช็คจำนวนข้อความในแชทนี้
+        const totalMessages = await messageModel.countDocuments({ chatId });
+
+        // ถ้ามีข้อความมากกว่า 50 ให้ลบข้อความที่เก่าที่สุด
+        if (totalMessages > 50) {
+           // ค้นหาข้อความที่เก่าที่สุดในแชทนี้
+  const oldestMessage = await messageModel.findOne({ chatId }).sort({ createdAt: 1 });
+  if(oldestMessage) {
+    await messageModel.deleteOne({ _id: oldestMessage._id });
+  }
+}
+
         res.status(201).json({ message: "Message created and notification sent.", message, notification });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "An error occurred while creating the message and notification.", error });
     }
 };
+
 
 const markMessageAsRead = async (req, res) => {
     const { senderId } = req.params;
@@ -122,17 +134,46 @@ const notificationUserRead = async (req, res) => {
     }
 };
 
+const notificationDeleteUserRead = async (req, res) => {
+    const { recipientId } = req.params;
+    console.log('Deleting notifications for recipientId:', recipientId); // เพิ่มการ log ที่นี่
+    try {
+        const deletedNotifications = await notificationChatModel.deleteMany(
+            { recipientId, isRead: true }
+        );
+        res.status(200).json({ message: "Deleted read notifications", deletedNotifications });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+  
+
+
 // getMessages
 const getMessages = async (req, res) => {
     const { chatId } = req.params;
 
     try {
+        // ตรวจสอบว่ามี chatId หรือไม่
+        if (!chatId) {
+            return res.status(400).json({ error: 'chatId is required' });
+        }
+
+        // ค้นหาข้อความในฐานข้อมูลตาม chatId
         const messages = await messageModel.find({ chatId });
+
+        // หากไม่พบข้อความ ให้ส่งข้อความว่าไม่มีข้อความ
+        if (messages.length === 0) {
+            return res.status(200).json({ message: 'No messages found' });
+        }
+
+        // ส่งข้อความทั้งหมดที่พบ
         res.status(200).json(messages);
-    }catch (error) {
-        console.log(error);
-        res.status(500).json(error);
-    };
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 };
 
 // const getMessages = async (req, res) => {
@@ -156,4 +197,4 @@ const getMessages = async (req, res) => {
 // };
 
 
-module.exports = {createMessage, getMessages,markMessageAsRead, getUnreadNotifications,updateNotificationsToRead,notificationUserRead};
+module.exports = {createMessage, getMessages,markMessageAsRead, getUnreadNotifications,updateNotificationsToRead,notificationUserRead,notificationDeleteUserRead};

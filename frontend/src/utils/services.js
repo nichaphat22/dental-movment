@@ -1,6 +1,6 @@
 // https://project-it-410215.uc.r.appspot.com/api
 // <<<<<<< HEAD
-export const baseUrl = "http://localhost:8080/api";
+export const baseUrl = "https://backend-dental-production.up.railway.app/api";
 // export const baseUrl = "https://project-it-410215.uc.r.appspot.com/api";
 // =======
 // export const baseUrl = "http://localhost:8080/api";

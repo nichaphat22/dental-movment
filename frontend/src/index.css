@@ -1,3 +1,9 @@
+/* #root{
+  position: relative;  
+  width: 100%;
+  height: 100vh;  
+  overflow: hidden;
+} */
 /* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap'); */
 body {
@@ -14,11 +20,6 @@ body {
   /* color: pink; */
 }
 
-.chat-header{
-  font-size: 13px;
-  font-weight: 400;
-  
-}
 
 /* All users */
 .all-users {
@@ -46,22 +47,29 @@ body {
 
 /* User Card */
 .user-card {
-  color: white;
+
   position: relative;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: rgba(125, 125, 125, 0.03) 0px 0px 0.15em, rgba(138, 133, 138, 0.12) 0px 0.25em 1em;
+  /* border-bottom: 2px solid rgba(0, 0, 0, 0.1); */
   /* box-shadow: 0 0 1px 1px  rgba(0, 0, 0, 0.1); */
+  border-radius:10px;
+  /* padding:15px; */
+  margin:2px ;
   width: 30vw;
+  background:#fff;
 }
 
 .user-card-noti{
   color: white;
   position: relative;
+  box-shadow: rgba(125, 125, 125, 0.03) 0px 0px 0.15em, rgba(138, 133, 138, 0.12) 0px 0.25em 1em;
   /* border-bottom: 2px solid rgba(0, 0, 0, 0.1); */
-  width: 100%;
+  /* width: 100%; */
  
 }
 .user-card-noti:hover,.user-card:hover{
-  background: #f4f4f4;
+box-shadow: rgba(83, 83, 83, 0.18) 0px 0px 0.15em, rgba(138, 133, 138, 0.12) 0px 0.25em 1em;
+  background-color:#eef1f8;
 }
 
 .user-card .text-content {
@@ -74,28 +82,30 @@ body {
 }
 .user-card-noti .name{
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 .user-card .name {
-  font-weight: 500;
+  font-weight: 400;
   font-size: 1rem;
+  color:#000;
 }
 
 
-.user-card-noti .text,.user-card .text{
+/* .user-card-noti .text{
   font-size: 1rem;
-  color: rgb(180, 180, 180);
-}
+  color:rgb(161, 161, 161);
+} */
 
 
 .user-card-noti .date {
   font-size: 0.65rem;
-  color: rgb(180, 180, 180);
+  color:rgb(161, 161, 161);
 }
 
 .user-card .date {
-  font-size: 0.75rem;
-  color: rgb(180, 180, 180);
+  font-size: 0.8rem;
+  color:rgb(161, 161, 161);
+  /* font-weight:400; */
 }
 
 
@@ -113,12 +123,13 @@ body {
 
 /* Chat Box */
 .chat-box {
-  max-height: calc(100vh - 4rem);
+  max-height: 100vh;
   /* overflow-y: auto; */
-  background: #f3f3f3;
-  border-radius: 10px;
-  border: 1px solid #DADADA  ;
-  
+  background:rgb(255, 255, 255);
+  border: 1px solid #DADADA;
+  /* border-radius: 10px; */
+  /* border: 1px solid #DADADA  ; */
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;
 }
 
 /* @media (min-width: 830px) and (max-width: 1024px) {
@@ -130,32 +141,47 @@ body {
 
 @media (max-width: 830px) {
   .chat-box {
-   height: 94vh;
+  max-height: 100vh;
   /* margin:auto; */
   }
 }
 
 @media (min-width: 1200px) {
   .chat-box {
-   max-height: 92vh !important;
+    max-height: 100vh !important;
   /* margin:auto; */
   }
 }
 
 
 .messages-box1 {
-  height: 100vh;
+  max-height: calc(100vh - 4rem);
+  /* max-height: 100vh; กำหนดความสูงสูงสุดเท่ากับ viewport */
+  /* max-width: 100vw; */
+  overflow-y: auto;
+  /* display: flex; */
+  /* flex-direction: column; */
+  border-radius: 10px;
+  overflow-x: hidden; 
+  background: #eef1f8;
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em;
+  border: 1px solid #DADADA;
 }
+
 
 /* Chat Header */
 .chat-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  /* align-items: center;
+  justify-content: center; */
   padding: 0.75rem;
-  color: black;
-  background: #fff;
-  border-bottom: 1px solid #DADADA  ;
+  color: #000 !important;
+  /* background: #eef1f8; */
+  font-size: 18px;
+  font-weight: 300;
+  /* box-shadow: rgba(135, 135, 135, 0.28) 0px 0px 0.25em, rgba(217, 132, 240, 0.19) 0px 0.25em 1em !important; */
+  /* background-color:rgb(125, 26, 167) !important; เปลี่ยนสีพื้นหลัง */
+  border-bottom:  1px solid rgba(216, 216, 216, 0.9) !important;
 }
 
 /* Messages */
@@ -163,8 +189,18 @@ body {
   max-height: calc(100vh-20rem);
   overflow-y: auto;
   padding: 0 2rem;
+  box-shadow: rgba(255, 255, 255, 0.33) 0px 0px 0.25em, rgba(217, 132, 240, 0) 0px 0.25em 1em !important;
+  /* background: #f7f6fb; */
 }
 
+
+.react-input-emoji--button svg{
+  fill:#8567f6!important;
+}
+.react-input-emoji--container{
+border:none !important;
+box-shadow: rgb(243, 237, 249) 0px 0px 0.2em, rgb(215, 208, 230) 0px 0px 0.2em !important;
+}
 .message {
   
   color: black;
@@ -181,13 +217,13 @@ body {
 
 .message.self {
   color: white;
-   background:rgba(189, 76, 238, 0.76) ; 
+   background: #9d87f1; 
   border-radius: 20px 5px 20px 20px; 
 
 }
 .message.you {
   color: #000;
-   background:rgb(255, 255, 255) ; 
+   background:#eef1f8; 
   border-radius: 5px 20px 20px 20px; 
 
 }
@@ -221,9 +257,11 @@ span.messageRead{
 
 /* Chat Input  */
 .chat-input {
-  width: 100%;
+  /* width: 100%; */
   background: white;
-  padding: 0 1rem 1rem 1rem;
+  padding: 0.5rem ;
+  /* position:fixed; */
+  /* 1rem 1rem 1rem */
 }
 .send-btn {
   border: none;
@@ -245,7 +283,9 @@ span.messageRead{
 .notifications {
   position: relative;
 }
-
+/* .notifications-box{
+  background: #eef1f8,
+} */
 /* .notifications-icon {
   color: white;
   cursor: pointer;
@@ -269,17 +309,42 @@ span.messageRead{
   height: 250px;
   width: 300px;
   position: absolute;
-  top: 3rem;
+  /* top: -3px; */
   right: 0;
-  border-radius: 10px;
-  box-shadow: 0 0 5px 1px  rgba(0, 0, 0, 0.2);
-  background:rgb(255, 255, 255);
+  /* border-radius: 10px; */
+  /* box-shadow: 0 0 5px 1px  rgba(0, 0, 0, 0.2); */
+  /* background:#eef1f8; */
+   background:#fff;
+  box-shadow: var(--bs-box-shadow-lg) !important;
+  background-color: white;
   color: white;
   z-index: 10;
   overflow: hidden; 
   overflow-y: auto;
+  border: 1px solid #e5e7eb; /* border-gray-200 */
+  /* box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); shadow-lg */
+  border-radius: 0.75rem; /* rounded-xl */
   /* overflow-x: scroll; ใช้การเลื่อนในแนวนอน */
 }
+
+@media (max-height: 640px) {
+  .align-items-start{
+    height:86vh !important;
+  }
+ 
+}
+@media (min-height: 882px) {
+  .align-items-start{
+    height:92vh !important;
+  }
+ 
+}
+@media (max-width: 360px) {
+  .notifications-box{
+    right: -55px;
+  }
+}
+
 @media (max-width: 767px) {
   .notifications-box{height: 250px;
   width: 250px;
@@ -354,6 +419,9 @@ span.messageRead{
   justify-content: center;
 }
 
+.container{
+  max-width: 100% !important;
+}
 .swiper-button-next,
 .swiper-button-prev {
   color: #1e40af !important; /* ปรับสีปุ่มลูกศร */

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { ChatContext } from "../context/ChatContext";
 import axios from "axios";
+import { baseUrl } from '../utils/services';
 
 export const useFetchLatestMessage = (chat) => {
     const { newMessage, notifications } = useContext(ChatContext);
@@ -14,7 +15,7 @@ export const useFetchLatestMessage = (chat) => {
 
             try {
                 // Sending GET request to fetch messages for the given chat
-                const response = await axios.get(`/api/messages/${chat._id}`);
+                const response = await axios.get(`${baseUrl}/messages/${chat._id}`);
 
                 // Check if there's an error in the response
                 if (response?.data?.error) {

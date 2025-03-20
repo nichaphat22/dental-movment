@@ -15,7 +15,7 @@ const EditRPDSampleCase = () => {
         </Frame>
 
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

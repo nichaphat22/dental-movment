@@ -31,6 +31,34 @@
         margin-left: 20%;
         width: 80%;
     }
+
+    
+    
+    
+}
+
+@media (max-width: 768px) {
+    /* .sidebar-desktop {
+        display: block;
+        width: 20%; /* เทียบกับ w-1/5 */
+    /* }
+    .sidebar-mobile {
+        display: none;
+    } */ 
+
+    .main-content {
+        flex: 1;
+        width: 100% !important; /* เทียบกับ w-4/5 */
+        margin:auto !important;
+        /* margin-left: 20%; */
+    }
+    .frame{
+        /* width: 100vw!important; */
+    }
+    
+    
+    
+    
 }
 
 @media (max-width: 767px) { /* ซ่อน Sidebar และให้เนื้อหากินเต็มหน้าจอ */

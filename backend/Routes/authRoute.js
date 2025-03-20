@@ -23,7 +23,7 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: `${process.env.CLIENT_URL || "http://localhost:5173"}/login`,
+    failureRedirect: `${process.env.CLIENT_URL || "https://backend-dental-production.up.railway.app"}/login`,
     
   }),
   (req, res) => {
@@ -39,7 +39,7 @@ router.get(
         img: req.user.img,
         role: req.user.role,
         roleData: req.user.roleData ? req.user.roleData._id : null,
-        
+        roleRef: req.user.roleRef,
       },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
@@ -48,7 +48,7 @@ router.get(
     console.log("✅ Redirecting with Token:", token);
     res.redirect(
       `${
-        process.env.CLIENT_URL || "http://localhost:5173"
+        process.env.CLIENT_URL || "https://backend-dental-production.up.railway.app"
       }/login?token=${token}`
     );
   }

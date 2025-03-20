@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { PiClipboardTextDuotone } from "react-icons/pi";
 import { Typography } from "@material-tailwind/react";
 import axios from "axios";
+import { baseUrl } from '../../../utils/services';
 
 
 const QuizList = () => {
@@ -78,7 +79,7 @@ const QuizList = () => {
     if (!user) return; // เช็คว่า user มีค่าก่อน
 
     try {
-      await axios.post("http://localhost:8080/api/recent", {
+      await axios.post(`${baseUrl}/recent`, {
         userId: user._id, // ใช้ userId ที่ได้จาก useSelector
         action: actionType,
         animationId,

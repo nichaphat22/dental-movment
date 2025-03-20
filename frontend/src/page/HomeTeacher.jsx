@@ -17,7 +17,7 @@ const HomeTeacher = () => {
           <View_Biomechanical_consideration />
         </Frame>
         {/* ChatBox */}
-        <ChatBox />
+        {/* <ChatBox /> */}
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { API } from '../src/api/api';
 // import { setUser } from './redux/authSlice';
 import { loginSuccess } from './redux/authSlice';
-import { AuthContextProvider } from './context/AuthContext';
+// import { AuthContextProvider } from './context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 
 // import 
@@ -127,7 +127,7 @@ function App () {
           <Route path="/login" element={user ? <Navigate to="/"/>:<Login />} />
           {/* <Route path="/lectureHistory" element={user ? <LectureHistory/> : <Login />}></Route>
           <Route path="/bookmark" element={user ? <Bookmark /> : <Login />} /> */}
-          <Route path="/chat" element={user ? <Chat /> : <Login />} />
+          <Route path="/chat/:id" element={user ? <Chat /> : <Login />} />
           <Route path="/AR-RPD" element={user ? <ARModel /> : <Login />} />
 
           <Route element={<ProtectedRoute allowedRoles={['teacher', 'student']}/>}>
@@ -173,7 +173,7 @@ function App () {
               <Route path="/MovementOfRPD-teacher" element={ <MovementOfRPD /> } />
 
               <Route path="/Add-RPD" element={ <AddRPDSampleCase /> } />
-              <Route path="/Edit-RPD/:name/edit" element={ <EditRPDSampleCase /> } />
+              <Route path="/Edit-RPD/:id/edit" element={ <EditRPDSampleCase /> } />
               <Route path="/Add-Biomechanical-consideration" element={ <AddBiomechanicalConsideration /> } />
               <Route path="/Edit-Biomechanical-consideration/:id" element={ <EditBiomechanicalConsideration /> } />
               <Route path="/Add-MovementOfRPD" element={ <AddMovementOfRPD /> } />

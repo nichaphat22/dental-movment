@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { API } from '../../api/api';
-
+import { baseUrl } from '../../utils/services';
 const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -9,7 +9,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await API.post('/api/auth/register', { email, password, name});
+            await API.post(`${baseUrl}/auth/register`, { email, password, name});
             alert('Registration Successful');
         } catch (error) {
             console.error(error.response.data);

@@ -6,17 +6,9 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import './RPD_sample_case.css';
 import { FaPen, FaEraser, FaTrash } from "react-icons/fa"; // Import icons
-// import { baseUrl } from '../../../utils/services';
+import { baseUrl } from '../../../utils/services';
 import { AuthContext } from '../../../context/AuthContext';
 import { IoIosSave } from "react-icons/io";
-// import { SlNote } from "react-icons/sl";
-import { RiStickyNoteAddFill } from "react-icons/ri";
-// import { fabric } from 'fabric';
-
-import { FaUndoAlt } from "react-icons/fa";
-// import Text from './Text'
-import { FaRedoAlt } from "react-icons/fa";
-// import Text from './Text';
 import { RxText } from "react-icons/rx";
 import { FaBold } from "react-icons/fa6";
 import { FiItalic } from "react-icons/fi";
@@ -48,6 +40,7 @@ import InputNumber from 'rc-input-number';
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 
+
 const ViewModel = () => {
   const location = useLocation();
   const containerRef = useRef(null);
@@ -72,7 +65,7 @@ const ViewModel = () => {
   const [fabricCanvas, setFabricCanvas] = useState(null);
   const [isTextMode, setIsTextMode] = useState(false); // State for text mode
   const [textColor, setTextColor] = useState('#000000'); // Text color
-  const [fontSize, setFontSize] = useState(10); // Text size
+  const [fontSize, setFontSize] = useState(20); // Text size
 
   // const [isModelActive, setIsModelActive] = useState(false); 
   const [animationStopped, setAnimationStopped] = useState(false);
@@ -112,8 +105,11 @@ const ViewModel = () => {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     // renderer.setPixelRatio(window.devicePixelRatio); // ป้องกันภาพแตก
     // renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.domElement.style.width = "100%";
-    renderer.domElement.style.height = "100%";
+  // กำหนดขนาดให้เต็มพื้นที่ของ container
+  renderer.domElement.style.width = "100%";
+  renderer.domElement.style.height = "100%";
+  // renderer.domElement.style.maxWidth = "100%"; // ตัวอย่าง max-width
+  // renderer.domElement.style.maxHeight = "100%"; // ตัวอย่าง max-height
 
     renderer.setPixelRatio(2); // ตั้งค่าความละเอียดเป็น 2 เท่าของค่าปกติ
 
@@ -132,13 +128,14 @@ const ViewModel = () => {
     controlsRef.current = controls;
     controls.enableDamping = true;
     controls.screenSpacePanning = true; // เพิ่มการสนับสนุนสำหรับการเลื่อนโมเดล
+    controls.enableZoom = true;
 
 
     // ใช้ Pointer Events
     renderer.domElement.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch") {
         // เมื่อเกิดเหตุการณ์สัมผัส
-        controls.enabled = false;
+        controls.enabled = true;
       }
     });
 
@@ -168,6 +165,14 @@ const ViewModel = () => {
 
     renderer.domElement.addEventListener("touchend", () => {
       controls.enabled = true; // ปล่อยการควบคุมเมื่อสัมผัสเสร็จ
+    });
+
+  // รองรับการสัมผัส
+    renderer.domElement.addEventListener("touchmove", (e) => {
+        if (e.touches.length === 1) {
+            e.preventDefault();
+            controls.update(); // อัพเดต controls สำหรับการซูม
+        }
     });
 
     const container = containerRef.current;
@@ -724,7 +729,7 @@ const ViewModel = () => {
     };
 
     try {
-      const response = await axios.post(`/api/lecture`, canvasData);
+      const response = await axios.post(`${baseUrl}/lecture`, canvasData);
       console.log("Image and notes saved successfully:", response.data);
       toast.success("บันทึกรูปภาพเสร็จสิ้น!", { autoClose: 1500 });
     } catch (error) {
@@ -816,22 +821,35 @@ const ViewModel = () => {
   
   ///////////////////////////////////////////////////////////////////////////////
   return (
-    <div className="container-ar" style={{ position: 'relative' }}>
+    <div className="container" style={{position: 'relative'  }}>
+{/* */}
 
-   <ToastContainer  />  
 
-      <div className="model-container" style={{ zIndex: 10, marginTop: '0', paddingTop: '0px' ,width:'100%'}}>
+
+    {/* zIndex: 10, marginTop: '0', paddingTop: '0px' ,width:'100%' */}
+    {/* <div className="model-container" style={{ }}>
       <div className="switch-mode" style={{marginTop:'20px'}}>
       {/* display:'inline-flex' */}
+  
 
-
-        <div className="draw" style={{display: 'inline-flex', gap:3,marginTop:'30px', marginLeft:'',margin: 'auto',
+        {/* <div className="draw" style={{display: 'inline-flex', gap:3,marginTop:'30px', marginLeft:'',margin: 'auto',
       height: '', width: '', zIndex: 5, background: '#fff',padding:'10px',justifyContent:'space-between',marginBottom:'10px',
-    height:'85px',alignContent:'center',alignItems:'center',borderRadius:'15px',boxShadow: 'rgba(149, 149, 149, 0.67) 0px 1px 2px 0px, rgba(151, 151, 151, 0.15) 0px 1px 3px 1px'}}>
+    height:'85px',alignContent:'center',alignItems:'center',borderRadius:'15px',boxShadow: 'rgba(149, 149, 149, 0.67) 0px 1px 2px 0px, rgba(151, 151, 151, 0.15) 0px 1px 3px 1px'}}> */} 
+
+
+   <ToastContainer  />  
+    {/* zIndex: 10, marginTop: '0', paddingTop: '0px' ,width:'100%' */}
+      <div className="model-container" style={{ }}>
+      <div className="switch-mode" style={{ display: 'flex', marginTop: '20px', maxWidth: '100%', marginBottom: '20px',position:'relative'}}>
+
+        <div className="draw" style={{position:'relative',display: 'flex',gap:2, marginLeft:'',margin: 'auto',maxWidth:'95%', flexWrap: 'wrap',justifyContent: 'center',
+      zIndex: 6, background: '#fff',padding:'10px 15px',
+    maxHeight:'100vh',alignContent:'center',alignItems:'center',borderRadius:'15px',boxShadow: 'rgba(149, 149, 149, 0.67) 0px 1px 2px 0px, rgba(151, 151, 151, 0.15) 0px 1px 3px 1px'}}>
+
 
 <div className="Mode" style={{display: 'inline-flex'}}>
   <input
-        type="checkbox"
+    type="checkbox"
         id="animationMode"
         checked={isChecked} // ผูกกับ state
         onChange={handleToggle} // อัปเดตค่าเมื่อกด
@@ -935,32 +953,12 @@ const ViewModel = () => {
             >
               <RxText size="18" />
             </button>
-            {/* <input
-              className='ip-fontSize'
-              type="number"
-              title="ขนาดตัวอักษร"
-              value={fontSize}
-              style={{
-                // justifyItems: 'center',
-                zIndex: 5,
-                cursor: 'pointer',
-                fontSize:'14px',
-                width: '50px',
-                height: '40px',
-                color: '#000',
-              }}
-              onChange={(e) => {
-                setFontSize(e.target.value);
-                changeFontSize(e.target.value);
-              }} 
-              inputMode="numeric"  // ใช้สำหรับให้คีย์บอร์ดแสดงตัวเลข
-              />  */}
 
 <InputNumber
   min={1}
   max={120}
   // ❌ defaultValue ใช้เพียงค่าเริ่มต้น แต่ไม่อัปเดตตาม state
-  defaultValue={14} 
+  defaultValue={18} 
   // ✅ ต้องใช้ value แทน เพื่อให้ React อัปเดตค่าตาม `setFontSize`
   value={fontSize} 
   onChange={(value) => {
@@ -968,59 +966,10 @@ const ViewModel = () => {
     changeFontSize(value);
   }}
   style={{
-    fontSize: '16px',
+    fontSize: '18px',
   }}
 />
 
-          {/* <ul className="options"
-              style={{
-                // display: 'flex',
-                zIndex: 5,
-                // margin: '5px',
-
-                padding: 0,
-                margin: 0,
-                cursor: 'pointer',
-              }}>
-              {presetColors.map((color, index) => (
-                <li key={index} className={`option tool color ${currentColor === color ? 'active' : ''}`}
-                  style={{
-                    backgroundColor: color,
-                    listStyle: 'none',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50px',
-                    border: '1px solid #000',
-                    margin: '5px '
-                  }} onClick={() => handleColorChange(color)}></li>
-              ))}
-
-            </ul> */}
-
-            {/* <input
-              title="สีเพิ่มเติม"
-              className='ip-color'
-              type="color"
-              value={currentColor}
-              onChange={(e) => {
-                setCurrentColor(e.target.value); setTextColor(e.target.value);
-                changeTextColor(e.target.value);
-              }}
-              style={{
-                zIndex: 5,
-                padding: '0',
-                minWidth: '28px',
-                minHeight: '28px',
-                width: '28px',
-                height: '28px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                border: 'none',
-                outline: 'none',
-                appearance: 'none'
-                // boxShadow: '1px 1px 1px rgba(0, 0, 0, 0.5)',
-              }}
-            /> */}
             <div 
   style={{
     width: '28px',
@@ -1028,6 +977,7 @@ const ViewModel = () => {
     borderRadius: '50px',
     backgroundColor: currentColor,
     cursor: 'pointer',
+    marginLeft:'15px',
     border: '1px solid #ccc', // เพิ่มเส้นขอบให้ดูเหมือนปุ่ม
   }}
   onClick={() => document.getElementById('color-picker').click()} // คลิกแล้วเปิด input สี
@@ -1042,6 +992,7 @@ const ViewModel = () => {
       changeTextColor(e.target.value);
     }}
     style={{
+
       visibility: 'hidden', // ซ่อน input จริง
       position: 'absolute',
     }}
@@ -1281,14 +1232,30 @@ const ViewModel = () => {
         <div className="bt-mode" style={{
         }}>
           
-     
-  
-          <div className='containerRef' ref={containerRef} style={{ zIndex: 5, width: '100%', }}>  </div>
+          {loading ? ( // Show loading spinner while data is loading
+          <div className="d-flex justify-content-center my-5" style={{}}>
+            {/* animation="grow" */}
+           <Spinner
+                      as="span"
+                      animation="grow"
+                     //  size="lg"
+                      role="status"
+                      aria-hidden="true"
+                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
+                       height: '25px'}}
+                    />
+                    กำลังโหลด...
+                    
+          </div>
+        ) : (
 
+          
+  
+          <div className='containerRef' ref={containerRef} style={{ zIndex: 5,width:'100%'}}>  </div>
+        )}
           {showCanvas &&
-            <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5, width: '100%' }} />
+            <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5,width:'100%' }} />
           }
-        {/* </div> */}
 
         </div>
 

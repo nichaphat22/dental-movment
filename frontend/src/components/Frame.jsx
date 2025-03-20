@@ -3,8 +3,8 @@ const Frame = ( {children,style}) => {
         <div
         className="frame"
         style={{
-            display: "table-cell",
-            width: "80vw",
+            // display: "table-cell",
+            // width: "80vw",
             // height:"50vw",
             minHeight: "70vw",
             padding: "8px",
