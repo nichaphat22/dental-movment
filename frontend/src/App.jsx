@@ -66,6 +66,8 @@ import Result from './page/pageQuiz/StudentQuiz/Result';
 import DashboardStudent from './page/home/homeStudent/DashboardStudent';
 import DashboardTeacher from './page/home/homeTeacher/DashboardTeacher';
 
+import Restorepage from './page/home/homeTeacher/Restorepage';
+
 
 // import HomeS from "./page/home/homeStudent/homeS";
 import Success from "./page/loginSuccess/success";
@@ -161,6 +163,8 @@ function App () {
           {/* Route สำหรับ Teacher */}
           <Route element={<ProtectedRoute allowedRoles={['teacher']}/>}>
               <Route path='/dashboard-teacher' element={<DashboardTeacher/>}/>
+
+              <Route path='/restore-teacher' element={<Restorepage/>}/>
 
               <Route path="/lesson-teacher" element={<HomeTeacher /> }/>
 

@@ -51,7 +51,7 @@ passport.use(
           return done(new Error("Access Token not received"), null);
         }
  
-        const email = profile.emails?.[0]?.value; // ป้องกัน error ถ้าไม่มี email
+       const email = profile.emails?.[0]?.value; // ป้องกัน error ถ้าไม่มี email
         if (!email) {
           console.error("❌ Google Auth Failed: Email not provided");
           return done(null, false, { message: "Email not provided by Google" });
@@ -60,13 +60,30 @@ passport.use(
         //ต้องมีรายชื่ออยู่ในระบบถึงจะเข้าใช้งานได้
         const existingUser = await User.findOne({ email });
 
-        if (existingUser) {
-          console.log("✅ Authorized Google User:", existingUser);
-          return done(null, existingUser);
-        } else {
+        if (!existingUser) {
           console.warn("🚫 Google Login Denied: Email not in system");
           return done(null, false, { message: "Not authorized" });
         }
+
+        // ตรวจสอบว่าเป็นนักศึกษา และถูกลบหรือไม่
+        if (existingUser.role === "student") {
+          const student = await Student.findOne({ user: existingUser._id });
+          if (student?.isDeleted) {
+            console.warn("🚫 Google Login Denied: Student is soft deleted");
+            return done(null, false, { message: "Your account has been deactivated" });
+          }
+        }
+
+        console.log("✅ Authorized Google User:", existingUser);
+        return done(null, existingUser);
+
+        // if (existingUser) {
+        //   console.log("✅ Authorized Google User:", existingUser);
+        //   return done(null, existingUser);
+        // } else {
+        //   console.warn("🚫 Google Login Denied: Email not in system");
+        //   return done(null, false, { message: "Not authorized" });
+        // } 
 
         // เพิ่มผู้ใช้ใหม่ที่อีเมล์ไม่มีอยู่ในระบบ จะเพิ่มอัตโนมัต
         // let user = await User.findOne({ googleId: profile.id });
@@ -105,6 +122,7 @@ passport.use(
         // }
 
         // return done(null, user);
+      
       } catch (error) {
         console.error("❌ Google Authentication Error:", error);
         return done(error, null);

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import {API} from "../../api/api";
+import { API } from "../../api/api";
 import { GoX } from "react-icons/go";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -27,10 +27,30 @@ const AddUser = ({ isOpen, onClose }) => {
   const [message, setMessage] = useState("");
   const [studentID, setStudentID] = useState("");
   const token = localStorage.getItem("token"); // หรือดึงจาก Context/Auth State
+  const [file, setFile] = useState(null);
+  const [excelData, setExcelData] = useState([]);
+
+  const validateEmail = async (email) => {
+    // เช็คว่าเป็นอีเมลจริงหรือไม่
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      setMessage("❌ กรุณากรอกอีเมลให้ถูกต้อง");
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+
+    if (!name.trim() || !studentID.trim() || !email.trim()) {
+      setMessage("❌ กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+
+    const isValidEmail = await validateEmail(email);
+    if (!isValidEmail) return;
 
     try {
       const res = await axios.post(
@@ -55,6 +75,93 @@ const AddUser = ({ isOpen, onClose }) => {
       setStudentID("");
     } catch (error) {
       setMessage(`❌ ${error.response?.data?.message || "Error occurred"}`);
+    }
+  };
+
+  // const handleFileChange = (e) => {
+  //   const selectedFile = e.target.files[0];
+  //   if (selectedFile) {
+  //     const fileType = selectedFile.type;
+  //     const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
+  //     const maxSize = 5 * 1024 * 1024;  // กำหนดขนาดไฟล์สูงสุดเป็น 5MB
+
+  //     if (!allowedTypes.includes(fileType)) {
+  //       setMessage("กรุณาเลือกไฟล์ Excel เท่านั้น");
+  //       return;
+  //     }
+  //     if (selectedFile.size > maxSize) {
+  //       setMessage("ขนาดไฟล์ใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB");
+  //       return;
+  //     }
+  //     setFile(selectedFile);
+  //   }
+  // };
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [selectedFileName, setSelectedFileName] = useState(""); // เก็บชื่อไฟล์
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.name.endsWith(".xls") && !file.name.endsWith(".xlsx")) {
+        setMessage("กรุณาเลือกไฟล์ Excel (.xls, .xlsx)");
+        setSelectedFileName(""); // เคลียร์ชื่อไฟล์ถ้าไม่ใช่ Excel
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setMessage("ไฟล์มีขนาดใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 10MB");
+        setSelectedFileName(""); // เคลียร์ชื่อไฟล์
+        return;
+      }
+      setFile(file);
+      setSelectedFileName(file.name); // อัปเดตชื่อไฟล์
+    }
+  };
+
+  const handleSubmitFile = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    if (!file) {
+      setMessage("กรุณาเลือกไฟล์");
+      setIsLoading(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:8080/api/auth/uploadStudent",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`, // ส่ง token ไปใน request
+          },
+        }
+      );
+      setExcelData(res.data);
+      setMessage(res.data.message || "อัปโหลดไฟล์สำเร็จ");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+
+      // ตรวจสอบข้อมูล error.response
+      if (error.response) {
+        console.log("Response data:", error.response.data); // ข้อมูลตอบกลับจากเซิร์ฟเวอร์
+        console.log("Response status:", error.response.status); // สถานะ HTTP
+        console.log("Response headers:", error.response.headers); // headers ที่ตอบกลับ
+
+        setMessage(
+          error.response?.data?.message || "เกิดข้อผิดพลาดในการอัปโหลดไฟล์"
+        );
+      } else {
+        setMessage("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,10 +202,7 @@ const AddUser = ({ isOpen, onClose }) => {
             {/* Form สำหรับเพิ่มรายชื่อ */}
             <TabPanel value="card" className="p-0">
               {message && <p className="mb-4 text-red-600">{message}</p>}
-              <form
-                className="mt-6 flex flex-col gap-4"
-                
-              >
+              <form className="mt-6 flex flex-col gap-4">
                 <div>
                   <Typography
                     variant="small"
@@ -150,10 +254,6 @@ const AddUser = ({ isOpen, onClose }) => {
                     required
                   />
                 </div>
-                
-                 
-                
-               
               </form>
               {/* Buttons */}
               <div className="flex justify-center mt-4">
@@ -164,8 +264,9 @@ const AddUser = ({ isOpen, onClose }) => {
                   ยกเลิก
                 </button>
                 <button
-                onClick={handleSubmit} 
-                className="px-4 py-2 rounded  bg-blue-500 text-white">
+                  onClick={handleSubmit}
+                  className="px-4 py-2 rounded  bg-blue-500 text-white"
+                >
                   บันทึก
                 </button>
               </div>
@@ -174,10 +275,61 @@ const AddUser = ({ isOpen, onClose }) => {
             {/* Form สำหรับเพิ่มรายชื่อจาก Excel */}
             <TabPanel value="excel" className="p-0">
               <div className="mt-6">
-                <Typography variant="small" color="blue-gray" className="mb-2">
-                  อัพโหลดไฟล์ Excel
-                </Typography>
-                <input type="file" accept=".xlsx, .xls" className="w-full" />
+                <form onSubmit={handleSubmitFile}>
+                  <label className="text-blue-500 font-medium border p-6 text-center cursor-pointer block">
+                    <p>เพิ่มไฟล์</p>
+                    {/* แสดงชื่อไฟล์ที่เลือก */}
+                    {selectedFileName && (
+                      <p className="mt-2 text-center text-gray-600">
+                        ไฟล์ที่เลือก: {selectedFileName}
+                      </p>
+                    )}
+
+                    <input
+                      type="file"
+                      onChange={handleFileChange}
+                      accept=".xls,.xlsx"
+                      className="hidden"
+                    />
+                  </label>
+                  <div className="flex justify-center">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 mt-4 bg-blue-500 text-white rounded"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}
+                    </button>
+                  </div>
+                </form>
+                {message && <div>{message}</div>}
+
+                {/* Show excel data table if available */}
+                {excelData.length > 0 && (
+                  <div className="mt-6">
+                    <h2 className="text-xl font-bold">ข้อมูลจากไฟล์ Excel:</h2>
+                    <table className="w-full table-auto mt-4">
+                      <thead>
+                        <tr>
+                          <th className="border px-4 py-2">Student ID</th>
+                          <th className="border px-4 py-2">Name</th>
+                          <th className="border px-4 py-2">Email</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {excelData.map((row, index) => (
+                          <tr key={index}>
+                            <td className="border px-4 py-2">
+                              {row.studentID}
+                            </td>
+                            <td className="border px-4 py-2">{row.name}</td>
+                            <td className="border px-4 py-2">{row.email}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </TabPanel>
           </TabsBody>

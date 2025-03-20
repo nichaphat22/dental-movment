@@ -28,18 +28,19 @@ const RecentActionCard = ({ action, handleAction }) => {
   };
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-      <h3 className="text-xl font-semibold mb-2">{action.action}</h3>
-      <p className="text-sm text-gray-600">
+      <h3 className="text-2xl text-start font-semibold mb-1">{action.action}</h3>
+      <p className="text-base  text-gray-600">
         {action.animationId
           ? `📖 บทเรียน: ${action.animationId.Ani_name}`
           : action.quizId
           ? `📝 แบบทดสอบ: ${action.quizId.title}`
           : "📌 สื่อ 3D"}
       </p>
-      <p className="text-xs text-gray-500">🕒 {moment(action.createdAt).fromNow()}</p>
+      <p className="text-xs text-gray-500 ">🕒 {moment(action.createdAt).fromNow()}</p>
+      <div className="flex justify-end m-2">
       <button
         onClick={handleClick} // เรียกใช้ handleAction เมื่อคลิก
-        className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        className=" mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
       >
         {action.animationId
           ? "ดูสื่อการสอน"
@@ -47,6 +48,9 @@ const RecentActionCard = ({ action, handleAction }) => {
           ? "ทำแบบทดสอบ"
           : "ดูสื่อ 3D"}
       </button>
+        
+      </div>
+      
     </div>
   );
 };

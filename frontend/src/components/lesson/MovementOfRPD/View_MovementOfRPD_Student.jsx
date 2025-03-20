@@ -1,43 +1,41 @@
 import React, { useEffect, useState } from "react";
 import "./MovementOfRPD.css";
-import { ref, get } from "firebase/database";
-import { database } from "../../../config/firebase";
-import { useNavigate, useLocation } from "react-router-dom";
+import { ref as dbRef, get, remove } from "firebase/database";
+import { ref as storageRef, getDownloadURL, deleteObject } from "firebase/storage"; 
+import { storage, database } from "../../../config/firebase";
+import Swal from "sweetalert2";
+import { useLocation, useNavigate } from "react-router-dom";
+import { HiPlusSm } from "react-icons/hi";
+import { useSelector } from "react-redux";
+import { animate } from "framer-motion";
 
 function View_MovementOfRPD_Student() {
-  const [animation3d, setAnimation3d] = useState([]);
+const [animation3d, setAnimation3d] = useState([]);
+  const [loading, setLoading] = useState(true); // สถานะการโหลด
+  const [error, setError] = useState(null); // ข้อความ error
+  const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // ดึงข้อมูลจาก Firebase Realtime Database
-    const fetchAnimation3d = async () => {
-      try {
-        const animation3dRef = ref(database, "animation3d");
-        const snapshot = await get(animation3dRef);
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const animationList = Object.keys(data).map((key) => ({
-            id: key,
-            name: data[key].name,
-            url: data[key].url,
-            aniImageUrl: data[key].aniImageUrl,
-          }));
-          setAnimation3d(animationList);
-        }
-      } catch (error) {
-        console.error("Error fetching animation3d data:", error);
+    const fetchAnimations = async () => {
+      const animationsRef = dbRef(database, "animations/");
+      const snapshot = await get(animationsRef);
+      if (snapshot.exists()) {
+        setAnimation3d(Object.values(snapshot.val()));
+      } else {
+        setAnimation3d([]);
       }
     };
 
-    fetchAnimation3d();
+    fetchAnimations();
   }, []);
 
-  const handleImageClick = (name, url, aniImageUrl) => {
-    navigate(`/animation3d/${name}/view`, {
-      state: { selectedFile: { name, url, aniImageUrl } },
+  const handleAnimationClick = (animation) => {
+    navigate(`/animation3d/${animation.name}/view`, {
+      state: animation,
     });
-  };
+  }
 
   return (
     <div className="cont">
@@ -49,14 +47,14 @@ function View_MovementOfRPD_Student() {
           <div
             className="cursor-pointer bg-white shadow-sm rounded-lg p-4 lg:transform lg:transition lg:duration-300 lg:hover:scale-105 lg:hover:shadow-md"
             key={animation.id}
-            onClick={() => handleImageClick(animation.name, animation.url, animation.aniImageUrl)}
+            onClick={() =>handleAnimationClick(animation)}
           >
             <img
-              src={animation.aniImageUrl}
+              src={animation.imageUrl}
               alt={animation.name}
               className="cursor-pointer mb-4 w-full rounded hover:transform-none shadow-none"
             />
-            <h3 className="md:text-base lg:text-lg font-bold mb-2 text-center break-words">
+            <h3 className="md:text-base lg:text-lg font-normal mb-2 text-center break-words">
               {animation.name}
             </h3>
           </div>

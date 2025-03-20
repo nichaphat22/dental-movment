@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { LuLayoutDashboard } from "react-icons/lu";
-import { GoPeople, GoRepo,GoClock} from "react-icons/go";
+import { GoPeople, GoRepo, GoClock, GoSync } from "react-icons/go";
 import { PiClipboardTextDuotone } from "react-icons/pi";
 import {
   MdLogout,
   MdOutlineFormatIndentIncrease,
   MdOutlineFormatIndentDecrease,
 } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({ isExpanded, toggleSidebar }) => {
   return (
@@ -28,34 +29,49 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
 
       {/* เมนูรายการ */}
       <ul className="flex flex-col space-y-3.5 w-full">
-        <MenuItem
-          isExpanded={isExpanded}
-          icon={<LuLayoutDashboard className="h-6 w-6" />}
-          text="Dashboard"
-          active
-        />
-        <MenuItem
-          isExpanded={isExpanded}
-          icon={<GoPeople className="h-6 w-6" />}
-          text="จัดการนักศึกษา"
-        />
-        <MenuItem
-          isExpanded={isExpanded}
-          icon={<GoRepo className="h-6 w-6" />}
-          text="จัดการบทเรียน"
-        />
-        <MenuItem
-          isExpanded={isExpanded}
-          icon={<PiClipboardTextDuotone className="h-6 w-6" />}
-          text="จัดการแบบทดสอบ"
-        />
+        <Link to="/dashboard-teacher">
+          <MenuItem
+            isExpanded={isExpanded}
+            icon={<LuLayoutDashboard className="h-6 w-6" />}
+            text="Dashboard"
+            active
+          />
+        </Link>
+        <Link to="/dashboard-teacher">
+          <MenuItem
+            isExpanded={isExpanded}
+            icon={<GoPeople className="h-6 w-6" />}
+            text="จัดการนักศึกษา"
+          />
+        </Link>
+        <Link to="/lesson-teacher">
+          <MenuItem
+            isExpanded={isExpanded}
+            icon={<GoRepo className="h-6 w-6" />}
+            text="จัดการบทเรียน"
+          />
+        </Link>
+        <Link to="/ListQuiz-teacher">
+          <MenuItem
+            isExpanded={isExpanded}
+            icon={<PiClipboardTextDuotone className="h-6 w-6" />}
+            text="จัดการแบบทดสอบ"
+          />
+        </Link>
+
         <hr className="my-2 border-gray-300 border-3 rounded-md" />
-        <MenuItem
+        {/* <MenuItem
           isExpanded={isExpanded}
           icon={<GoClock className="h-6 w-6" />}
           text="การเข้าใช้งาน"
-          
-        />
+        /> */}
+        <Link to="/restore-teacher">
+          <MenuItem
+            isExpanded={isExpanded}
+            icon={<GoSync className="h-6 w-6" />}
+            text="กู้คืนรายชื่อ"
+          />
+        </Link>
       </ul>
 
       {/* <div className="border-t flex p-3">
@@ -66,22 +82,23 @@ const Sidebar = ({ isExpanded, toggleSidebar }) => {
 };
 
 /** 🔹 สร้าง Component สำหรับเมนู */
-const MenuItem = ({ isExpanded, icon, text, active ,alert}) => (
+const MenuItem = ({ isExpanded, icon, text, active, alert }) => (
   <li
     className={`group flex items-center p-2.5 rounded-md hover:bg-gray-200 cursor-pointer transition-all ${
       !isExpanded && "justify-center"
     } ${
       active
-        ?  "bg-gradient-to-tr from-indigo-100 to-indigo-50"
-        :  "hover:bg-indigo-50 text-gray-600 "
+        ? "bg-gradient-to-tr from-indigo-100 to-indigo-50"
+        : "hover:bg-indigo-50 text-gray-600 "
     }`}
   >
     <span className="group-hover:text-black text-gray-600">{icon}</span>
     {isExpanded && (
-      <span className="ml-2 text-gray-700 group-hover:text-black font-normal">{text}</span>
+      <span className="ml-2 text-gray-700 group-hover:text-black font-normal">
+        {text}
+      </span>
     )}
   </li>
 );
 
 export default Sidebar;
-

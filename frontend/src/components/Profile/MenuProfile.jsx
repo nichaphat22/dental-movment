@@ -64,7 +64,7 @@ const MenuProfile = () => {
             exit={{ opacity: 0, y: -10 }}
             className="absolute right-0 mt-3 w-72 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
           >
-            <div className="w-full h-24  p-2 border-b">
+            <div className="w-full h-16  p-2 border-b">
               <div className="flex">
                 <div className="w-12 h-12 mr-3 flex-shrink-0  flex items-center justify-center">
                   <img
@@ -78,7 +78,7 @@ const MenuProfile = () => {
                   <p className="text-xs md:text-xs">{user?.email}</p>
                 </div>
               </div>
-              <div 
+              {/* <div 
                 onClick={toggleProfileModal}
                 className="-mx-2 flex space-x-2 hover:bg-gray-100 mt-2.5 cursor-pointer px-2 py-1"
               
@@ -86,7 +86,7 @@ const MenuProfile = () => {
                 <GoPencil className="w-3.5 h-3.5 ml-2" />
                 <p className="text-xs ">Customize profile</p>
                 
-              </div>
+              </div> */}
             </div>
             <div
               onClick={handleLogout}
