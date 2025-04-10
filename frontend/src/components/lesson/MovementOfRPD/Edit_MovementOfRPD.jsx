@@ -16,7 +16,19 @@ function Edit_MovementOfRPD() {
   const [selectedImageName, setSelectedImageName] = useState("");
   const [existingAnimation, setExistingAnimation] = useState("");
   const [existingImage, setExistingImage] = useState("");
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
+  // const validateName = (name) => {
+  //   // ตัดช่องว่างหน้า-หลัง แล้วเช็คว่าชื่อว่างเปล่าหรือเป็นช่องว่างล้วนๆ
+  //   if (!name.trim()) {
+  //     setNameError("กรุณากรอกชื่อ ห้ามเป็นค่าว่างหรือเว้นวรรคเพียงอย่างเดียว");
+  //     return false;
+  //   }
+  //   setNameError("");
+  //   return true;
+  // }
+
 
   useEffect(() => {
     const fetchAnimationData = async () => {
@@ -88,9 +100,9 @@ function Edit_MovementOfRPD() {
       });
   
       // Redirect หลังจากแสดงแจ้งเตือน
-      setTimeout(() => {
+     
         navigate("/MovementOfRPD-teacher");
-      }, 3000);  // หยุดการเปลี่ยนหน้าเป็นเวลา 3 วินาที
+       // หยุดการเปลี่ยนหน้าเป็นเวลา 3 วินาที
   
     } catch (error) {
       console.error("Error updating animation:", error);

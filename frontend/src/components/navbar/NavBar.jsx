@@ -100,9 +100,9 @@ const NavBar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link to="/login" className="text-purple-600 font-bold">
+                {/* <Link to="/login" className="text-purple-600 font-bold">
                   Google Login
-                </Link>
+                </Link> */}
               </div>
             )}
           </div>
@@ -153,6 +153,13 @@ const NavBar = () => {
                 >
                   รายการโปรด
                 </Link>
+                <a
+                   href="/redirect-to-dental-online" 
+                   className="text-purple-600 group flex items-center"
+                >
+                  Online Learning
+                  <HiOutlineArrowLongRight className="ml-1.5 text-xl transition-transform duration-300 group-hover:translate-x-2 group-hover:-rotate-45" />
+                </a>
               </>
             )}
             {user?.role === "teacher" && (
@@ -181,13 +188,13 @@ const NavBar = () => {
                 >
                   รายการโปรด
                 </Link>
-                <Link
-                  to="/bookmark-teacher"
-                  className="text-purple-600 group flex items-center"
+                <a
+                   href="/redirect-to-dental-online" 
+                   className="text-purple-600 group flex items-center"
                 >
                   Online Learning
                   <HiOutlineArrowLongRight className="ml-1.5 text-xl transition-transform duration-300 group-hover:translate-x-2 group-hover:-rotate-45" />
-                </Link>
+                </a>
               </>
             )}
           </div>
@@ -202,9 +209,9 @@ const NavBar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Link to="/login" className="text-purple-600 font-bold">
+                {/* <Link to="/login" className="text-purple-600 font-bold">
                   Google Login
-                </Link>
+                </Link> */}
               </div>
             )}
           </div>

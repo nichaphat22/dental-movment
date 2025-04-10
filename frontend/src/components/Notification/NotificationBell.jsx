@@ -21,11 +21,11 @@ import {
 const token = localStorage.getItem("token");
 
 // ตั้งค่า WebSocket
-// const socket = io("http://localhost:8080", { autoConnect: false });
-const socket = io("https://backend-dental-production.up.railway.app", {
-  query: { token },
-  transports: ["websocket", "polling"],
-});
+const socket = io("http://localhost:8080", { autoConnect: false });
+// const socket = io("https://backend-dental-production.up.railway.app", {
+//   query: { token },
+//   transports: ["websocket", "polling"],
+// });
 
 socket.on("connect", () => {
   console.log("✅ Connected to server with socket ID:", socket.id);

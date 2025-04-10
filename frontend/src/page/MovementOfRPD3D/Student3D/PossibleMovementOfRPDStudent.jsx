@@ -13,7 +13,7 @@ const HomeStudent = () => {
       {/* Main Content Area */}
       <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
         <Frame className="overflow-auto">
-          <Student_View_RPD_sample_case />
+          {/* <Student_View_RPD_sample_case /> */}
           {/* <Student_Bio/> */}
         </Frame>
 

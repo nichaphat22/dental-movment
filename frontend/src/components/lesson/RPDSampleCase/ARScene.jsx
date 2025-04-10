@@ -98,7 +98,7 @@ function ARScene() {
       if (windowWidth < 1024) {
         setScale(0.025);  // เล็กลงสำหรับหน้าจอเล็กกว่า 1024px
       } else {
-        setScale(0.035);   // ปรับขนาดสำหรับหน้าจอที่ใหญ่กว่า
+        setScale(0.01);   // ปรับขนาดสำหรับหน้าจอที่ใหญ่กว่า
       }
     };
 
@@ -213,7 +213,7 @@ function ARScene() {
               
               <AR_RPD_sample_case modelUrl={pattern.modelUrl} scale={scale} 
                 position={[0, 1, 0]}
-              rotation={[ 1.2, 0, 0]} 
+              // rotation={[ 1.2, 0, 0]} 
                
               />
             </ARMarker>

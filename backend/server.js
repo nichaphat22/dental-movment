@@ -84,20 +84,20 @@ app.use(
 // ใช้ express.json() และ cors
 app.use(express.json());
 
-// const corsOptions = {
-//   origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com','https://backend-dental-production.up.railway.app'],
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-//   // allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
-//   // credentials: true, // ใช้สำหรับอนุญาต cookie หรือข้อมูล session
-// };
-
-
 const corsOptions = {
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com','https://backend-dental-production.up.railway.app','http://localhost:8080','https://dentalonlinelearning-production.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  // allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
-  // credentials: true, // ใช้สำหรับอนุญาต cookie หรือข้อมูล session
+  allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
+  credentials: true, // ใช้สำหรับอนุญาต cookie หรือข้อมูล session
 };
+
+
+// const corsOptions = {
+//   origin: ['http://localhost:5173'],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+//   allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
+//   credentials: true, // ใช้สำหรับอนุญาต cookie หรือข้อมูล session
+// };
 
 
 
@@ -128,7 +128,7 @@ const io = new Server(server, {
 
 
 // ให้ Express เสิร์ฟไฟล์ Frontend หลังจาก API
-app.use(express.static(path.join(__dirname, "./dist")));
+// app.use(express.static(path.join(__dirname, "./dist")));
 
 //Router
 app.get("/", (req, res) => {
@@ -155,9 +155,9 @@ app.set("socketio", io);
 mongoose.connect(process.env.DBURI)
   .then(() => console.log("MongoDB connection established"))
   .catch(error => console.log("MongoDB connection failed:", error.message));
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "./dist/index.html"));
-});
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "./dist/index.html"));
+// });
 
 // Socket.io
 // io.on("connection", (socket) => {

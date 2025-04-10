@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL =
   import.meta.env.VITE_APP_NOTIFICATION_API_URL ||
-  "https://backend-dental-production.up.railway.app/api/notifications";
+  "http://localhost:8080/api/notifications";
 
 export default API_URL;
 

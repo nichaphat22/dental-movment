@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { baseUrl } from "../../utils/services";
 import { ref, get } from "firebase/database";
-import { database } from "../../config/firebase";
+// import { database } from "../../config/firebase";
 
 
 const ListManagement = () => {
@@ -72,45 +72,45 @@ const ListManagement = () => {
     fetchAnimation2D();
   }, []);
 
-  //get model firebase
-  useEffect(() => {
-    const fetchModelCount = async () => {
-      try {
-        const modelsRef = ref(database, "models/");
-        const snapshot = await get(modelsRef);
+  // //get model firebase
+  // useEffect(() => {
+  //   const fetchModelCount = async () => {
+  //     try {
+  //       const modelsRef = ref(database, "models/");
+  //       const snapshot = await get(modelsRef);
 
-        if (snapshot.exists()) {
-          const modelData = snapshot.val();
-          setModelCount(Object.keys(modelData).length);
-        } else {
-          console.warn("No models found in database.");
-        }
-      } catch (error) {
-        console.error("Error fetching model count:", error);
-      }
-    };
-    fetchModelCount();
-  }, []);
+  //       if (snapshot.exists()) {
+  //         const modelData = snapshot.val();
+  //         setModelCount(Object.keys(modelData).length);
+  //       } else {
+  //         console.warn("No models found in database.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching model count:", error);
+  //     }
+  //   };
+  //   fetchModelCount();
+  // }, []);
 
-  //get animation3d firebase
-  useEffect(() => {
-    const fetchAnimation3dCount = async () => {
-      try {
-        const animation3dRef = ref(database, "animations/");
-        const snapshot = await get(animation3dRef);
+  // //get animation3d firebase
+  // useEffect(() => {
+  //   const fetchAnimation3dCount = async () => {
+  //     try {
+  //       const animation3dRef = ref(database, "animations/");
+  //       const snapshot = await get(animation3dRef);
 
-        if (snapshot.exists()) {
-          const animation3dData = snapshot.val();
-          setAnimation3ds(Object.keys(animation3dData).length);
-        } else {
-          console.warn("No animation3d found in database.");
-        }
-      } catch (error) {
-        console.error("Error fetching animation3d count:", error);
-      }
-    };
-    fetchAnimation3dCount();
-  }, []);
+  //       if (snapshot.exists()) {
+  //         const animation3dData = snapshot.val();
+  //         setAnimation3ds(Object.keys(animation3dData).length);
+  //       } else {
+  //         console.warn("No animation3d found in database.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching animation3d count:", error);
+  //     }
+  //   };
+  //   fetchAnimation3dCount();
+  // }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-2 m-0 ">
@@ -152,7 +152,7 @@ const ListManagement = () => {
 
           </div>
           <div>
-            <p className="text-4xl text-blue-400 mb-2">{modelCount}</p>
+            {/* <p className="text-4xl text-blue-400 mb-2">{modelCount}</p> */}
             <p className="text-xs md:text-xs">Possible movement of RPD</p>
             <p className="text-xs md:text-xs">3D Model</p>
           </div>
@@ -166,7 +166,7 @@ const ListManagement = () => {
 
           </div>
           <div>
-            <p className="text-4xl text-orange-400 mb-2">{animation3ds}</p>
+            {/* <p className="text-4xl text-orange-400 mb-2">{animation3ds}</p> */}
             <p className="text-xs md:text-xs">การเคลื่อนที่ของฟันเทียม</p>
             <p className="text-xs md:text-xs">3D Animation</p>
           </div>

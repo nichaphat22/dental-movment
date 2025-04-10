@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import defaultImage from "../../../../public/imgQuiz.svg";
 import { HiPlusSm } from "react-icons/hi";
 import { HiOutlineX } from "react-icons/hi";
+
 import { RiImageAddLine } from "react-icons/ri";
 import {
   GoTrash,
@@ -19,13 +20,16 @@ import { useSelector } from "react-redux";
 
 const CreateQuiz = () => {
   const [title, setTitle] = useState("");
-  const user = useSelector(state => state.auth.user);
-  const roleData = useSelector(state => state.auth.roleData);
-
-  console.log(user);      // ข้อมูลของผู้ใช้
-  console.log(roleData);  // ข้อมูล roleData ของผู้ใช้
+  const user = useSelector((state) => state.auth.user);
+  const roleData = useSelector((state) => state.auth.roleData);
+  const [message, setMessage] = useState("");
+  console.log(user); // ข้อมูลของผู้ใช้
+  console.log(roleData); // ข้อมูล roleData ของผู้ใช้
   const [teacher, setTeacher] = useState("");
   const teacherId = localStorage.getItem("teacherId");
+   const [nameError, setNameError] = useState("");
+   const [titleError, setTitleError] = useState("");
+   const [descriptionError, setDescriptionError] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState([
     {
@@ -43,6 +47,50 @@ const CreateQuiz = () => {
 
   console.log("Stored Teacher ID:", roleData);
 
+    const validateTitle = (title) => {
+    // ตัดช่องว่างหน้า-หลัง แล้วเช็คว่าชื่อว่างเปล่าหรือเป็นช่องว่างล้วนๆ
+    if (!title.trim()) {
+      setTitleError("ห้ามเป็นค่าว่างหรือเว้นวรรคเพียงอย่างเดียว");
+      return false;
+    }
+    setTitleError("");
+    return true;
+  }
+
+  
+  const validateDescription = (description) => {
+    // ตัดช่องว่างหน้า-หลัง แล้วเช็คว่าชื่อว่างเปล่าหรือเป็นช่องว่างล้วนๆ
+    if (!description.trim()) {
+      setDescriptionError("ห้ามเป็นค่าว่างหรือเว้นวรรคเพียงอย่างเดียว");
+      return false;
+    }
+    setDescriptionError("");
+    return true;
+  }
+
+  const validateQuestions = () => {
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
+  
+      // เช็คว่า question ไม่เป็นค่าว่าง
+      if (!q.question.trim()) {
+        Swal.fire("เกิดข้อผิดพลาด", `คำถามที่ ${i + 1} ต้องไม่เป็นค่าว่าง`, "warning");
+        return false;
+      }
+  
+      // เช็คว่า choices ต้องไม่มีค่าว่าง
+      for (let j = 0; j < q.choices.length; j++) {
+        if (!q.choices[j].trim()) {
+          Swal.fire("เกิดข้อผิดพลาด", `ตัวเลือกที่ ${j + 1} ของคำถามที่ ${i + 1} ต้องไม่เป็นค่าว่าง`, "warning");
+          return false;
+        }
+      }
+    }
+  
+    return true;
+  };
+  
+
   useEffect(() => {
     const storedTeacher = localStorage.getItem("teacherId");
     console.log("Stored Teacher ID:", storedTeacher); // ตรวจสอบค่า teacherId
@@ -54,6 +102,9 @@ const CreateQuiz = () => {
 
   // Question
   const handleAddQuestion = (index) => {
+    if (!validateQuestions()) {
+      return; // ถ้าไม่ผ่าน validation ให้หยุดทำงาน
+    }
     const newQuestion = {
       question: "",
       choices: ["", ""],
@@ -209,11 +260,12 @@ const CreateQuiz = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    setMessage("");
+
     // ตรวจสอบข้อมูลก่อนส่ง
     if (
-      !title ||
-      !description ||
+      !title.trim() ||
+      !description.trim() ||
       questions.some((q) => !q.question || q.choices.some((choice) => !choice))
     ) {
       toast.error("กรุณากรอกข้อมูลให้ครบถ้วน และเพิ่มคำถามให้ครบ", {
@@ -224,7 +276,7 @@ const CreateQuiz = () => {
       });
       return;
     }
-  
+
     // สร้างข้อมูล quiz
     const quizData = {
       title,
@@ -232,20 +284,22 @@ const CreateQuiz = () => {
       description,
       questions,
     };
-  
+
     console.log("Quiz Data before sending:", quizData); // ตรวจสอบข้อมูลก่อนส่ง
-  
+
     try {
       const response = await quizService.createQuiz(quizData); // รับค่าผลลัพธ์จาก API
       setTitle("");
       // setImage(defaultImage);
       setDescription("");
       setQuestions([]);
-  
+      setTitleError("");
+      setDescriptionError("");
+
       navigate(`/ListQuiz-teacher`, {
         state: { success: true, message: "Quiz created successfully!" },
       });
-  
+
       console.log("✅ Quiz Created:", response.data); // ใช้ response ที่ได้จาก API
     } catch (error) {
       console.error(
@@ -260,7 +314,6 @@ const CreateQuiz = () => {
       });
     }
   };
-  
 
   // สลับตำแหน่งคำถาม
   const handleMoveUp = (index) => {
@@ -311,10 +364,12 @@ const CreateQuiz = () => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             variant="static"
+            onBlur={() => validateTitle(title)}
             color="blue-gray"
             placeholder="ชื่อแบบทดสอบ..."
             className="p-1 pt-4 text-sm md:text-base font-bold text-black focus:!bg-gray-50 focus:!rounded-t-md "
           />
+          {titleError && <p className="text-red-600 text-sm">{titleError}</p>}
         </div>
 
         <div className="my-4">
@@ -323,10 +378,12 @@ const CreateQuiz = () => {
             color="blue-gray"
             variant="outlined"
             onChange={(e) => setDescription(e.target.value)}
+            onBlur={() => validateDescription(description)}
             label="คำอธิบาย"
             labelProps={{ className: "font-normal" }}
             className="text-sm md:text-base text-black h-44"
           />
+          {descriptionError && <p className="text-red-600 text-sm">{descriptionError}</p>}
         </div>
 
         {/* กรอบคำถาม */}

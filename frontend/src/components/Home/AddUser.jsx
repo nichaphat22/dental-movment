@@ -27,31 +27,65 @@ const AddUser = ({ isOpen, onClose }) => {
   const [role, setRole] = useState("student");
   const [message, setMessage] = useState("");
   const [studentID, setStudentID] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [studentIDError, setStudentIDError] = useState("");
   const token = localStorage.getItem("token"); // หรือดึงจาก Context/Auth State
   const [file, setFile] = useState(null);
   const [excelData, setExcelData] = useState([]);
 
-  const validateEmail = async (email) => {
-    // เช็คว่าเป็นอีเมลจริงหรือไม่
+  const validateEmail = (email) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      setMessage("❌ กรุณากรอกอีเมลให้ถูกต้อง");
+      setEmailError("❌ กรุณากรอกอีเมลให้ถูกต้อง");
       return false;
     }
+    setEmailError("");
     return true;
   };
+
+  const validateName = (name) => {
+    const namePattern = /^[a-zA-Zก-๙\s'-]{2,50}$/;
+    if (!namePattern.test(name)) {
+      setNameError("ชื่อไม่ควรมีตัวเลขหรืออักขระพิเศษ");
+      return false;
+    }
+    setNameError("");
+    return true;
+  };
+
+  const validateStudentID = (studentID) => {
+    const studentIDPattern = /^\d{9}-\d{1}$/; 
+    if (!studentIDPattern.test(studentID)) {
+      setStudentIDError("รหัสนักศึกษาควรมีรูปแบบ 9 หลักตามด้วย - และอีก 1 หลัก");
+      return false;
+    }
+    setStudentIDError("");
+    return true;
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
 
     if (!name.trim() || !studentID.trim() || !email.trim()) {
-      setMessage("❌ กรุณากรอกข้อมูลให้ครบถ้วน");
+      setMessage("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
 
-    const isValidEmail = await validateEmail(email);
-    if (!isValidEmail) return;
+    // const isNameValid = validateName(name);
+    // const isEmailValid = validateEmail(email);
+    // const isStudentIDValid = validateStudentID(studentID);
+
+    // ตรวจสอบการ Validate ทั้งสามฟังก์ชัน
+    if (
+      !validateEmail(email) ||
+      !validateName(name) ||
+      !validateStudentID(studentID)
+    ) {
+      return;
+    }
 
     try {
       const res = await axios.post(
@@ -75,7 +109,7 @@ const AddUser = ({ isOpen, onClose }) => {
       setRole("student");
       setStudentID("");
     } catch (error) {
-      setMessage(`❌ ${error.response?.data?.message || "Error occurred"}`);
+      setMessage(`${error.response?.data?.message || "Error occurred"}`);
     }
   };
 
@@ -216,27 +250,31 @@ const AddUser = ({ isOpen, onClose }) => {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    onBlur={() => validateName(name)}
                     placeholder="กรอกชื่อ..."
                     className="border w-full p-2 rounded-md"
                     required
                   />
                 </div>
+                {nameError && <p className="text-red-600 text-sm">{nameError}</p>}
                 <div>
                   <Typography
                     variant="small"
                     color="blue-gray"
                     className="mb-2 font-medium"
                   >
-                    Email
+                    Email:
                   </Typography>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="..."
+                    onBlur={() => validateEmail(email)}
+                    placeholder="กรอกอีเมล..."
                     className="border w-full p-2 rounded-md"
                     required
                   />
+                  {emailError && <p className="text-red-600 text-sm">{emailError}</p>}
                 </div>
                 <div>
                   <Typography
@@ -250,12 +288,15 @@ const AddUser = ({ isOpen, onClose }) => {
                     type="text"
                     value={studentID}
                     onChange={(e) => setStudentID(e.target.value)}
+                    onBlur={() => validateStudentID(studentID)}
                     placeholder="กรอกรหัสนักศึกษา..."
                     className="border w-full p-2 rounded-md"
                     required
                   />
+                  {studentIDError && <p className="text-red-600 text-sm">{studentIDError}</p>}
                 </div>
-              </form>
+                {/* {message && <p className="mb-4 text-red-600">{message}</p>}   */}
+                </form>
               {/* Buttons */}
               <div className="flex justify-center mt-4">
                 <button

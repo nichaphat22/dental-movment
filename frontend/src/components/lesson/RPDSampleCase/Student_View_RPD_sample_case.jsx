@@ -144,22 +144,7 @@ const handleBookmarkClick = async (userId, modelId) => {
 
 
   <Container className="container-model">
-  {loading ? ( // Show loading spinner while data is loading
-          <div className="d-flex justify-content-center my-5" style={{}}>
-            {/* animation="grow" */}
-           <Spinner
-                      as="span"
-                      animation="grow"
-                     //  size="lg"
-                      role="status"
-                      aria-hidden="true"
-                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
-                       height: '25px'}}
-                    />
-                    กำลังโหลด...
-                    
-          </div>
-        ) : (
+  
 
           
     <Row >
@@ -205,7 +190,7 @@ const handleBookmarkClick = async (userId, modelId) => {
           // </div>
         ))}
         </Row>
-         )}
+         {/* )} */}
         </Container>
     </div>
   );

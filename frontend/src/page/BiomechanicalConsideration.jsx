@@ -12,7 +12,7 @@ const BiomechanicalConsideration = () => {
             {/* Main Content Area */}
             <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
                 <Frame className="overflow-auto">
-                    <View_Biomechanical_consideration />
+                    {/* <View_Biomechanical_consideration /> */}
                 </Frame>
 
                 {/* ChatBox */}

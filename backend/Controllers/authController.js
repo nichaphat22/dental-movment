@@ -88,9 +88,16 @@ exports.login = (req, res) => {
 exports.logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) return res.status(500).json({ error: "Logout failed" });
-    res.json({ message: "Logged out" });
+
+    // Clear the session cookie
+    res.clearCookie("connect.sid", {
+      httpOnly: true,
+      secure: false, // Change to true in production with HTTPS
+      sameSite: "none",
+    });
+
+    res.status(200).json({ message: "Logged out" });
   });
 };
-
 
 

@@ -12,11 +12,11 @@ const DashboardStudent = () => {
         <h1 className="text-2xl text-left">รายการล่าสุด</h1>
         {userId ? <Recents userId={userId} /> : <p>⏳ กำลังโหลด...</p>}
     
-     
+{/*      
         <h1 className="text-2xl  mb-4 text-left">รายการโปรด</h1>
 
         <h1 className="text-2xl  mb-4 text-left">ประวัติการเลกเชอร์</h1>
-     
+      */}
     </div>
   );
 };

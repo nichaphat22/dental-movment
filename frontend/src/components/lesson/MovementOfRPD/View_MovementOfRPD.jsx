@@ -16,6 +16,7 @@ function View_MovementOfRPD() {
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
+    const [selectedFileName, setSelectedFileName] = useState("");
 
   useEffect(() => {
     const fetchAnimations = async () => {
@@ -111,10 +112,12 @@ function View_MovementOfRPD() {
             <div
               className="cursor-pointer bg-white shadow-sm rounded-lg p-4 lg:transform lg:transition lg:duration-300 lg:hover:scale-105 lg:hover:shadow-md"
               key={animation.id}
-              onClick={() => handleAnimationClick(animation)}
+              
             >
+              
               <img
                 loading="lazy"
+                onClick={() => handleAnimationClick(animation)}
                 src={animation.imageUrl} // ใช้ URL ที่ดึงมาจาก Database
                 alt={animation.name}
                 className="cursor-pointer mb-4 w-full rounded hover:transform-none shadow-none"
@@ -130,6 +133,7 @@ function View_MovementOfRPD() {
                 >
                   แก้ไข
                 </button>
+
                 <button
                   className="bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600"
                   onClick={() => removeAnimation(animation)}

@@ -110,7 +110,7 @@ const Recents = ({ userId }) => {
           ))
         ) : (
           <SwiperSlide>
-            <div className="w-full p-4 text-center text-gray-500">ไม่มีรายการล่าสุด</div>
+            <div className="flex justify-center w-full p-4 text-center text-gray-500">ไม่มีรายการล่าสุด</div>
           </SwiperSlide>
         )}
       </Swiper>

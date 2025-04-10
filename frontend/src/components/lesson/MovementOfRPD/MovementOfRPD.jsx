@@ -12,7 +12,20 @@ function MovementOfRPD() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [message, setMessage] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [name, setName] = useState("");
   const navigate = useNavigate();
+
+  const validateName = (name) => {
+    // ตัดช่องว่างหน้า-หลัง แล้วเช็คว่าชื่อว่างเปล่าหรือเป็นช่องว่างล้วนๆ
+    if (!name.trim()) {
+      setNameError("กรุณากรอกชื่อ ห้ามเป็นค่าว่างหรือเว้นวรรคเพียงอย่างเดียว");
+      return false;
+    }
+    setNameError("");
+    return true;
+  }
 
   // Handle file and image changes
   const handleFileChange = (event) => setSelectedFile(event.target.files[0]);
@@ -21,8 +34,9 @@ function MovementOfRPD() {
   // Function to add new animation
   const handleAddAnimation3D = async (e) => {
     e.preventDefault();
-    if (!newAnimationName || !selectedFile || !selectedImage) {
-      Swal.fire({ icon: "warning", title: "กรุณาเลือกไฟล์วิดีโอและรูปภาพ" });
+    setMessage("");
+    if (!newAnimationName.trim() || !selectedFile || !selectedImage) {
+      Swal.fire({ icon: "warning", title: "กรุณากรอกข้อมูลให้ครบถ้วน" });
       return;
     }
 
@@ -82,7 +96,8 @@ function MovementOfRPD() {
           <form>
             <label htmlFor="newAnimationName" className="mt-2 mb-1.5">ชื่อ Animation:</label>
             <br />
-            <input type="text" id="newAnimationName" value={newAnimationName} onChange={(e) => setNewAnimationName(e.target.value)} className="w-11/12 p-2 border rounded-md" />
+            <input type="text" id="newAnimationName" value={newAnimationName} onBlur={() => validateName(name)} onChange={(e) => setNewAnimationName(e.target.value)} className="w-11/12 p-2 border rounded-md" />
+            {nameError && <p className="text-red-600 text-sm">{nameError}</p>}
 
             <div className="relative text-center flex justify-center mb-2 mt-4">
               {selectedFile ? (
