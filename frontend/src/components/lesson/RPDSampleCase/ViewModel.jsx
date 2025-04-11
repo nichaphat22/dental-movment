@@ -39,6 +39,7 @@ import InputNumber from 'rc-input-number';
 
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
+// import { Card, Button, Row, Col, Container, Spinner, Dropdown, ButtonGroup, } from 'react-bootstrap';
 
 
 const ViewModel = () => {
@@ -84,6 +85,8 @@ const ViewModel = () => {
   const lineWidthRef = useRef(null);
   const [showLineWidth, setShowLineWidth] = useState(false);
   // const [fontSize, setFontSize] = useState(14); // ค่าเริ่มต้นเป็น 14px
+
+// const [loading, setLoading] = useState(true); // Loading state
 
 
   const [showCanvas, setShowCanvas] = useState(false);
@@ -206,11 +209,13 @@ const ViewModel = () => {
 
           // เริ่มด้วย animationStopped เป็น true เพื่อป้องกันการโต้ตอบทันที
           setAnimationStopped(true);
+          // setLoading(false); 
         },
         undefined,
         (error) => {
           console.error('Error loading model:', error);
           alert('Failed to load the model. Please try again.');
+          // setLoading(false); 
         }
       );
     }
@@ -1232,27 +1237,10 @@ const ViewModel = () => {
         <div className="bt-mode" style={{
         }}>
           
-          {loading ? ( // Show loading spinner while data is loading
-          <div className="d-flex justify-content-center my-5" style={{}}>
-            {/* animation="grow" */}
-           <Spinner
-                      as="span"
-                      animation="grow"
-                     //  size="lg"
-                      role="status"
-                      aria-hidden="true"
-                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
-                       height: '25px'}}
-                    />
-                    กำลังโหลด...
-                    
-          </div>
-        ) : (
 
-          
   
           <div className='containerRef' ref={containerRef} style={{ zIndex: 5,width:'100%'}}>  </div>
-        )}
+
           {showCanvas &&
             <canvas className='canvas-drawing' ref={canvasRef} style={{ zIndex: 5,width:'100%' }} />
           }

@@ -89,8 +89,10 @@ function BookMark() {
 
       // ตั้งค่ารายการโมเดลที่ถูกบุ๊คมาร์ค
       setBookmarkedModels(modelsWithUrls);
+      setLoading(false); 
     } catch (error) {
       console.error("Error fetching bookmarked models:", error);
+      setLoading(false); 
     }
   };
 

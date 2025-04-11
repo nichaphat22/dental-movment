@@ -23,6 +23,7 @@ const LectureHistory = () => {
   const [selectedLecture, setSelectedLecture] = useState(null);
   // Context สำหรับดึงข้อมูลผู้ใช้ที่ล็อกอิน
   const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true); // Loading state
 
   console.log("User from Redux:", user);
   console.log(selectedLecture);
@@ -37,8 +38,10 @@ const LectureHistory = () => {
       }
       const response = await axios.get(`${baseUrl}/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
       setLectures(response.data); // ตั้งค่าข้อมูลบรรยายใน state
+      setLoading(false); 
     } catch (error) {
       console.error('Error fetching lectures:', error); // จัดการข้อผิดพลาด
+      setLoading(false); 
     }
   };
   
