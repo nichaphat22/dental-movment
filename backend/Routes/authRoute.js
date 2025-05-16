@@ -24,7 +24,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${
-      process.env.CLIENT_URL || "http://localhost:5173"
+      process.env.CLIENT_URL || "https://dental-movment-production.up.railway.app"
     }/login`,
   }),
   (req, res) => {
@@ -49,7 +49,7 @@ router.get(
     console.log("✅ Redirecting with Token:", token);
     res.redirect(
       `${
-        process.env.CLIENT_URL || "http://localhost:5173"
+        process.env.CLIENT_URL || "https://dental-movment-production.up.railway.app"
       }/login?token=${token}`
     );
   }

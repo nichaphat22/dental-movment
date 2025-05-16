@@ -202,7 +202,7 @@ const Loginn = () => {
               className="flex justify-center md:justify-start
                             "
             >
-              <a href="http://localhost:8080/api/auth/google">
+              <a href="https://dental-movment-production.up.railway.app/api/auth/google">
                 <button>Login with Google</button>
               </a>
               <HiOutlineArrowLongRight
