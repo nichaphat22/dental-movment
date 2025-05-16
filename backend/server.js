@@ -274,3 +274,12 @@ io.on("connection", (socket) => {
       console.log("Updated socket map:", Array.from(socketMap.entries()));
   });
 });
+
+// เสิร์ฟไฟล์ static จาก dist (frontend build)
+app.use(express.static(path.join(__dirname, "dist")));
+
+// ถ้าไม่เจอ route ของ API, fallback ให้ React จัดการ route เอง
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
