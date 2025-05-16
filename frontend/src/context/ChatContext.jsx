@@ -49,8 +49,9 @@ export const ChatContextProvider = ({ children }) => {
     // const socketUrl = 'https://backend-dental-production.up.railway.app';
 
     // สร้างการเชื่อมต่อ WebSocket
+    //---------------------เชื่อมต่อ server --------------//
     // const newSocket = io( {
-        const newSocket = io("https://backend-dental-production.up.railway.app",{
+        const newSocket = io("http://localhost:8080",{
       transports: ['websocket'], // ใช้ทั้ง WebSocket และ polling
     });
         newSocket.on("connect", () => {

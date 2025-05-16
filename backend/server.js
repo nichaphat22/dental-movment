@@ -85,7 +85,7 @@ app.use(
 app.use(express.json());
 
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com','https://backend-dental-production.up.railway.app','http://localhost:8080','https://dentalonlinelearning-production.up.railway.app'],
+  origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com','http://localhost:8080','https://dentalonlinelearning-production.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Origin'],
   credentials: true, // ใช้สำหรับอนุญาต cookie หรือข้อมูล session
@@ -249,7 +249,7 @@ io.on("connection", (socket) => {
 
   // ✅ แจ้งให้ sender รู้ว่าข้อความถูกอ่าน
   socket.on("markAsRead", ({ updatedMessages,senderId, recipientId }) => {
-      console.log("✅ dgfdffffffffmessage", updatedMessages);
+      console.log("✅ message", updatedMessages);
       const senderSocketId = socketMap.get(senderId);
       const recipientSocketId = socketMap.get(recipientId); // ✅ เก็บค่าของ recipient
 

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("https://backend-dental-production.up.railway.app"); // URL ของ WebSocket server
+const socket = io("http://localhost:8080"); // URL ของ WebSocket server
 
 // สร้าง Context
 const NotificationContext = createContext();

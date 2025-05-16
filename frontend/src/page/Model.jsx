@@ -27,7 +27,7 @@ const Model = () => {
         <div className="main-content" >
         {/* style={{ borderRadius: "0",background:'', maxHeight: "10vw",borderTop:'none'}} */}
           <Frame >
-            {/* <ViewModel /> */}
+            <ViewModel />
           </Frame>
   
           {/* ChatBox */}
