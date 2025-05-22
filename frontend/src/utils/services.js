@@ -4,7 +4,7 @@
 // export const baseUrl = "https://project-it-410215.uc.r.appspot.com/api";
 // =======
 // export const baseUrl = "http://localhost:8080/api";
-export const baseUrl = "https://dental-movment-production.up.railway.app/api";
+export const baseUrl = "https://dental-movmentofrpd.up.railway.app/api";
 // export const baseUrl = "https://backend-dental-production.up.railway.app/api";
 // >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
 
