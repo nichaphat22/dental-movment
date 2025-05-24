@@ -20,13 +20,12 @@ const Restorepage = () => {
           isExpanded ? "ml-64" : "ml-10"
         }`}
       >
-        <h1 className="text-xl font-bold  text-gray-600 border-b-2 pb-2">การกู้คืน</h1>
+        <h1 className="text-xl font-bold  text-gray-600 border-b-2 pb-2">
+          การกู้คืน
+        </h1>
         <div className="p-2 mt-2 mb-16">
           <Restore />
         </div>
-
-        
-        
       </div>
     </div>
   );

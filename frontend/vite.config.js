@@ -17,10 +17,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
-  // server: {
-  //   proxy: {
-  //     '/api': 'http://localhost:8080',  // ตรวจสอบว่า API กำลังทำงานที่พอร์ตนี้
-  //   },
-  //   https: true,  // ถ้าเซิร์ฟเวอร์ของคุณใช้ HTTPS
-  // },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8080',  // ตรวจสอบว่า API กำลังทำงานที่พอร์ตนี้
+    },
+    // https: true,  // ถ้าเซิร์ฟเวอร์ของคุณใช้ HTTPS
+  },
 })

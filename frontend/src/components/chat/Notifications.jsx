@@ -108,24 +108,12 @@ const handleNotificationsClick = async () => {
   
   
 return (
-  <div className="notifications" style={{ zIndex: 51 }}>
-    <div
-      className="notifications-icon"
-      style={{
-        width: "45px",
-        height: "45px",
-        borderRadius: "50%",
-        color: "rgb(169, 85, 247)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "rgba(241, 241, 241, 0.7)",
-        border: "none",
-        cursor: "pointer",
-      }}
+  <div className="notifications">
+    <button
+      className="relative p-2 rounded-full hover:bg-gray-200 transition"
       onClick={() => handleNotificationsClick()}
     >
-      <BsChatTextFill size={20} />
+      <BsChatTextFill className="text-purple-500 w-5 h-5" />
       {unreadNotifications.length > 0 && (
         <div
           className="unread-count"
@@ -142,7 +130,7 @@ return (
           }}
         />
       )}
-    </div>
+    </button>
     <AnimatePresence>
       {isOpen && (
         <motion.div

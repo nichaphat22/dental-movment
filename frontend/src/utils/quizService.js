@@ -1,8 +1,6 @@
 import axios from "axios";
 import { baseUrl } from "./services";
 
-// const BASE_URL = "http://localhost:8080/api/quiz";
-
 const quizService = {
 
   getAllQuiz: () => axios.get(`${baseUrl}/quiz/`), // ดึงควิซทั้งหมด

@@ -122,22 +122,26 @@ const createQuiz = async (req, res) => {
 
     // ส่งแจ้งเตือนให้กับนักเรียน
     await notificationController.sendNotification(
-      "quiz_add",                 // ประเภทการแจ้งเตือน
-      title,                       // ชื่อ Quiz
-      newQuiz._id,                 // ID ของ Quiz
-      "student",                   // ส่งให้กับนักเรียน
-      io                           // ส่งแจ้งเตือนแบบเรียลไทม์
+      "quiz_add", // ประเภทการแจ้งเตือน
+      title, // ชื่อ Quiz
+      newQuiz._id, // ID ของ Quiz
+      "student", // ส่งให้กับนักเรียน
+      io // ส่งแจ้งเตือนแบบเรียลไทม์
     );
 
     // ส่งแจ้งเตือนให้กับคุณครู
     await notificationController.sendNotification(
-      "quiz_add",                 // ประเภทการแจ้งเตือน
-      title,                       // ชื่อ Quiz
-      newQuiz._id,                 // ID ของ Quiz
-      "teacher",                   // ส่งให้กับคุณครู
-      io                           // ส่งแจ้งเตือนแบบเรียลไทม์
+      "quiz_add", // ประเภทการแจ้งเตือน
+      title, // ชื่อ Quiz
+      newQuiz._id, // ID ของ Quiz
+      "teacher", // ส่งให้กับคุณครู
+      io // ส่งแจ้งเตือนแบบเรียลไทม์
     );
 
+    const getAllQuizzes = await Quiz.find({
+      isDeleted: { $ne: true },
+    }).populate("questions");
+    io.emit("quizUpdated", { quiz: getAllQuizzes });
 
     // ส่งผลลัพธ์ที่สำเร็จ
     res.status(201).json({
@@ -219,7 +223,6 @@ const updateQuiz = async (req, res) => {
     // อัปเดตข้อมูล Quiz (เฉพาะฟิลด์ที่มีการส่งมา)
     if (title) quiz.title = title;
     if (description) quiz.description = description;
-    
 
     // อัปเดตข้อมูลคำถาม (questions)
     if (Array.isArray(questions)) {
@@ -233,7 +236,9 @@ const updateQuiz = async (req, res) => {
       const questionsToAdd = questions.filter((q) => !q._id && !q.deleted);
 
       // ลบคำถามที่ต้องการลบ
-      await Question.deleteMany({ _id: { $in: questionToDelete.map((q) => q._id) } });
+      await Question.deleteMany({
+        _id: { $in: questionToDelete.map((q) => q._id) },
+      });
 
       // อัปเดตคำถามที่มีอยู่
       await Promise.all(
@@ -261,7 +266,9 @@ const updateQuiz = async (req, res) => {
       );
 
       quiz.questions = [
-        ...existingQuestions.filter((q) => !questionToDelete.includes(q)).map((q) => q._id),
+        ...existingQuestions
+          .filter((q) => !questionToDelete.includes(q))
+          .map((q) => q._id),
         ...newQuestions.map((q) => q._id),
       ];
     }
@@ -277,21 +284,27 @@ const updateQuiz = async (req, res) => {
 
     // ส่งแจ้งเตือนให้กับนักเรียน
     await notificationController.sendNotification(
-      "quiz_update",                 // ประเภทการแจ้งเตือน
-      title,                       // ชื่อ Quiz
-      quiz._id,                 // ID ของ Quiz
-      "student",                   // ส่งให้กับนักเรียน
-      io                           // ส่งแจ้งเตือนแบบเรียลไทม์
+      "quiz_update", // ประเภทการแจ้งเตือน
+      title, // ชื่อ Quiz
+      quiz._id, // ID ของ Quiz
+      "student", // ส่งให้กับนักเรียน
+      io // ส่งแจ้งเตือนแบบเรียลไทม์
     );
 
     // ส่งแจ้งเตือนให้กับคุณครู
     await notificationController.sendNotification(
-      "quiz_update",                 // ประเภทการแจ้งเตือน
-      title,                       // ชื่อ Quiz
-      quiz._id,                 // ID ของ Quiz
-      "teacher",                   // ส่งให้กับคุณครู
-      io                           // ส่งแจ้งเตือนแบบเรียลไทม์
+      "quiz_update", // ประเภทการแจ้งเตือน
+      title, // ชื่อ Quiz
+      quiz._id, // ID ของ Quiz
+      "teacher", // ส่งให้กับคุณครู
+      io // ส่งแจ้งเตือนแบบเรียลไทม์
     );
+
+    // ✅ อัปเดต client แบบ real-time
+    const allQuizzes = await Quiz.find({ isDeleted: { $ne: true } }).populate(
+      "questions"
+    );
+    io.emit("quizUpdated", { quiz: allQuizzes });
 
     // ส่งผลลัพธ์ที่สำเร็จ
     res.status(200).json({
@@ -304,7 +317,6 @@ const updateQuiz = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 //---------------------question--------------------//
 

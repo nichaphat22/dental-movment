@@ -89,31 +89,33 @@ const Recents = ({ userId }) => {
   };
 
   return (
-    <div className="w-full p-6">
-      <Swiper
-        modules={[Navigation, Pagination, Autoplay]}
-        spaceBetween={20}
-        slidesPerView={1}
-        navigation
-        pagination={{ clickable: true }}
-        breakpoints={{
-          640: { slidesPerView: 1 },
-          768: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
-        }}
-      >
-        {recentActions.length > 0 ? (
-          recentActions.map((action) => (
+    <div className="w-full p-6 ">
+      {recentActions.length > 0 ? (
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          spaceBetween={20}
+          slidesPerView={1}
+          navigation
+          pagination={{ clickable: true }}
+          breakpoints={{
+            640: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+        >
+          {recentActions.map((action) => (
             <SwiperSlide key={action._id}>
               <RecentActionCard action={action} handleAction={handleAction} />
             </SwiperSlide>
-          ))
-        ) : (
-          <SwiperSlide>
-            <div className="flex justify-center w-full p-4 text-center text-gray-500">ไม่มีรายการล่าสุด</div>
-          </SwiperSlide>
-        )}
-      </Swiper>
+          ))}
+        </Swiper>
+      ) : (
+        <div className="flex justify-center items-center min-h-[180px] w-full">
+          <div className=" justify-center items-center">
+            <p className="text-gray-500 text-base">ไม่มีรายการล่าสุด</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

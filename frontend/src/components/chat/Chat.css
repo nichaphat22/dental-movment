@@ -122,3 +122,22 @@
 .modal-content {
     max-width: 100% !important;
 }
+
+.notifications-icon {
+    width: 45px;
+    height: 45px;
+    color: rgb(169, 85, 247);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;;
+    border-radius: 50%;
+}
+
+.notifications-icon:hover {
+    background-color: #f3e8ff;
+    
+    
+}

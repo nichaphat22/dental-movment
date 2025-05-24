@@ -3,20 +3,25 @@ import quizService from "../../../utils/quizService";
 import { useNavigate, useParams } from "react-router-dom";
 import { CiMenuKebab, CiEdit, CiTrash } from "react-icons/ci";
 import Swal from "sweetalert2";
+import { Spinner } from "react-bootstrap";
 
 const QuizDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
+        setLoading(true);
         const response = await quizService.getQuizById(id);
         setQuiz(response.data.quiz);
         console.log("Quiz data:", response.data.quiz); // ตรวจสอบข้อมูลที่ได้รับ
       } catch (error) {
         console.error("Error fetching quiz:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchQuiz();
@@ -63,9 +68,26 @@ const QuizDetails = () => {
     });
   };
 
-  if (!quiz) {
-    return <div>Loading...</div>; // แสดงหน้ารอโหลดข้อมูล
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center space-x-3">
+          <Spinner
+            animation="grow"
+            role="status"
+            style={{
+              width: "25px",
+              height: "25px",
+              marginRight: "8px",
+              backgroundColor: "#a845f3",
+            }}
+          />
+          <span className="text-gray-500 text-lg font-normal">กำลังโหลด...</span>
+        </div>
+      </div>
+    );
   }
+
   if (!quiz.questions || quiz.questions.length === 0) {
     return <div>ไม่มีคำถามในแบบทดสอบนี้</div>; // กรณีไม่มีคำถาม
   }
@@ -147,7 +169,8 @@ const QuizDetails = () => {
             </ol>
             {question.answerExplanation && (
               <p className="text-xs md:text-sm text-gray-500 mt-2 text-justify">
-               <span className="font-bold ">คำอธิบาย:</span>  {question.answerExplanation}
+                <span className="font-bold ">คำอธิบาย:</span>{" "}
+                {question.answerExplanation}
               </p>
             )}
           </div>

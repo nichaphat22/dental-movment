@@ -44,17 +44,15 @@ const userSchema = new mongoose.Schema(
       },
     ],
     isDeleted: { type: Boolean, default: false },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
-
-// กรองเอกสารที่ไม่ได้ลบเมื่อทำการ query
-userSchema.pre(/^find/, function (next) {
-  this.find({ deleted_at: null });
-  next();
-});
 
 const userModel = mongoose.model("User", userSchema);
 

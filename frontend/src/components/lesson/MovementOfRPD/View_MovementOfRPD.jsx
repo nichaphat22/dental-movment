@@ -33,7 +33,7 @@ function View_MovementOfRPD() {
   }, []);
 
   const handleAnimationClick = (animation) => {
-    navigate(`/animation3d/${animation.name}/view`, {
+    navigate(`/animation3d-teacher/${animation.name}/view`, {
       state: animation,
     });
   }

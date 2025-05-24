@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import socket from "../../utils/socket";
 import quizService from "../../utils/quizService";
 import {
   GoPeople,
@@ -11,8 +12,8 @@ import { TbChartScatter3D } from "react-icons/tb";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { baseUrl } from "../../utils/services";
-import { ref, get } from "firebase/database";
-// import { database } from "../../config/firebase";
+import { ref, get, onValue } from "firebase/database";
+import { database } from "../../config/firebase";
 
 
 const ListManagement = () => {
@@ -24,55 +25,119 @@ const ListManagement = () => {
   const [animation3ds, setAnimation3ds] = useState(0);
 
   //get student
+  // useEffect(() => {
+  //   const fetchStudents = async () => {
+  //     try {
+  //       const response = await axios.get(`${baseUrl}/auth/students`);
+  //       setStudents(response.data); // ไม่ต้องดึง count
+  //     } catch (error) {
+  //       console.error("Failed to fetch students", error);
+  //       setStudents([]);
+  //     }
+  //   };
+  //   fetchStudents();
+  // }, []);
+  // //get quiz
+  // useEffect(() => {
+  //   const fetchQuizzes = async () => {
+  //     try {
+  //       const response = await quizService.getAllQuiz();
+
+  //       if (response.data && Array.isArray(response.data.quiz)) {
+  //         setQuizzes(response.data.quiz);
+  //       } else {
+  //         console.error("Expected an array but got", response.data);
+  //         setQuizzes([]);
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to fetch quizzes", error);
+  //       setQuizzes([]);
+  //     }
+  //   };
+  //   fetchQuizzes();
+  // }, []);
+  // //get Animation 2D
+  // useEffect(() => {
+  //   const fetchAnimation2D = async () => {
+  //     try {
+  //       const response = await axios.get(`${baseUrl}/animation/getAnimation`);
+  //       setAnimations(response.data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch Animation2D", error);
+  //       setAnimations([]);
+  //     }
+  //   };
+  //   fetchAnimation2D();
+  // }, []);
+
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fecthAll = async () => {
       try {
-        const response = await axios.get(`${baseUrl}/auth/students`);
-        setStudents(response.data); // ไม่ต้องดึง count
+        const [studentRes, quizRes, animRes] = await Promise.all([
+          axios.get(`${baseUrl}/auth/students`),
+          quizService.getAllQuiz(),
+          axios.get(`${baseUrl}/animation/getAnimation`)
+        ]);
+        setStudents(studentRes.data || []);
+        setQuizzes(quizRes.data?.quiz || []);
+        setAnimations(animRes.data || []);
       } catch (error) {
-        console.error("Failed to fetch students", error);
-        setStudents([]);
+        console.error("Init fetch failed:", err);
       }
     };
-    fetchStudents();
+
+    fecthAll();
+
+    //firebase realtime listeners
+    const modelsRef = ref(database, "models/");
+    const animations3DRef = ref(database, "animations/");
+
+    const unsubscribeModels = onValue(modelsRef, (snapshot) => {
+      const data = snapshot.val();
+      setModelCount(data ? Object.keys(data).length : 0);
+    });
+
+    const unsubscribeAnimations = onValue(animations3DRef, (snapshot) => {
+      const data = snapshot.val();
+      setAnimation3ds(data ? Object.keys(data).length : 0);
+    });
+
+    // Socket listeners
+    socket.on("studentUpdated", (data) => {
+      setStudents(data);
+    });
+
+    socket.on("quizUpdated", (data) => {
+      setQuizzes(data);
+    });
+
+    socket.on("animationUpdated", (data) => {
+      setAnimations(data);
+    });
+
+    socket.on("studentDeleted", (deletedId) => {
+      setStudents((prev) => prev.filter((student) => student._id !== deletedId));
+    });
+
+    socket.on("studentsDeleted", (deletedIds) => {
+    setStudents((prev) => prev.filter((s) => !deletedIds.includes(s._id)));
+  });
+
+    return () => {
+      unsubscribeModels();
+      unsubscribeAnimations();
+      socket.off("studentUpdated");
+      socket.off("quizUpdated");
+      socket.off("animationUpdated");
+       socket.off("studentDeleted");
+       socket.off("studentsDeleted");
+    };
   }, []);
 
 
-  //get quiz
-  useEffect(() => {
-    const fetchQuizzes = async () => {
-      try {
-        const response = await quizService.getAllQuiz();
 
-        if (response.data && Array.isArray(response.data.quiz)) {
-          setQuizzes(response.data.quiz);
-        } else {
-          console.error("Expected an array but got", response.data);
-          setQuizzes([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch quizzes", error);
-        setQuizzes([]);
-      }
-    };
-    fetchQuizzes();
-  }, []);
 
-  //get Animation 2D
-  useEffect(() => {
-    const fetchAnimation2D = async () => {
-      try {
-        const response = await axios.get(`${baseUrl}/animation/getAnimation`);
-        setAnimations(response.data);
-      } catch (error) {
-        console.error("Failed to fetch Animation2D", error);
-        setAnimations([]);
-      }
-    };
-    fetchAnimation2D();
-  }, []);
-
-  // //get model firebase
+  //get model firebase
   // useEffect(() => {
   //   const fetchModelCount = async () => {
   //     try {
@@ -152,7 +217,7 @@ const ListManagement = () => {
 
           </div>
           <div>
-            {/* <p className="text-4xl text-blue-400 mb-2">{modelCount}</p> */}
+            <p className="text-4xl text-blue-400 mb-2">{modelCount}</p>
             <p className="text-xs md:text-xs">Possible movement of RPD</p>
             <p className="text-xs md:text-xs">3D Model</p>
           </div>
@@ -166,7 +231,7 @@ const ListManagement = () => {
 
           </div>
           <div>
-            {/* <p className="text-4xl text-orange-400 mb-2">{animation3ds}</p> */}
+            <p className="text-4xl text-orange-400 mb-2">{animation3ds}</p>
             <p className="text-xs md:text-xs">การเคลื่อนที่ของฟันเทียม</p>
             <p className="text-xs md:text-xs">3D Animation</p>
           </div>
@@ -197,7 +262,7 @@ const ListManagement = () => {
           </div>
           <div>
             <p className="text-4xl text-yellow-400 mb-2">{modelCount}</p>
-            {/* <p className="text-xs md:text-xs">View AR</p> */}
+            <p className="text-xs md:text-xs">View AR</p>
             <p className="text-xs md:text-xs">AR</p>
           </div>
         </div>

@@ -7,6 +7,9 @@ const path = require("path");
 
 const Student = require("../Models/studentModel");
 const User = require("../Models/userModel");
+const { default: mongoose } = require("mongoose");
+const Teacher = require("../Models/teacherModel");
+const { isDataView } = require("util/types");
 
 const checkUserStatus = async (email) => {
   const user = await User.findOne({ email });
@@ -16,6 +19,7 @@ const checkUserStatus = async (email) => {
 //uploadfile
 const uploadedFile = async (req, res) => {
   try {
+    const io = req.app.get("socketio");
     if (!req.file) {
       return res.status(400).json({ message: "กรุณาอัปโหลดไฟล์" });
     }
@@ -55,7 +59,9 @@ const uploadedFile = async (req, res) => {
 
         let findUser = await User.findOne({ email: studentEmail });
 
-        const profileImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(studentEmail)}&background=random`;
+        const profileImage = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          studentEmail
+        )}&background=random`;
 
         if (!findUser) {
           // สร้างบัญชีใหม่
@@ -64,7 +70,7 @@ const uploadedFile = async (req, res) => {
             name: studentName,
             role: "student",
             img: profileImage,
-            isDeleted: false
+            isDeleted: false,
           });
           await createUser.save();
 
@@ -79,6 +85,17 @@ const uploadedFile = async (req, res) => {
           await User.findByIdAndUpdate(createUser._id, {
             roleData: createStudent._id,
             roleRef: "Student",
+          });
+          // ✅ emit ผ่าน socket ว่ามีการเพิ่ม user ใหม่
+          io.emit("userAdded", {
+            message: "เพิ่มผู้ใช้ใหม่จากไฟล์",
+            user: {
+              _id: createUser._id,
+              email: createUser.email,
+              name: createUser.name,
+              img: createUser.img,
+              role: createUser.role,
+            },
           });
         } else if (!findUser.roleData) {
           // ถ้ามี User แต่ยังไม่มี Student, สร้าง Student และเพิ่ม roleData
@@ -97,6 +114,8 @@ const uploadedFile = async (req, res) => {
 
     await processStudents(studentLists);
 
+    
+
     res.json({ message: "อัปโหลดและบันทึกข้อมูลสำเร็จ!" });
   } catch (error) {
     console.error("❌ เกิดข้อผิดพลาด:", error);
@@ -110,12 +129,10 @@ const getAllStudents = async (req, res) => {
     const students = await Student.find({ isDeleted: false })
       .populate({
         path: "user",
-        select: "_id name email isDeleted",
+        select: "name email isDeleted",
         match: { isDeleted: false },
-        
       })
       .select("studentID user"); // เพิ่ม studentID ในผลลัพธ์
-      
 
     res.status(200).json(students);
   } catch (error) {
@@ -123,17 +140,21 @@ const getAllStudents = async (req, res) => {
   }
 };
 
-//Soft Delete นักศึกษา 
+//Soft Delete นักศึกษา
 const softDeleteStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     console.log("🔍 studentIds ที่ได้รับจาก frontend:", req.body);
 
+    // ตรวจสอบว่า studentId ถูกต้องหรือไม่
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "studentId ไม่ถูกต้อง" });
+    }
 
     // ค้นหานักศึกษาด้วย studentId
     const student = await Student.findOneAndUpdate(
       { _id: studentId },
-      { isDeleted: true },
+      { isDeleted: true, deletedAt: new Date() },
       { new: true }
     );
 
@@ -143,8 +164,13 @@ const softDeleteStudent = async (req, res) => {
 
     // อัปเดตสถานะ isDeleted ใน User ที่เกี่ยวข้อง
     if (student.user) {
-      await User.findByIdAndUpdate(student.user, { isDeleted: true });
+      await User.findByIdAndUpdate(student.user, {
+        isDeleted: true,
+        deletedAt: new Date(),
+      });
     }
+    const io = req.app.get("socketio");
+    io.emit("studentDeleted", studentId);
 
     res.status(200).json({ message: "ลบนักศึกษาเรียบร้อยแล้ว (Soft Delete)" });
   } catch (error) {
@@ -152,57 +178,60 @@ const softDeleteStudent = async (req, res) => {
   }
 };
 
-
 const softDeleteMultipleStudents = async (req, res) => {
   try {
-    console.log("📌 Request Body ที่ได้รับ:", req.body);
-    console.log("📌 Headers ที่ได้รับ:", req.headers);
-
-    // ตรวจสอบว่า studentIds เป็นอาร์เรย์และมีข้อมูล
-    if (!req.body.studentIds || !Array.isArray(req.body.studentIds) || req.body.studentIds.length === 0) {
-      return res.status(400).json({ message: "กรุณาระบุ studentIds ที่ถูกต้อง" });
-    }
-
     const { studentIds } = req.body;
 
-    // ตรวจสอบว่าแต่ละ studentId เป็น ObjectId ที่ถูกต้อง
-    const validIds = studentIds.filter(id => mongoose.Types.ObjectId.isValid(id));
-    if (validIds.length === 0) {
-      return res.status(400).json({ message: "studentIds ไม่ถูกต้อง" });
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "กรุณาส่ง studentIds ให้ถูกต้อง" });
     }
 
-    console.log("✅ studentIds ที่ผ่านการตรวจสอบ:", validIds);
+    const validObjectIds = studentIds.filter((id) =>
+      mongoose.Types.ObjectId.isValid(id)
+    );
 
-    // อัปเดตสถานะ isDeleted ใน Student
+    // ดึง student เพื่อหาว่า user ไหนเกี่ยวข้อง
+    const studentsBeforeUpdate = await Student.find({
+      _id: { $in: validObjectIds },
+    });
+
+    const userIdsToUpdate = studentsBeforeUpdate
+      .filter((student) => student.user)
+      .map((student) => new mongoose.Types.ObjectId(student.user)); // 👈 แปลงให้แน่ใจว่าเป็น ObjectId
+
+    console.log("✅ จะอัปเดต userIds:", userIdsToUpdate);
+
+    // อัปเดต Student
     const studentUpdate = await Student.updateMany(
-      { _id: { $in: validIds } },
-      { $set: { isDeleted: true } }
+      { _id: { $in: validObjectIds } },
+      { $set: { isDeleted: true, deletedAt: new Date() } }
     );
 
-    // อัปเดตสถานะ isDeleted ใน User ที่เกี่ยวข้อง
+    // อัปเดต User
     const userUpdate = await User.updateMany(
-      { _id: { $in: validIds } },
-      { $set: { isDeleted: true } }
+      { _id: { $in: userIdsToUpdate } },
+      { $set: { isDeleted: true, deletedAt: new Date() } }
     );
 
-    console.log("✅ อัปเดตสำเร็จ:", studentUpdate, userUpdate);
+    console.log("🟢 Student update:", studentUpdate);
+    console.log("🟢 User update:", userUpdate);
 
-    // ส่งผลลัพธ์กลับ
+    const io = req.app.get("socketio");
+    io.emit("studentsDeleted", validObjectIds);
+
     res.status(200).json({
-      message: "ลบนักศึกษาหลายคนเรียบร้อยแล้ว (Soft Delete)",
-      deletedCount: studentUpdate.nModified, // จำนวนที่ถูกลบ
+      message: "ลบนักศึกษาเรียบร้อยแล้ว (Soft Delete)",
+      studentModifiedCount: studentUpdate.modifiedCount,
+      userModifiedCount: userUpdate.modifiedCount,
     });
   } catch (error) {
-    console.error("❌ เกิดข้อผิดพลาดในการลบ:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบนักศึกษา", error: error.message });
+    console.error("❌ เกิดข้อผิดพลาดในการ soft delete:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบนักศึกษา" });
   }
 };
 
-
-
-
-
-// ✅ กู้คืน (Restore) นักศึกษา
 // ✅ กู้คืน (Restore) นักศึกษา
 const restoreMultipleStudents = async (req, res) => {
   try {
@@ -210,32 +239,87 @@ const restoreMultipleStudents = async (req, res) => {
 
     // ตรวจสอบว่า studentIds เป็นอาร์เรย์หรือไม่
     if (!Array.isArray(studentIds) || studentIds.length === 0) {
-      return res.status(400).json({ message: "กรุณาส่ง studentIds ที่ถูกต้อง" });
+      return res
+        .status(400)
+        .json({ message: "กรุณาส่ง studentIds ที่ถูกต้อง" });
     }
 
-    // ค้นหานักเรียนที่ต้องกู้คืน
-    const studentsToRestore = await Student.find({ _id: { $in: studentIds } });
-    
-    // ดึง userId จาก student
-    const userIds = studentsToRestore.map(student => student.user).filter(Boolean); // กรองค่า null หรือ undefined ออก
+    const validObjectIds = studentIds.filter((id) =>
+      mongoose.Types.ObjectId.isValid(id)
+    );
 
-    // อัปเดต isDeleted ของ User และ Student
+    // ค้นหานักเรียนที่ต้องกู้คืน
+    const studentsBeforeUpdate = await Student.find({
+      _id: { $in: validObjectIds },
+    });
+
+    // ดึง userId จาก student
+    const userIdsToUpdate = studentsBeforeUpdate
+      .map((student) => student.user)
+      .filter((student) => new mongoose.Types.ObjectId(student.user)); // กรองค่า null หรือ undefined ออก
+
+    //update student
+    const studentUpdate = await Student.updateMany(
+      { _id: { $in: validObjectIds } },
+      { $set: { isDeleted: false } }
+    );
+
+    //update user
+    const userUpdate = await User.updateMany(
+      { _id: { $in: userIdsToUpdate } },
+      { $set: { isDeleted: false } }
+    );
+
+    res
+      .status(200)
+      .json({
+        message: "กู้คืนข้อมูลนักศึกษาเรียบร้อยแล้ว",
+        studentModifiedCount: studentUpdate.modifiedCount,
+        userModifiedCount: userUpdate.modifiedCount,
+      });
+  } catch (error) {
+    console.error("Error restoring students:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการกู้คืนข้อมูล" });
+  }
+};
+
+const restoreStudents = async (req, res) => {
+  try {
+    const { studentIds } = req.body;
+    console.log("📥 studentIds:", studentIds);
+
+    if (!Array.isArray(studentIds)) {
+      studentIds = [studentIds];
+    }
+
+
+    // ดึง student เพื่อหาว่า user ไหนเกี่ยวข้อง
+    const students = await Student.find({ _id: { $in: studentIds } });
+    console.log("🧍 students:", students);
+
+    // if (!students.length) {
+    //   return res.status(404).json({ message: "ไม่พบนักเรียน" });
+    // }
+
+    const userIds = students.map((s) => s.user).filter(Boolean);
+    console.log("🧑‍💻 userIds:", userIds);
+
+    // อัปเดต User isDeleted = false
     if (userIds.length > 0) {
       await User.updateMany(
         { _id: { $in: userIds } },
         { $set: { isDeleted: false } }
       );
     }
-
+    // อัปเดต student isDeleted = false
     await Student.updateMany(
       { _id: { $in: studentIds } },
       { $set: { isDeleted: false } }
     );
 
-    res.status(200).json({ message: "กู้คืนข้อมูลนักศึกษาเรียบร้อยแล้ว" });
+    res.status(200).json({ message: "กู้คืนข้อมูลเรียบร้อย" });
   } catch (error) {
-    console.error("Error restoring students:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการกู้คืนข้อมูล" });
+    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 };
 
@@ -249,27 +333,77 @@ const getDeletedStudents = async (req, res) => {
       })
       .select("studentID user");
 
-    if (!students || students.length === 0) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลนักศึกษาที่ถูกลบ" });
-    }
+    const filtered = students.filter((s) => s.user !== null);
 
-    res.status(200).json(students);
+    res.status(200).json(filtered);
   } catch (error) {
-    console.error("❌ Error fetching deleted students:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล" });
+    console.error("Error fetching deleted students:", error);
+    res.status(500).json({ message: "Error fetching deleted students" });
   }
 };
 
+const getDeletedUsers = async (req, res) => {
+  try {
+    const deletedUsers = await User.find({
+      isDeleted: true,
+      role: { $in: ["student", "teacher"] },
+    }).select("name email role isDeleted deletedAt");
 
+    const students = await Student.find({ isDeleted: true })
+      .populate({
+        path: "user",
+        match: { isDeleted: true },
+        select: "name email role isDeleted deletedAt",
+      })
+      .select("studentID user deletedAt");
 
+    const teachers = await Teacher.find({ isDeleted: true })
+      .populate({
+        path: "user",
+        match: { isDeleted: true },
+        select: "name email role isDeleted deletedAt",
+      })
+      .select("deletedAt");
 
+    const studentUserIds = students.map((s) => s.user?._id?.toString());
+
+    const teacherMerged = teachers
+      .filter(
+        (t) =>
+          t.user !== null && !studentUserIds.includes(t.user._id.toString())
+      )
+      .map((t) => ({
+        _id: t._id,
+        teacherId: t._id,
+        studentID: null,
+        user: t.user,
+        deletedAt: t.deletedAt,
+      }));
+
+    const studentMerged = students
+      .filter((s) => s.user !== null)
+      .map((s) => ({
+        _id: s._id,
+        studentID: s.studentID,
+        user: s.user,
+        deletedAt: s.deletedAt,
+      }));
+
+    const merged = [...studentMerged, ...teacherMerged];
+
+    res.status(200).json(merged);
+  } catch (error) {
+    console.error("❌ Error fetching deleted users:", error);
+    res.status(500).json({ message: "Error fetching deleted users" });
+  }
+};
 
 const deleteStudent = async (req, res) => {
   const studentId = req.params.studentId;
 
   try {
     // ค้นหานักเรียนที่ต้องการลบ พร้อม populate user ที่เกี่ยวข้อง
-    const student = await Student.findById(studentId).populate('user');
+    const student = await Student.findById(studentId).populate("user");
 
     if (!student) {
       return res.status(404).json({ message: "ไม่พบข้อมูลนักเรียน" });
@@ -287,7 +421,9 @@ const deleteStudent = async (req, res) => {
     res.status(200).json({ message: "ลบข้อมูลนักเรียนและผู้ใช้เรียบร้อยแล้ว" });
   } catch (error) {
     console.error("❌ Error deleting student and user:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบข้อมูลนักเรียนและผู้ใช้" });
+    res
+      .status(500)
+      .json({ message: "เกิดข้อผิดพลาดในการลบข้อมูลนักเรียนและผู้ใช้" });
   }
 };
 
@@ -300,7 +436,9 @@ const deleteMultipleStudents = async (req, res) => {
     }
 
     // ค้นหานักเรียนทั้งหมดที่ต้องการลบ พร้อม populate user ที่เกี่ยวข้อง
-    const students = await Student.find({ _id: { $in: studentIds } }).populate('user');
+    const students = await Student.find({ _id: { $in: studentIds } }).populate(
+      "user"
+    );
 
     if (students.length === 0) {
       return res.status(404).json({ message: "ไม่พบนักเรียนที่ต้องการลบ" });
@@ -308,8 +446,8 @@ const deleteMultipleStudents = async (req, res) => {
 
     // ลบข้อมูลผู้ใช้ที่เกี่ยวข้อง
     const userIds = students
-      .filter(student => student.user) // ตรวจสอบว่ามี user หรือไม่
-      .map(student => student.user._id);
+      .filter((student) => student.user) // ตรวจสอบว่ามี user หรือไม่
+      .map((student) => student.user._id);
 
     if (userIds.length > 0) {
       await User.deleteMany({ _id: { $in: userIds } });
@@ -318,18 +456,14 @@ const deleteMultipleStudents = async (req, res) => {
     // ลบข้อมูลนักเรียนทั้งหมด
     await Student.deleteMany({ _id: { $in: studentIds } });
 
-    res.status(200).json({ message: "ลบนักเรียนและผู้ใช้ที่เกี่ยวข้องเรียบร้อยแล้ว" });
+    res
+      .status(200)
+      .json({ message: "ลบนักเรียนและผู้ใช้ที่เกี่ยวข้องเรียบร้อยแล้ว" });
   } catch (error) {
     console.error("❌ Error deleting multiple students:", error);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบข้อมูลนักเรียน" });
   }
 };
-
-
-
-
-
-
 
 module.exports = {
   uploadedFile,
@@ -341,5 +475,7 @@ module.exports = {
   softDeleteMultipleStudents,
   deleteStudent,
   deleteMultipleStudents,
-  getDeletedStudents
+  getDeletedStudents,
+  restoreStudents,
+  getDeletedUsers,
 };

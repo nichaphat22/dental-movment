@@ -11,6 +11,7 @@ import {
   GoChevronUp,
 } from "react-icons/go";
 import { RiImageAddLine } from "react-icons/ri";
+import { Spinner } from "react-bootstrap";
 
 const QuizEdit = () => {
   const { id } = useParams();
@@ -27,6 +28,7 @@ const QuizEdit = () => {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
+        setIsLoading(true);
         const response = await quizService.getQuizById(id);
         setQuiz(response.data.quiz);
         console.log("Quiz data:", response.data.quiz);
@@ -335,9 +337,25 @@ const QuizEdit = () => {
     setQuiz({ ...quiz, questions: updatedQuestions });
   };
 
-  if (isLoading) {
-    return <div>Loading quiz details, please wait...</div>;
-  }
+   if (isLoading) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="flex items-center space-x-3">
+            <Spinner
+              animation="grow"
+              role="status"
+              style={{
+                width: "25px",
+                height: "25px",
+                marginRight: "8px",
+                backgroundColor: "#a845f3",
+              }}
+            />
+            <span className="text-gray-500 text-lg font-normal">กำลังโหลด...</span>
+          </div>
+        </div>
+      );
+    }
 
   if (!quiz) {
     return <div>Error: Could not find quiz data. Please try again later.</div>;

@@ -79,7 +79,7 @@ function View_Biomechanical_consideration() {
   };
 
   const handleImageClick = (id) => {
-    navigate(`/animation/view/${id}`);
+    navigate(`/animation-teacher/view/${id}`);
   };
 
   return (

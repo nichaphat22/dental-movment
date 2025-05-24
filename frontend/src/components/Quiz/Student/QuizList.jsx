@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { PiClipboardTextDuotone } from "react-icons/pi";
 import { Typography } from "@material-tailwind/react";
 import axios from "axios";
-import { baseUrl } from '../../../utils/services';
-
+import { baseUrl } from "../../../utils/services";
+import { Spinner } from "react-bootstrap";
 
 const QuizList = () => {
   const user = useSelector((state) => state.auth.user); // รับข้อมูลผู้ใช้จาก Redux
@@ -14,6 +14,7 @@ const QuizList = () => {
   const [quizzes, setQuizzes] = useState([]); // เก็บข้อมูลแบบทดสอบ
   const [quizScores, setQuizScores] = useState({}); // เก็บคะแนนแบบทดสอบ
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   // ข้อมูล student จาก user
   const studentId = roleData;
@@ -100,8 +101,22 @@ const QuizList = () => {
   // ถ้าไม่มีข้อมูลผู้ใช้ หรือ quizzes ยังไม่ได้ถูกโหลด
   if (!user || !studentId || quizzes.length === 0) {
     return (
-      <div className="text-center">
-        <p>กำลังโหลดข้อมูล...</p>
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center space-x-3">
+          <Spinner
+            animation="grow"
+            role="status"
+            style={{
+              width: "25px",
+              height: "25px",
+              marginRight: "8px",
+              backgroundColor: "#a845f3",
+            }}
+          />
+          <span className="text-gray-500 text-lg font-normal">
+            กำลังโหลด...
+          </span>
+        </div>
       </div>
     );
   }

@@ -102,7 +102,7 @@ const ViewRPDSampleCase = () => {
 
   const handleModelClick = (model) => {
     setSelectedModel(model);
-    navigate(`/Model/${model.id}/view`, { // ใช้ id แทนชื่อ
+    navigate(`/Model-teacher/${model.id}/view`, { // ใช้ id แทนชื่อ
       state: { selectedModel: model },
     });
   };

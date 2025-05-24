@@ -1,25 +1,34 @@
-import React from "react";
-import NavBarLeft from "../components/navbar/NavBarLeft";
+import React, { useState } from "react";
 import Frame from "../components/Frame";
 import View_Biomechanical_consideration from "../components/lesson/Biomechanical_consideration/View_Biomechanical_consideration";
-// import ChatBox from "../components/Noti";
+import Sidebar from "../components/navbar/Sidebar";
 
 const BiomechanicalConsideration = () => {
-    return (
-        <div className="mt-[100px] flex">
-            <NavBarLeft />
+  const [isExpanded, setIsExpanded] = useState(true);
 
-            {/* Main Content Area */}
-            <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
-                <Frame className="overflow-auto">
-                    <View_Biomechanical_consideration />
-                </Frame>
+  return (
+    <div className="mt-[10px] flex">
+      {/* Sidebar */}
+      <Sidebar
+        isExpanded={isExpanded}
+        toggleSidebar={() => setIsExpanded(!isExpanded)}
+        className="mt-16"
+      />
+      {/* Main Content Area */}
+      <div
+        className={`flex-grow p-5 md:p-10 lg:p-4 mt-16 transition-all duration-300 ${
+          isExpanded ? "ml-64" : "ml-10"
+        }`}
+      >
+        <Frame className="overflow-auto">
+          <View_Biomechanical_consideration />
+        </Frame>
 
-                {/* ChatBox */}
-                {/* <ChatBox /> */}
-            </div>
-        </div>
-    );
+        {/* ChatBox */}
+        {/* <ChatBox /> */}
+      </div>
+    </div>
+  );
 };
 
 export default BiomechanicalConsideration;

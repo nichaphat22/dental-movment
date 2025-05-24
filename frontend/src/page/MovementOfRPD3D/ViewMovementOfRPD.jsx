@@ -7,12 +7,19 @@ import View_Animation3d from "../../components/lesson/MovementOfRPD/View_Animati
 import ChatBox from "../../components/Noti";
 
 const ViewMovementOfRPD = () => {
+  const [isExpanded, setIsExpanded] = useState(true);
+      const toggleSidebar = () => {
+          setIsExpanded((prev) => !prev);
+      }
   return (
     <div className="mt-[60px] flex">
-      <NavBarLeft />
+      <div className="hidden sm:block">
+       <NavBarLeft isExpanded={isExpanded} toggleSidebar={toggleSidebar}/>
+      </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
+      <div className={`flex-1 p-4 transition-all duration-300  ml-0 space-y-4
+        ${isExpanded ? "sm:ml-64" : "sm:ml-16"}`}>
         <Frame className="overflow-auto">
           <View_Animation3d />
         </Frame>

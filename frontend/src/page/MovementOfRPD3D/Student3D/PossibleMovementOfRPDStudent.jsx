@@ -5,13 +5,21 @@ import Student_View_RPD_sample_case from "../../../components/lesson/RPDSampleCa
 // import Student_Bio from "../components/lesson/Biomechanical_consideration/View_Biomechanical_consideration_Student"
 import ChatBox from "../../../components/Noti";
 
+
 const HomeStudent = () => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const toggleSidebar = () => {
+    setIsExpanded((prev) => !prev);
+  }
   return (
     <div className="mt-[60px] flex">
-      <NavBarLeft />
+      <div className="hidden sm:block">
+      <NavBarLeft isExpanded={isExpanded} toggleSidebar={toggleSidebar}/>
+      </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 p-4 ml-0 sm:ml-56 lg:ml-64 space-y-4">
+      <div className={`flex-1 p-4 transition-all duration-300 space-y-4 ml-0
+        ${isExpanded ? "sm:ml-64" : "sm:ml-16"} `}>
         <Frame className="overflow-auto">
           <Student_View_RPD_sample_case />
           {/* <Student_Bio/> */}

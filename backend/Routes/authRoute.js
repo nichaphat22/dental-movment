@@ -4,6 +4,7 @@ const multer = require("../middleware/multer");
 require("dotenv").config();
 const authController = require("../Controllers/authController");
 const studentController = require("../Controllers/studentController");
+const teacherController = require("../Controllers/teacherController");
 const jwt = require("jsonwebtoken");
 const User = require("../Models/userModel");
 const Student = require("../Models/studentModel");
@@ -20,11 +21,14 @@ router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
+
+// เปลี่ยน path https://dental-movmentofrpd.up.railway.app
+//
 router.get(
   "/google/callback",
   passport.authenticate("google", {
     failureRedirect: `${
-      process.env.CLIENT_URL || "https://dental-movmentofrpd.up.railway.app"
+      process.env.CLIENT_URL || "http://localhost:8080"
     }/login`,
   }),
   (req, res) => {
@@ -42,14 +46,14 @@ router.get(
         roleData: req.user.roleData ? req.user.roleData._id : null,
         roleRef: req.user.roleRef,
       },
-      process.env.JWT_SECRET_KEY,   
+      process.env.JWT_SECRET_KEY,
       { expiresIn: "1h" }
     );
 
     console.log("✅ Redirecting with Token:", token);
     res.redirect(
       `${
-        process.env.CLIENT_URL || "https://dental-movmentofrpd.up.railway.app"
+        process.env.CLIENT_URL || "http://localhost:8080"
       }/login?token=${token}`
     );
   }
@@ -70,49 +74,61 @@ router.get("/sso", async (req, res) => {
     }
 
     const { userId, email, name, role, timestamp } = decoded;
-    if (Date.now() - timestamp > 3600000) { // 1 ชั่วโมง
+    if (Date.now() - timestamp > 3600000) {
+      // 1 ชั่วโมง
       return res.status(401).send("Token too old");
     }
 
-    let user = await findOrCreateUser({ externalId: userId, email, name, role });
+    let user = await findOrCreateUser({
+      externalId: userId,
+      email,
+      name,
+      role,
+    });
 
     req.session.userId = user.id;
     req.session.isLoggedIn = true;
     req.session.role = role;
 
-    res.redirect(role === "teacher" ? "/dashboard/teacher" : "/dashboard/student");
-
+    res.redirect(
+      role === "teacher" ? "/dashboard/teacher" : "/dashboard/student"
+    );
   } catch (error) {
     console.error("SSO error:", error);
     res.status(401).send("Invalid token");
   }
 });
 
-router.get('/redirect-to-dental-online', async (req, res) => {
+router.get("/redirect-to-dental-online", async (req, res) => {
   try {
-      const user = req.session.user;
+    const user = req.session.user;
 
-      if (!user) {
-          return res.status(401).send('Unauthorized');
-      }
+    if (!user) {
+      return res.status(401).send("Unauthorized");
+    }
 
-      const token = jwt.sign({
-          externalId: user._id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          timestamp: Date.now()
-      }, process.env.SSO_SECRET, { expiresIn: '5m' });
+    const token = jwt.sign(
+      {
+        externalId: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        timestamp: Date.now(),
+      },
+      process.env.SSO_SECRET,
+      { expiresIn: "5m" }
+    );
 
-      res.redirect(`https://dentalonlinelearning-production.up.railway.app/sso-login?token=${token}`);
+    res.redirect(
+      `https://dentalonlinelearning-production.up.railway.app/sso-login?token=${token}`
+    );
   } catch (error) {
-      console.error('Error:', error);
-      res.status(500).send('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    console.error("Error:", error);
+    res.status(500).send("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
   }
 });
 
-
-// เชื่อมไป web e-learning 
+// เชื่อมไป web e-learning
 // router.post("/sso-to-elearning", verifyToken, (req, res) => {
 //   try {
 //     const user = req.user; // ได้จาก middleware verifyToken (JWT ใน dentalweb)
@@ -142,8 +158,6 @@ router.get('/redirect-to-dental-online', async (req, res) => {
 //     res.status(500).json({ message: "Internal Server Error" });
 //   }
 // });
-
-
 
 //----------------------------------------------------------------------//
 router.get("/user", verifyToken, async (req, res) => {
@@ -189,7 +203,7 @@ router.post("/addUser", verifyToken, async (req, res) => {
         email
       )}&background=random`;
 
-    const userRole = role || "student";
+    const userRole = role || "student" || "teacher";
 
     const user = new User({
       email,
@@ -220,6 +234,12 @@ router.post("/addUser", verifyToken, async (req, res) => {
     await user.save();
     console.log("✅ User Created:", user);
 
+    const io = req.app.get("socketio");
+    io.emit("userAdded", {
+      message: "เพิ่มผู้ใช้ใหม่",
+      user,
+    });
+
     return res.status(201).json({
       message: "เพิ่มผู้ใช้สำเร็จ",
       user,
@@ -232,27 +252,38 @@ router.post("/addUser", verifyToken, async (req, res) => {
 
 //ดึงนักศึกษาทั้งหมด
 router.get("/students", studentController.getAllStudents);
-router.put(
-  "/students/softDelete/:studentId",
-  studentController.softDeleteStudent
-);
-router.put(
-  "/students/softDelete/delete-multiple",
-  studentController.softDeleteMultipleStudents
-);
+router.get("/teachers", teacherController.getAllTeachers);
 
-router.put("/students/restore", studentController.restoreMultipleStudents);
-router.get("/students/delete", studentController.getDeletedStudents);
+//ดึงนักศึกษาที่ถูกลบ Soft Delete
+router.get("/students/softDelete", studentController.getDeletedStudents);
+router.get("/users/softDelete", studentController.getDeletedUsers);
 
-router.delete(
-  "/students/delete/:studentId",
-  verifyToken,
-  studentController.deleteStudent
-);
-router.delete(
-  "/students/delete-multiple",
-  verifyToken,
-  studentController.deleteMultipleStudents
-);
+//ลบ Soft Delete หลายรายการ
+router.put("/students/softDelete/delete-multiple",studentController.softDeleteMultipleStudents);
+
+//กู้คืนแบบอันเดียว
+router.put("/students/restore", studentController.restoreStudents);
+router.put("/teachers/restore", teacherController.restoreTeacher);
+
+//กู้คืนแบบหลายอัน
+router.put("/students/restoreMultiple", studentController.restoreMultipleStudents);
+router.put("/teachers/restoreMultiple", teacherController.restoreMultipleTeachers);
+
+
+
+
+router.delete("/students/delete-multiple",verifyToken,studentController.deleteMultipleStudents);
+router.delete("/teachers/delete-multiple",verifyToken, teacherController.deleteMultipleTeachers);
+
+//ลบ Soft Delete
+router.put("/students/softDelete/:studentId",studentController.softDeleteStudent);
+router.put("/teachers/softDelete/:teacherId", teacherController.softDeleteTeacher);
+
+
+router.delete("/students/delete/:studentId",verifyToken,studentController.deleteStudent);
+router.delete("/teachers/delete/:teacherId", verifyToken, teacherController.deleteTeacher);
+
+
+// teacher
 
 module.exports = router;

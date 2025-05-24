@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import socket from "../../utils/socket";
 import {
   GoChevronDown,
   GoChevronUp,
   GoPencil,
   GoPersonAdd,
   GoSearch,
+  GoTrash,
 } from "react-icons/go";
 import { Input } from "@material-tailwind/react";
 import EditStudentModel from "./EditStudentModel";
@@ -23,25 +25,41 @@ const TableStudent = () => {
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  const rowsPerpage = 8;
+  const rowsPerpage = 10;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showCheckbox, setShowCheckbox] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectMode, setSelectMode] = useState(false);
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/auth/students`);
+      console.log(response.data);
+      setStudents(response.data); // Assuming the response data is an array of students
+    } catch (error) {
+      console.error("Failed to fetch users", error);
+      setStudents([]);
+    }
+  };
   // Fetch students
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get(`${baseUrl}/auth/students`);
-        console.log(response.data);
-        setStudents(response.data); // Assuming the response data is an array of students
-      } catch (error) {
-        console.error("Failed to fetch users", error);
-        setStudents([]);
-      }
-    };
     fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    socket.on("studentAdded", (newStudent) => {
+      setStudents((prev) => [...prev, newStudent]);
+    });
+
+    socket.on("studentDeleted", (deletedId) => {
+      setStudents((prev) => prev.filter((s) => s._id !== deletedId));
+    });
+
+    return () => {
+      socket.off("studentAdded");
+      socket.off("studentDeleted");
+    };
   }, []);
 
   useEffect(() => {
@@ -75,16 +93,15 @@ const TableStudent = () => {
   const handleEdit = (student) => {
     setSelectedStudent(student);
     setIsEditModalOpen(true);
-};
+  };
 
-const handleSave = (updatedStudent) => {
+  const handleSave = (updatedStudent) => {
     setStudents((prevStudents) =>
-        prevStudents.map((student) =>
-            student._id === updatedStudent._id ? updatedStudent : student
-        )
+      prevStudents.map((student) =>
+        student._id === updatedStudent._id ? updatedStudent : student
+      )
     );
-};
-
+  };
 
   // Sorting function
   const sortedStudents = [...students]
@@ -134,6 +151,13 @@ const handleSave = (updatedStudent) => {
     console.log("Updated students list:", students);
   }, [students]);
 
+  useEffect(() => {
+    const newTotalPages = Math.ceil(sortedStudents.length / rowsPerpage);
+    if (currentPage > newTotalPages) {
+      setCurrentPage(Math.max(newTotalPages, 1));
+    }
+  }, [students, sortedStudents.length]);
+
   const handleSelectStudent = (studentId) => {
     setSelectedStudents(
       (prevSelected) =>
@@ -145,27 +169,47 @@ const handleSave = (updatedStudent) => {
 
   // soft deleted
   const handleSoftDelete = async (studentId) => {
-    try {
-      const token = localStorage.getItem("token"); // หรือดึงจาก Redux ถ้ามี
-      if (!token) {
-        console.error("Token not found. User might not be authenticated.");
-        return;
-      }
-      await axios.put(
-        `${baseUrl}/auth/students/softDelete/${studentId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // ส่ง token ไปใน request
-          },
+    if (!studentId) {
+      console.error("❌ studentId ไม่ถูกต้อง");
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "คุณต้องการลบข้อมูลนี้จริงหรือไม่?",
+      text: "ข้อมูลจะถูกลบ!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem("token"); // หรือดึงจาก Redux ถ้ามี
+        if (!token) {
+          console.error("Token not found. User might not be authenticated.");
+          return;
         }
-      );
-      // Remove deleted student from the UI
-      setStudents((prevStudents) =>
-        prevStudents.filter((student) => student._id !== studentId)
-      );
-    } catch (error) {
-      console.error("Error deleting student:", error);
+        await axios.put(
+          `${baseUrl}/auth/students/softDelete/${studentId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // ส่ง token ไปใน request
+            },
+          }
+        );
+        // Remove deleted student from the UI
+        setStudents((prevStudents) =>
+          prevStudents.filter((student) => student._id !== studentId)
+        );
+
+        
+
+        Swal.fire("สำเร็จ!", "ข้อมูลนักศึกษาถูกลบเรียบร้อยแล้ว.", "success");
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบข้อมูลนักศึกษาได้", "error");
+      }
     }
   };
 
@@ -180,9 +224,14 @@ const handleSave = (updatedStudent) => {
 
     try {
       // ตรวจสอบข้อมูลที่ส่งไปก่อน
+      console.log(
+        "📦 Payload ที่จะส่ง:",
+        JSON.stringify({ studentIds: selectedStudents }, null, 2)
+      );
+
       console.log("Deleting students with IDs: ", selectedStudents);
 
-      const response = await axios.put(
+      const res = await axios.put(
         `${baseUrl}/auth/students/softDelete/delete-multiple`,
         { studentIds: selectedStudents }, // ส่ง array ของ studentIds
         {
@@ -192,6 +241,8 @@ const handleSave = (updatedStudent) => {
           },
         }
       );
+
+      console.log(selectedStudents);
 
       // Update UI
       setStudents((prevStudents) =>
@@ -203,7 +254,7 @@ const handleSave = (updatedStudent) => {
       Swal.fire("สำเร็จ!", "ลบหลายรายการสำเร็จ", "success");
     } catch (error) {
       console.error("❌ Error deleting:", error);
-      Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบหลายรายการได้", "error");
+      Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถลบนักศึกษาได้", "error");
     }
   };
 
@@ -224,6 +275,7 @@ const handleSave = (updatedStudent) => {
             <AddUser
               isOpen={isAddModalOpen}
               onClose={() => setIsAddModalOpen(false)}
+              onSuccess={fetchUsers}
             />
           )}
         </div>
@@ -236,37 +288,37 @@ const handleSave = (updatedStudent) => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
       </div>
-       {/* Soft Delete */}
-       {/* <div className="mt-4 flex justify-end gap-2 mb-2">
-        <button
-          onClick={handleSoftDeleteMultiple}
-          className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-500"
-        >
-          ลบหลายรายการ
-        </button>
-      </div> */}
 
       {/* Table */}
       <div className="overflow-x-auto m-0">
         <table className="min-w-full border border-gray-300 text-sm">
           <thead>
             <tr className="bg-gray-600 text-white text-center">
-              {/* <th>
+              <th className="py-2 px-2">
                 <input
                   type="checkbox"
-                  onChange={(e) =>
-                    setSelectedStudents(
-                      e.target.checked ? students.map((s) => s._id) : []
-                    )
-                  }
-                  checked={
-                    selectedStudents.length > 0 &&
-                    students.every((s) => selectedStudents.includes(s._id))
-                  }
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      const idsToAdd = currentStudents
+                        .map((s) => s._id)
+                        .filter((id) => !selectedStudents.includes(id));
+                      setSelectedStudents([...selectedStudents, ...idsToAdd]);
+                    } else {
+                      const idsToRemove = currentStudents.map((s) => s._id);
+                      setSelectedStudents(
+                        selectedStudents.filter(
+                          (id) => !idsToRemove.includes(id)
+                        )
+                      );
+                    }
+                  }}
+                  checked={currentStudents.every((s) =>
+                    selectedStudents.includes(s._id)
+                  )}
                 />
-              </th> */}
+              </th>
+
               <th className="py-2 px-4">ลำดับที่</th>
               <th
                 className="py-2 px-4"
@@ -292,21 +344,37 @@ const handleSave = (updatedStudent) => {
           </thead>
           <tbody>
             {currentStudents.length > 0 ? (
-              currentStudents.map((student, index) => (
-                <tr key={index} className="odd:bg-white even:bg-gray-50 hover:bg-gray-100 text-center text-xs md:text-sm">
-                  {/* <td className="py-2 px-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedStudents.includes(student._id)}
-                      onChange={() => handleSelectStudent(student._id)}
-                    />
-                  </td> */}
-                  <td className="py-2 px-4 border">{startIndex + index + 1}</td>
-                  <td className="py-2 px-4 border">{student?.studentID || "N/A"}</td>
-                  <td className="py-2 px-4 border">{student?.user?.name || "N/A"}</td>
-                  <td className="py-2 px-4 border">{student?.user?.email || "N/A"}</td>
-                  {/* แก้ไข */}
-                  {/* <td className="py-2 px-4">
+              currentStudents.map((student, index) => {
+                const isSelected = selectedStudents.includes(student._id);
+                return (
+                  <tr
+                    key={index}
+                    className={`text-center text-xs md:text-sm ${
+                      isSelected ? "bg-blue-50" : "odd:bg-white even:bg-gray-50"
+                    } hover:bg-gray-100 transition`}
+                  >
+                    <td className="py-2 px-2 border">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleSelectStudent(student._id)}
+                      />
+                    </td>
+
+                    <td className="py-2 px-2 border">
+                      {startIndex + index + 1}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {student?.studentID || "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {student?.user?.name || "N/A"}
+                    </td>
+                    <td className="py-2 px-4 border">
+                      {student?.user?.email || "N/A"}
+                    </td>
+                    {/* แก้ไข */}
+                    {/* <td className="py-2 px-4">
                     <button
                       onClick={() => handleEdit(student._id)}
                       className="bg-yellow-500 text-white rounded px-2 py-1 hover:bg-yellow-400"
@@ -322,16 +390,17 @@ const handleSave = (updatedStudent) => {
                       />
                     )}
                   </td> */}
-                  <td className="py-2 px-4 border">
-                    <button
-                      onClick={() => handleSoftDelete(student._id)}
-                      className="bg-red-600 text-white rounded px-2 py-1 hover:bg-red-500"
-                    >
-                      ลบ
-                    </button>
-                  </td>
-                </tr>
-              ))
+                    <td className="py-2 px-4 border">
+                      <button
+                        onClick={() => handleSoftDelete(student._id)}
+                        // className="bg-red-600 text-white rounded px-2 py-1 hover:bg-red-500"
+                      >
+                        <GoTrash className="text-red-600" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="6" className="text-center py-4">
@@ -343,7 +412,39 @@ const handleSave = (updatedStudent) => {
         </table>
       </div>
 
-     
+      {/* Soft Delete */}
+      <div className="mt-4 flex flex-wrap justify-end items-center gap-2 mb-2">
+        {/* <div>
+          <button
+            onClick={() => setSelectMode(!selectMode)}
+            className={`px-4 py-2 rounded ${selectMode ? "bg-gray-500" : "bg-blue-600"} text-white hover:opacity-90`}
+          >
+            {selectMode ? "ยกเลิก Select" : "Select"}
+          </button>
+        </div> */}
+        {selectedStudents.length > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="text-base text-gray-600">
+              เลือกแล้ว{" "}
+              <span className="text-red-600">{selectedStudents.length}</span> /{" "}
+              {students.length} รายการ
+            </span>
+            {/* <span>
+              ในหน้านี้: {currentStudents.filter(s => selectedStudents.includes(s._id)).length} / {currentStudents.length}
+            </span> */}
+
+            {selectedStudents.length > 0 && (
+              <button
+                onClick={handleSoftDeleteMultiple}
+                className="bg-red-600 text-white px-4 py-2 flex items-center rounded hover:bg-red-500"
+              >
+                <GoTrash className="text-white w-5 h-5 mr-2" />
+                ลบ
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Pagination */}
       <div className="flex justify-center items-center mt-4 space-x-4 text-sm md:text-base">
@@ -363,14 +464,14 @@ const handleSave = (updatedStudent) => {
         </span>
         <button
           className={`px-4 py-2 border rounded-md ${
-            currentPage === totalPages
+            currentPage >= totalPages
               ? "opacity-50 cursor-not-allowed"
               : "hover:bg-gray-200"
           }`}
           onClick={() =>
             setCurrentPage((prev) => Math.min(prev + 1, totalPages))
           }
-          disabled={currentPage === totalPages}
+          disabled={currentPage >= totalPages}
         >
           ถัดไป
         </button>

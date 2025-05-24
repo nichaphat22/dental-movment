@@ -354,7 +354,7 @@ const CreateQuiz = () => {
 
   return (
     <div className="relative border-t-8 border-purple-500 p-4 md:p-10 bg-white rounded-lg shadow-md max-w-4xl mx-auto">
-      <ToastContainer />
+      
       <h1 className="text-lg md:text-2xl lg:text-3xl  font-bold text-purple-500 mb-4 text-center">
         เพิ่มแบบทดสอบ
       </h1>

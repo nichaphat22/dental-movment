@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import socket from "../../utils/socket";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setNotifications,
@@ -8,7 +9,7 @@ import {
 } from "../../redux/notificationSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaBell, FaTrash } from "react-icons/fa";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -20,16 +21,16 @@ import {
 
 const token = localStorage.getItem("token");
 
-// ตั้งค่า WebSocket
-const socket = io("http://localhost:8080", { autoConnect: false });
-// const socket = io("https://backend-dental-production.up.railway.app", {
-//   query: { token },
-//   transports: ["websocket", "polling"],
-// });
+// // ตั้งค่า WebSocket
+// const socket = io("http://localhost:8080", { autoConnect: false });
+// // const socket = io("https://backend-dental-production.up.railway.app", {
+// //   query: { token },
+// //   transports: ["websocket", "polling"],
+// // });
 
-socket.on("connect", () => {
-  console.log("✅ Connected to server with socket ID:", socket.id);
-});
+// socket.on("connect", () => {
+//   console.log("✅ Connected to server with socket ID:", socket.id);
+// });
 
 function NotificationBell() {
   const dispatch = useDispatch();
@@ -64,7 +65,7 @@ function NotificationBell() {
       socket.disconnect();
       console.log("❌ Socket disconnected");
     }
-  
+
     const handleNewNotification = (notification) => {
       console.log("📩 Received notification:", notification);
       if (notification?.message) {
@@ -72,15 +73,14 @@ function NotificationBell() {
         dispatch(addNotification(notification));
       }
     };
-  
+
     socket.on("newNotification", handleNewNotification);
-  
+
     return () => {
       socket.off("newNotification", handleNewNotification);
       socket.disconnect();
     };
   }, [dispatch, user]);
-  
 
   // ปิด dropdown เมื่อคลิกข้างนอก
   useEffect(() => {
@@ -99,45 +99,49 @@ function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const handleRead = useCallback(async (notificationIds, link) => {
-    try {
-      console.log(`✅ Marking notification as read: ${notificationIds}`);
-      await markNotificationsAsRead(notificationIds);
-      dispatch(markAsReadReducer(notificationIds));
-      navigate(link || "/default");
-    } catch (error) {
-      console.error("❌ Error marking notification as read:", error);
-    }
-  }, [dispatch, navigate]);
+  const handleRead = useCallback(
+    async (notificationIds, link) => {
+      try {
+        console.log(`✅ Marking notification as read: ${notificationIds}`);
+        await markNotificationsAsRead(notificationIds);
+        dispatch(markAsReadReducer(notificationIds));
+        navigate(link || "/default");
+      } catch (error) {
+        console.error("❌ Error marking notification as read:", error);
+      }
+    },
+    [dispatch, navigate]
+  );
 
-  const handleDelete = useCallback(async (notificationId) => {
-    try {
-      if (!user?._id) {
-        toast.error("❌ You must be logged in to delete notifications.");
-        return;
+  const handleDelete = useCallback(
+    async (notificationId) => {
+      try {
+        if (!user?._id) {
+          toast.error("❌ You must be logged in to delete notifications.");
+          return;
+        }
+
+        const notification = list.find((n) => n._id === notificationId);
+        if (!notification || notification.recipient !== user._id) {
+          // toast.error("❌ You cannot delete this notification.");
+          return;
+        }
+
+        console.log("🔹 Deleting notification ID:", notificationId);
+
+        await deleteNotificationAPI(notificationId);
+        dispatch(deleteNotificationReducer(notificationId));
+        // toast.success("✅ Notification deleted successfully.");
+      } catch (error) {
+        console.error("❌ Error deleting notification:", error);
+        // toast.error("❌ Failed to delete notification.");
       }
-  
-      const notification = list.find((n) => n._id === notificationId);
-      if (!notification || notification.recipient !== user._id) {
-        toast.error("❌ You cannot delete this notification.");
-        return;
-      }
-  
-      console.log("🔹 Deleting notification ID:", notificationId);
-  
-      await deleteNotificationAPI(notificationId);
-      dispatch(deleteNotificationReducer(notificationId));
-      toast.success("✅ Notification deleted successfully.");
-    } catch (error) {
-      console.error("❌ Error deleting notification:", error);
-      toast.error("❌ Failed to delete notification.");
-    }
-  }, [dispatch, list, user]);
-  
-  
+    },
+    [dispatch, list, user]
+  );
 
   return (
-    <div className="relative"  ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-200 transition"
@@ -156,16 +160,19 @@ function NotificationBell() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 mt-3 w-80 bg-white border border-gray-200 shadow-lg rounded-xl z-50"
- 
-         >
-            <div className="p-4 border-b">
-              <h4 className="text-lg text-center font-semibold text-gray-700">การแจ้งเตือน</h4>
+            className="absolute right-2 sm:right-0 mt-3 w-[20vw]  bg-white border border-gray-200 shadow-lg rounded-xl z-50"
+          >
+            <div className="p-2.5 border-b">
+              <h4 className="sm:text-base lg:text-lg text-center font-semibold text-gray-700">
+                การแจ้งเตือน
+              </h4>
             </div>
 
             <div className="max-h-64 overflow-y-auto">
               {list.length === 0 ? (
-                <p className="text-center p-3 text-gray-500">ไม่มีการแจ้งเตือน</p>
+                <p className="sm:text-xs lg:text-base text-center p-4 text-gray-500">
+                  ไม่มีการแจ้งเตือน
+                </p>
               ) : (
                 list.map((n) => (
                   <motion.div
@@ -176,8 +183,8 @@ function NotificationBell() {
                     exit={{ opacity: 0 }}
                   >
                     <p
-                      onClick={() => handleRead(n._id, n.link)}
-                      className="cursor-pointer text-sm hover:text-blue-500"
+                      onClick={() => handleRead([n._id], n.link)}
+                      className="cursor-pointer text-base hover:text-blue-500"
                     >
                       {n.message}
                     </p>
@@ -193,7 +200,7 @@ function NotificationBell() {
         )}
       </AnimatePresence>
 
-      <ToastContainer position="top-right" autoClose={3000} />
+     
     </div>
   );
 }

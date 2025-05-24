@@ -13,12 +13,17 @@ const teacherSchema = new mongoose.Schema(
         ref: "Quiz",
       },
     ],
+    isDeleted: { type: Boolean, default: false },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const Teacher  = mongoose.model("Teacher", teacherSchema);
+const Teacher = mongoose.model("Teacher", teacherSchema);
 
-module.exports = Teacher ;
+module.exports = Teacher;
