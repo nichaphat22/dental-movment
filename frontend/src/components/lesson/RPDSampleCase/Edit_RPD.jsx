@@ -457,7 +457,7 @@ const Edit_RPD = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           // เมื่อผู้ใช้กด "ตกลง" จะทำการนำทางไปยังหน้าถัดไป
-          navigate('/Possible-Movement-Of-RPD');
+          navigate('/Possible-Movement-Of-RPD-teacher');
         }
       });
 
@@ -489,7 +489,7 @@ const Edit_RPD = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         // ถ้าผู้ใช้กดยืนยันให้เปลี่ยนเส้นทาง
-        navigate("/Possible-Movement-Of-RPD");
+        navigate("/Possible-Movement-Of-RPD-teacher");
       }
     });
   };

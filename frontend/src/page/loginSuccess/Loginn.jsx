@@ -202,9 +202,10 @@ const Loginn = () => {
               className="flex justify-center md:justify-start
                             "
             >
-              <a href="https://dental-movmentofrpd.up.railway.app/api/auth/google">
+              <a href="/api/auth/google">
                 <button>Login with Google</button>
               </a>
+
               <HiOutlineArrowLongRight
                 className="text-xl group-hover:translate-x-2
                             group-hover:-rotate-45 duration-300"

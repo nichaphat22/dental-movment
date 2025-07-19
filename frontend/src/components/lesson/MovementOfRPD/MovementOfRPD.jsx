@@ -77,7 +77,7 @@ function MovementOfRPD() {
       setUploadProgress(0);
 
       Swal.fire({ icon: "success", title: "อัปโหลดสำเร็จ!" }).then(() => {
-        navigate("/MovementOfRPD");
+        navigate("/MovementOfRPD-teacher");
       });
     } catch (error) {
       console.error("Upload Error:", error);
@@ -135,7 +135,7 @@ function MovementOfRPD() {
 
             <br />
             <div className="flex items-center justify-center mt-8 text-sm">
-              <button className="bg-gray-300 text-black px-3 py-2 rounded mr-2 hover:bg-gray-400" onClick={() => navigate("/MovementOfRPD")}>
+              <button className="bg-gray-300 text-black px-3 py-2 rounded mr-2 hover:bg-gray-400" onClick={() => navigate("/MovementOfRPD-teacher")}>
                 ยกเลิก
               </button>
               <button className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600" onClick={handleAddAnimation3D}>

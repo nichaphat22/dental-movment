@@ -16,7 +16,7 @@ exports.sendNotification = async (type, title, itemId, role, io) => {
     const notificationTypes = {
       quiz_add: { link: role === "student" ? `/Quiz/${itemId}` : `/quiz-teacher/${itemId}`, message: `📝 มีแบบทดสอบใหม่: ${title}` },
       quiz_update: { link: role === "student" ? `/Quiz/${itemId}` : `/quiz-teacher/${itemId}`, message: `📢 มีการอัปเดตแบบทดสอบ: ${title}` },
-      lesson_add: { link: role === "student" ? `/Lesson/${itemId}` : `/lesson-teacher/${itemId}`, message: `📚 มีบทเรียนใหม่: ${title}` },
+      lesson_add: { link: role === "student" ? `/getAnimation3DById/${itemId}` : `/getAnimation3DById/${itemId}`, message: `📚 มีบทเรียนใหม่: ${title}` },
       lesson_update: { link: role === "student" ? `/Lesson/${itemId}` : `/lesson-teacher/${itemId}`, message: `📢 มีการอัปเดตบทเรียน: ${title}` },
     };
 

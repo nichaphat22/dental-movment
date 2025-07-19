@@ -1,7 +1,8 @@
 import axios from "axios";
-
+// api http://localhost:8080
+// https://dental-movmentofrpd.up.railway.app
 export const API = axios.create({
-    baseURL: 'https://dental-movment-production.up.railway.app',
+    baseURL: 'http://localhost:8080',
     withCredentials: true,
 })
 

@@ -51,7 +51,7 @@ export const ChatContextProvider = ({ children }) => {
     // สร้างการเชื่อมต่อ WebSocket
     //---------------------เชื่อมต่อ server --------------//
     // const newSocket = io( {
-        const newSocket = io("https://dental-movment-production.up.railway.app",{
+        const newSocket = io("http://localhost:8080",{
       transports: ['websocket'], // ใช้ทั้ง WebSocket และ polling
     });
         newSocket.on("connect", () => {

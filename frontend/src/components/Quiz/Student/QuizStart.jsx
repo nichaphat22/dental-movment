@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import quizService from "../../../utils/quizService";
 import QuizResults from "./QuizResults";
 import { useSelector } from "react-redux";
+import { Spinner } from "react-bootstrap";
 
 const QuizStart = () => {
   const { id } = useParams();
@@ -15,15 +16,19 @@ const QuizStart = () => {
   const [score, setScore] = useState(0);
   const user = useSelector(state => state.auth.user);
   const roleData = useSelector(state => state.auth.roleData)
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
+        setLoading(true);
         const response = await quizService.getQuizById(id);
         setQuiz(response.data.quiz);
         setAnswers(new Array(response.data.quiz.questions.length).fill(null));
       } catch (error) {
         console.error("Error fetching quiz:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -83,13 +88,33 @@ const QuizStart = () => {
     setScore(totalScore);
   };
 
-  if (!quiz) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
-      </div>
-    );
-  }
+  if (loading) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="flex items-center space-x-3">
+            <Spinner
+              animation="grow"
+              role="status"
+              style={{
+                width: "25px",
+                height: "25px",
+                marginRight: "8px",
+                backgroundColor: "#a845f3",
+              }}
+            />
+            <span className="text-gray-500 text-lg font-normal">กำลังโหลด...</span>
+          </div>
+        </div>
+      );
+    }
+
+  // if (!quiz) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       Loading...
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="mb-4">

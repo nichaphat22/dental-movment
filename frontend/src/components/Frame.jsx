@@ -6,6 +6,7 @@ const Frame = ( {children,style}) => {
             // display: "table-cell",
             // width: "80vw",
             // height:"50vw",
+            marginTop: "6px",
             minHeight: "70vw",
             padding: "8px",
             flexDirection: "column",

@@ -106,7 +106,7 @@ border-radius: 20px; */
   justify-content: center;
   align-items: center;
 } */
-
+/* 
 input{
   border: 2px ;
   border-style: solid;
@@ -114,7 +114,7 @@ input{
   border-radius: 8px;
   padding: 5px;
   color: rgb(145, 54, 205);
-}
+} */
 .save-button{
   color: rgb(255, 255, 255);
   background-color: rgb(9, 162, 22);

@@ -17,8 +17,9 @@ import {
   Option,
 } from "@material-tailwind/react";
 import { baseUrl } from "../../utils/services";
+import Swal from "sweetalert2";
 
-const AddUser = ({ isOpen, onClose }) => {
+const AddUser = ({ isOpen, onClose, onSuccess }) => {
   const [type, setType] = useState("card");
   const currentYear = new Date().getFullYear() + 543;
   const years = Array.from({ length: 20 }, (_, i) => currentYear - i);
@@ -33,6 +34,7 @@ const AddUser = ({ isOpen, onClose }) => {
   const token = localStorage.getItem("token"); // หรือดึงจาก Context/Auth State
   const [file, setFile] = useState(null);
   const [excelData, setExcelData] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const validateEmail = (email) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,15 +57,16 @@ const AddUser = ({ isOpen, onClose }) => {
   };
 
   const validateStudentID = (studentID) => {
-    const studentIDPattern = /^\d{9}-\d{1}$/; 
+    const studentIDPattern = /^\d{9}-\d{1}$/;
     if (!studentIDPattern.test(studentID)) {
-      setStudentIDError("รหัสนักศึกษาควรมีรูปแบบ 9 หลักตามด้วย - และอีก 1 หลัก");
+      setStudentIDError(
+        "รหัสนักศึกษาควรมีรูปแบบ 9 หลักตามด้วย - และอีก 1 หลัก"
+      );
       return false;
     }
     setStudentIDError("");
     return true;
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,35 +105,33 @@ const AddUser = ({ isOpen, onClose }) => {
           },
         }
       );
+      Swal.fire({
+        icon: "success",
+        title: "เพิ่มข้อมูลสำเร็จ",
+        text: res.data.message || "เพิ่มรายชื่อสำเร็จ",
+        confirmButtonText: "ตกลง",
+      }).then(() => {
+        setName("");
+        setEmail("");
+        setRole("student");
+        setStudentID("");
+        if (onSuccess) onSuccess();
+        onClose();
+      });
 
-      setMessage(`✅ ${res.data.message}`);
-      setName("");
-      setEmail("");
-      setRole("student");
-      setStudentID("");
+      
+
+      // setMessage(`✅ ${res.data.message}`);
     } catch (error) {
-      setMessage(`${error.response?.data?.message || "Error occurred"}`);
+      // setMessage(`${error.response?.data?.message || "Error occurred"}`);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text:
+          error.response?.data?.message || "เกิดข้อผิดพลาดในการเพิ่มรายชื่อ",
+      });
     }
   };
-
-  // const handleFileChange = (e) => {
-  //   const selectedFile = e.target.files[0];
-  //   if (selectedFile) {
-  //     const fileType = selectedFile.type;
-  //     const allowedTypes = ["application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
-  //     const maxSize = 5 * 1024 * 1024;  // กำหนดขนาดไฟล์สูงสุดเป็น 5MB
-
-  //     if (!allowedTypes.includes(fileType)) {
-  //       setMessage("กรุณาเลือกไฟล์ Excel เท่านั้น");
-  //       return;
-  //     }
-  //     if (selectedFile.size > maxSize) {
-  //       setMessage("ขนาดไฟล์ใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 5MB");
-  //       return;
-  //     }
-  //     setFile(selectedFile);
-  //   }
-  // };
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -156,30 +157,73 @@ const AddUser = ({ isOpen, onClose }) => {
 
   const handleSubmitFile = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
 
     if (!file) {
       setMessage("กรุณาเลือกไฟล์");
-      setIsLoading(false);
+      // setIsLoading(false);
       return;
     }
+
+    setUploadProgress(0);
 
     const formData = new FormData();
     formData.append("file", file);
 
+    Swal.fire({
+      title: "กำลังอัปโหลด...",
+      html: `
+        <div id="progress-container" style={"width: 100%; background:#eee; border-radius: 4px; "}>
+          
+        </div>
+        
+        `,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+    });
+
     try {
       const res = await axios.post(
-        "http://localhost:8080/api/auth/uploadStudent",
+        `${baseUrl}/auth/uploadStudent`,
         formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`, // ส่ง token ไปใน request
           },
+          // onUploadProgress: (ProgressEvent) => {
+          //   const percent = Math.round((ProgressEvent.loaded * 100) / ProgressEvent.total);
+          //   setUploadProgress(percent);
+
+          //   const progressBar = document.getElementById("progress-bar");
+          //   const progressText = document.getElementById("progress-text");
+          //   if (progressBar && progressText) {
+          //     progressBar.style.width = `${percent}%`;
+          //     progressText.textContent = `${percent}%`;
+          //   }
+          // },
         }
       );
-      setExcelData(res.data);
-      setMessage(res.data.message || "อัปโหลดไฟล์สำเร็จ");
+
+      Swal.close();
+
+      Swal.fire({
+        icon: "success",
+        title: "เพิ่มข้อมูลสำเร็จ",
+        text: res.data.message || "เพิ่มรายชื่อสำเร็จ",
+        confirmButtonText: "ตกลง",
+      }).then(() => {
+        setExcelData(res.data);
+        setFile(null);
+        setSelectedFileName("");
+        setMessage("");
+        if (onSuccess) onSuccess();
+        onClose();
+      });
+      // setMessage(res.data.message || "อัปโหลดไฟล์สำเร็จ");
     } catch (error) {
       console.error("Error uploading file:", error);
 
@@ -195,9 +239,7 @@ const AddUser = ({ isOpen, onClose }) => {
       } else {
         setMessage("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้");
       }
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
 
   return (
@@ -256,7 +298,9 @@ const AddUser = ({ isOpen, onClose }) => {
                     required
                   />
                 </div>
-                {nameError && <p className="text-red-600 text-sm">{nameError}</p>}
+                {nameError && (
+                  <p className="text-red-600 text-sm">{nameError}</p>
+                )}
                 <div>
                   <Typography
                     variant="small"
@@ -274,7 +318,9 @@ const AddUser = ({ isOpen, onClose }) => {
                     className="border w-full p-2 rounded-md"
                     required
                   />
-                  {emailError && <p className="text-red-600 text-sm">{emailError}</p>}
+                  {emailError && (
+                    <p className="text-red-600 text-sm">{emailError}</p>
+                  )}
                 </div>
                 <div>
                   <Typography
@@ -293,10 +339,12 @@ const AddUser = ({ isOpen, onClose }) => {
                     className="border w-full p-2 rounded-md"
                     required
                   />
-                  {studentIDError && <p className="text-red-600 text-sm">{studentIDError}</p>}
+                  {studentIDError && (
+                    <p className="text-red-600 text-sm">{studentIDError}</p>
+                  )}
                 </div>
                 {/* {message && <p className="mb-4 text-red-600">{message}</p>}   */}
-                </form>
+              </form>
               {/* Buttons */}
               <div className="flex justify-center mt-4">
                 <button
@@ -338,9 +386,8 @@ const AddUser = ({ isOpen, onClose }) => {
                     <button
                       type="submit"
                       className="px-4 py-2 mt-4 bg-blue-500 text-white rounded"
-                      disabled={isLoading}
                     >
-                      {isLoading ? "กำลังอัปโหลด..." : "อัปโหลด"}
+                      อัปโหลด
                     </button>
                   </div>
                 </form>

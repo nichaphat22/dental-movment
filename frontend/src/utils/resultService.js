@@ -1,8 +1,6 @@
 import axios from "axios";
 import { baseUrl } from "./services";
 
-// const BASE_URL = "http://localhost:8080/api/result";
-
 const resultService = {
   // แก้ไขการกำหนดฟังก์ชัน
   submitResult: (userId, quizId, correctAnswers, totalQuestions) => {

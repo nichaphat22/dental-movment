@@ -1,4 +1,5 @@
 const Animation3D = require('../Models/animation3DModel.js');
+const notificationController = require('../Controllers/notificationController.js');
 
 // GET all Animations3D
 const getAnimation3D = async (req, res) => {
@@ -53,13 +54,13 @@ const getAnimation3D = async (req, res) => {
   
   
   
-  // Create a new Animation
+  // Create a new Animation`
 // Create a new Animation
 const saveAnimation3D = async (req, res) => {
   const { Ani3D_name, Ani3D_description } = req.body;
   const { Ani3D_animation, Ani3D_image} = req.files;
-  // const Ani3D_animationFile = req.files['Ani3D_animation'] ? req.files['Ani3D_animation'][0] : null;
-  // const Ani3D_imageFile = req.files['Ani3D_image'] ? req.files['Ani3D_image'][0] : null;
+  const Ani3D_animationFile = req.files['Ani3D_animation'] ? req.files['Ani3D_animation'][0] : null;
+  const Ani3D_imageFile = req.files['Ani3D_image'] ? req.files['Ani3D_image'][0] : null;
 
   if (!Ani3D_name || !Ani3D_description || !Ani3D_animationFile || !Ani3D_imageFile) {
       return res.status(400).json({ err: "Ani3D_name, Ani3D_description, Ani3D_animation, and Ani3D_image details are required." });
@@ -85,6 +86,11 @@ const saveAnimation3D = async (req, res) => {
           }
       });
       console.log("Saved Successfully...");
+
+      await notificationController.sendNotification("lesson_add", Ani3D_name, newAnimation3D._id, "student", req.io);
+      await notificationController.sendNotification("lesson_add", Ani3D_name, newAnimation3D._id, "teacher", req.io);
+
+      
       res.status(201).json(newAnimation3D);
   } catch (error) {
       console.error("Error saving animation:", error);

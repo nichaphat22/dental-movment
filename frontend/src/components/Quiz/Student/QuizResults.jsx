@@ -3,6 +3,7 @@ import { Card, Button } from "react-bootstrap";
 import { GoSync } from "react-icons/go";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FcApproval ,FcOk} from "react-icons/fc";
+import { Spinner } from "@material-tailwind/react";
 
 const QuizResults = () => {
   const location = useLocation();
@@ -10,6 +11,7 @@ const QuizResults = () => {
   const [showAnswer, setShowAnswer] = useState(false);
   const answerSectionRef = useRef(null); // อ้างอิงไปยังส่วนเฉลย
   const { quiz, answers, score } = location.state || {};
+  const [loading, setLoading] = useState(true);
 
   if (!quiz || !quiz.questions) {
     return (

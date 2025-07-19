@@ -70,7 +70,7 @@ if (!Ani_name  || !Ani_description  || !Ani_animation || !Ani_image) {
       }).then((result) => {
         if (result.isConfirmed) {
           // เมื่อผู้ใช้กด "ตกลง" จะทำการนำทางไปยังหน้าถัดไป
-          navigate('/Biomechanical-consideration');
+          navigate('/Biomechanical-consideration-teacher');
         }
       });
     }catch (error) {
@@ -100,7 +100,7 @@ if (!Ani_name  || !Ani_description  || !Ani_animation || !Ani_image) {
             }).then((result) => {
               if (result.isConfirmed) {
                 // ถ้าผู้ใช้กดยืนยันให้เปลี่ยนเส้นทาง
-                navigate('/Biomechanical-consideration');
+                navigate('/Biomechanical-consideration-teacher');
               }
             });
     // ย้อนกลับไปยังหน้าที่แล้วในประวัติการเรียกดู

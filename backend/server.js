@@ -48,9 +48,6 @@ app.use(
 );
 
 
-// ใช้ express.json() และ cors
-app.use(express.json());
-
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://itweb0867.cpkkuhost.com','http://localhost:8080','https://dental-movmentofrpd.up.railway.app','https://dentalonlinelearning-production.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
@@ -130,6 +127,7 @@ io.on("connection", (socket) => {
 
       socketMap.set(userId, socket.id);
       socket.userId = userId; // ผูก userId กับ socket
+      socket.join(userId);
 
       console.log(`✅ User added: ${userId} -> ${socket.id}`);
       console.log("📌 Current socket map:", Array.from(socketMap.entries()));
@@ -194,6 +192,12 @@ io.on("connection", (socket) => {
           console.log(`📌 Recipient (${recipientId}) is connected at: ${recipientSocketId}`);
       }
   });
+
+   socket.on("studentAdded", (student) => {
+    socket.broadcast.emit("studentAdded", student);
+  });
+
+  
 
   // ✅ เมื่อผู้ใช้ disconnect ให้ลบจาก `socketMap`
   socket.on("disconnect", () => { 
