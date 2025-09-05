@@ -3,8 +3,18 @@ import axios from "axios";
 import "./Biomechanical_consideration.css";
 import { useNavigate } from "react-router-dom";
 // import {   } from "react-bootstrap";
-import { Card, Button, Row, Col,Container,Spinner,Dropdown, ButtonGroup,  } from 'react-bootstrap';
-import { baseUrl } from '../../../utils/services';
+import {
+  Card,
+  Button,
+  Row,
+  Col,
+  Container,
+  Spinner,
+  Dropdown,
+  ButtonGroup,
+} from "react-bootstrap";
+import { baseUrl } from "../../../utils/services";
+import { backendUrl } from "../../../utils/services";
 import { HiPlusSm } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 import { MdEdit } from "react-icons/md";
@@ -27,10 +37,14 @@ function View_Biomechanical_consideration() {
   }, []);
 
   const fetchAnimations = () => {
-    axios.get(`${baseUrl}/animation/getAnimation`)
+    axios
+      .get(`${baseUrl}/animation/getAnimation`)
       .then((response) => {
-          console.log("API Response:", response.data); // Debugging
-        setAnimations(response.data);
+        console.log("API Response:", response.data); // Debugging
+        const sortedData = response.data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        setAnimations(sortedData);
         setLoading(false); // Set loading to false once data is fetched
       })
       .catch((error) => {
@@ -39,13 +53,11 @@ function View_Biomechanical_consideration() {
       });
   };
 
-  
-
-  const goToEditPage = (id) => {
-    navigate(`/Edit-Biomechanical-consideration/${id}`);
+  const goToEditPage = (_id) => {
+    navigate(`/Edit-Biomechanical-consideration/${_id}`);
   };
 
-  const removeAnimation = (id) => {
+  const removeAnimation = (_id) => {
     Swal.fire({
       title: "คุณแน่ใจหรือไม่?",
       text: "คุณต้องการลบอนิเมชันนี้หรือไม่?",
@@ -59,9 +71,11 @@ function View_Biomechanical_consideration() {
       if (result.isConfirmed) {
         try {
           axios
-            .delete(`${baseUrl}/animation/deleteAnimation/${id}`)
+            .delete(`${baseUrl}/animation/deleteAnimation/${_id}`)
             .then((response) => {
-              setAnimations(animations.filter((animation) => animation._id !== id));
+              setAnimations(
+                animations.filter((animation) => animation._id !== _id)
+              );
             });
           Swal.fire("ลบสำเร็จ!", "อนิเมชันถูกลบเรียบร้อยแล้ว", "success");
         } catch (error) {
@@ -78,8 +92,8 @@ function View_Biomechanical_consideration() {
     navigate(`/Add-Biomechanical-consideration`);
   };
 
-  const handleImageClick = (id) => {
-    navigate(`/animation-teacher/view/${id}`);
+  const handleImageClick = (_id) => {
+    navigate(`/animation/view/${_id}`);
   };
 
   return (
@@ -90,11 +104,13 @@ function View_Biomechanical_consideration() {
       <div className="flex justify-between ">
         <div className="title ">Mechanical force</div>
         <button
-          className="flex items-center bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+          className="flex items-center bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 md:px-4 md:py-2 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 mt-2 md:mt-0 mb-4"
           onClick={handleAddAnimation}
         >
-          <HiPlusSm className="w-5 h-5 mr-2" />
-          เพิ่มสื่อการสอน
+          <HiPlusSm className="w-4 h-4 lg:w-5 lg:h-5 mr-1" />
+          <span className="text-xs md:text-sm lg:text-base">
+            เพิ่มสื่อการสอน
+          </span>
         </button>
       </div>
 
@@ -102,33 +118,51 @@ function View_Biomechanical_consideration() {
         {loading ? ( // Show loading spinner while data is loading
           <div className="d-flex justify-content-center my-5" style={{}}>
             {/* animation="grow" */}
-           <Spinner
-                      as="span"
-                      animation="grow"
-                     //  size="lg"
-                      role="status"
-                      aria-hidden="true"
-                      style={{marginRight:'5px',background:'rgb(168, 69, 243)', width: '25px',  // ปรับขนาดของสปินเนอร์
-                       height: '25px'}}
-                    />
-                    กำลังโหลด...
-                    
+            <Spinner
+              as="span"
+              animation="grow"
+              //  size="lg"
+              role="status"
+              aria-hidden="true"
+              style={{
+                marginRight: "5px",
+                background: "rgb(168, 69, 243)",
+                width: "25px", // ปรับขนาดของสปินเนอร์
+                height: "25px",
+              }}
+            />
+            กำลังโหลด...
           </div>
         ) : (
-
-          
           <Row>
             {animations.map((animation) => (
-              <Col xs={12} sm={6} md={6} lg={3} className="mb-4" key={animation._id}>
-                <div className="animationid" style={{ textAlign: 'center', justifyItems: 'center' }}>
-                  <div className="ani" style={{ boxShadow: '0 0 5px 2px rgba(0, 0, 0, 0.075)', paddingBottom: '15px' }}>
+              <Col
+                xs={12}
+                sm={6}
+                md={6}
+                lg={3}
+                className="mb-4"
+                key={animation._id}
+              >
+                <div
+                  className="animationid"
+                  style={{ textAlign: "center", justifyItems: "center" }}
+                >
+                  <div
+                    className="ani"
+                    style={{
+                      boxShadow: "0 0 5px 2px rgba(0, 0, 0, 0.075)",
+                      paddingBottom: "15px",
+                    }}
+                  >
                     <img
                       className="img_ani"
                       title="คลิกเพื่อเล่นวิดีโอ"
                       onClick={() => handleImageClick(animation._id)}
-                      src={`data:${animation.Ani_image.contentType};base64,${animation.Ani_image.data}`}
-                      alt={animation.Ani_name}
-                      style={{ cursor: "pointer", borderRadius: '10px' }}
+                      src={`${backendUrl}/${animation.Ani_image.path}`}
+
+                      alt={animation.Ani_name || ""}
+                      style={{ cursor: "pointer", borderRadius: "10px" }}
                     />
                     <div className="nameandbt">
                       <h3 className="Ani_name" title={animation?.Ani_name}>
@@ -136,14 +170,23 @@ function View_Biomechanical_consideration() {
                       </h3>
                       {/* <div id="dropdown-custom-components" className="no-arrow" > */}
 
-      <div className="dwMenu" >
-        <button className="btEdit" onClick={() => goToEditPage(animation._id)} title="แก้ไขแอนิเมชัน">
-          <CiEdit size={20}/>
-        </button>
-        <button className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
-        <RiDeleteBinLine size={19}/>
-          </button>
-      </div></div>
+                      <div className="dwMenu">
+                        <button
+                          className="btEdit"
+                          onClick={() => goToEditPage(animation._id)}
+                          title="แก้ไขแอนิเมชัน"
+                        >
+                          <CiEdit size={20} />
+                        </button>
+                        <button
+                          className="btDelete"
+                          onClick={() => removeAnimation(animation._id)}
+                          title="ลบแอนิเมชัน"
+                        >
+                          <RiDeleteBinLine size={19} />
+                        </button>
+                      </div>
+                    </div>
                     {/* </div> */}
                   </div>
                 </div>
@@ -157,17 +200,4 @@ function View_Biomechanical_consideration() {
 }
 
 export default View_Biomechanical_consideration;
-{/* <Dropdown as={ButtonGroup}>
-<Dropdown.Toggle  id="dropdown-custom-components" className="no-arrow" >
-<VscKebabVertical />
-</Dropdown.Toggle>
 
-<Dropdown.Menu className="dwMenu" >
-<Dropdown.Item className="btEdit" onClick={() => goToEditPage(animation._id)} title="แก้ไขแอนิเมชัน">
-แก้ไข
-</Dropdown.Item>
-<Dropdown.Item className="btDelete" onClick={() => removeAnimation(animation._id)} title="ลบแอนิเมชัน">
-ลบ
-</Dropdown.Item>
-</Dropdown.Menu>
-</Dropdown> */}

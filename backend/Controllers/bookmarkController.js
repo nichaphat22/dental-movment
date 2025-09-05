@@ -1,74 +1,102 @@
-const mongoose = require('mongoose'); // ✅ เพิ่มบรรทัดนี้
-const bookmarkModel = require('../Models/bookmarkModel');
+const mongoose = require("mongoose");
+const bookmarkModel = require("../Models/bookmarkModel");
 
-// ฟังก์ชันสำหรับดึงข้อมูล bookmarks ของผู้ใช้
+// ดึง bookmarks ของผู้ใช้
 const getBookmarks = async (req, res) => {
   const { userId } = req.params;
 
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ error: "Invalid userId" });
+  }
+
   try {
     const bookmark = await bookmarkModel.findOne({ userId });
-    if (bookmark && bookmark.bookmarks) {
-      res.json(bookmark.bookmarks);
-    } else {
-      res.json({}); // Ensure the bookmarks key is always present
-    }
+    if (!bookmark) return res.json({ bookmarks: [] });
+
+    const bookmarksAsString = bookmark.bookmarks.map((id) => id.toString());
+    res.json({ bookmarks: bookmarksAsString });
   } catch (error) {
-    console.error('Error fetching bookmarks:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching bookmarks:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
-
+// Toggle bookmark
 const updateBookmarks = async (req, res) => {
-  const { userId, bookmarks } = req.body;
-
-  if (!userId || !bookmarks) {
-    return res.status(400).json({ error: "User ID and bookmarks are required" });
-  }
-
-  console.log("Received userId:", userId);
-  console.log("Received bookmarks:", bookmarks);
-
   try {
-    const updated = await bookmarkModel.findOneAndUpdate(
-      { userId: userId }, // ค้นหาผู้ใช้โดยใช้ userId
-      { bookmarks: bookmarks }, // อัปเดต bookmarks
-      { new: true, upsert: true } // ใช้ upsert: true เพื่อเพิ่มข้อมูลใหม่ถ้าข้อมูลไม่พบ
-    );
+    const { userId, modelId } = req.body;
 
-    return res.json(updated); // ส่งข้อมูลที่อัปเดตกลับ
+    if (!userId || !modelId) {
+      return res
+        .status(400)
+        .json({ message: "userId and modelId are required" });
+    }
+
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(modelId)
+    ) {
+      return res.status(400).json({ message: "Invalid userId or modelId" });
+    }
+
+    let bookmark = await bookmarkModel.findOne({ userId });
+
+    if (!bookmark) {
+      // สร้างใหม่พร้อมแปลง userId และ modelId เป็น ObjectId
+      bookmark = new bookmarkModel({ 
+        userId, 
+        bookmarks: [modelId] ,
+      });
+    } else {
+      const exists = bookmark.bookmarks.some(
+        (id) => id.toString() === modelId
+      );
+      if (exists) {
+        bookmark.bookmarks = bookmark.bookmarks.filter(
+          (id) => id.toString() !== modelId
+        );
+      } else {
+        bookmark.bookmarks.push(modelId);
+      }
+    }
+
+    // บันทึก bookmark ทุกครั้งหลังแก้ไข
+    await bookmark.save();
+
+    // ส่งกลับเป็น string array
+    const bookmarksAsString = bookmark.bookmarks.map((id) => id.toString());
+    res.status(200).json({ bookmarks: bookmarksAsString });
   } catch (error) {
     console.error("Error updating bookmarks:", error);
-    return res.status(500).json({ error: "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
 };
+
+
+// ลบ bookmark (option)
 const removeBookmark = async (req, res) => {
-  const { userId, modelId } = req.params;
+  const { userId, modelId } = req.body;
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(modelId)
+  ) {
+    return res.status(400).json({ error: "Invalid userId or modelId" });
+  }
 
   try {
-    // Query by userId
-    const user = await bookmarkModel.findOne({ userId: userId });
+    const bookmark = await bookmarkModel.findOne({ userId });
+    if (!bookmark) return res.status(404).json({ error: "Bookmark not found" });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    bookmark.bookmarks = bookmark.bookmarks.filter(
+      (id) => id.toString() !== modelId
+    );
+    await bookmark.save();
 
-    // Log the bookmarks to see its structure
-    console.log('User bookmarks:', user.bookmarks);
-
-    // Remove the model from the Map
-    if (user.bookmarks.has(modelId)) {
-      user.bookmarks.delete(modelId);
-      await user.save();
-      res.status(200).json({ message: `${modelId} has been removed from bookmarks` });
-    } else {
-      res.status(404).json({ error: 'Model not found in bookmarks' });
-    }
+    res.status(200).json({ bookmarks: bookmark.bookmarks.map((id) => id.toString()) });
   } catch (error) {
-    console.error("Error removing model from bookmarks:", error);
-    res.status(500).json({ error: "Failed to remove model from bookmarks" });
+    console.error("Error removing bookmark:", error);
+    return res.status(500).json({ error: "Failed to remove bookmark" });
   }
 };
 
-
-module.exports = { getBookmarks, updateBookmarks,removeBookmark };
+module.exports = { getBookmarks, updateBookmarks, removeBookmark };

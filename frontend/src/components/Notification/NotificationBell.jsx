@@ -1,5 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import socket from "../../utils/socket";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/th";
+
 import { useDispatch, useSelector } from "react-redux";
 import {
   setNotifications,
@@ -21,16 +25,8 @@ import {
 
 const token = localStorage.getItem("token");
 
-// // ตั้งค่า WebSocket
-// const socket = io("http://localhost:8080", { autoConnect: false });
-// // const socket = io("https://backend-dental-production.up.railway.app", {
-// //   query: { token },
-// //   transports: ["websocket", "polling"],
-// // });
-
-// socket.on("connect", () => {
-//   console.log("✅ Connected to server with socket ID:", socket.id);
-// });
+dayjs.extend(relativeTime);
+dayjs.locale("th");
 
 function NotificationBell() {
   const dispatch = useDispatch();
@@ -39,9 +35,6 @@ function NotificationBell() {
   const user = useSelector((state) => state.auth.user);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  // console.log("🔹 User ID:", user?._id);
-  // console.log("🔹 Notifications list:", list);
 
   useEffect(() => {
     // ดึงการแจ้งเตือนจากเซิร์ฟเวอร์
@@ -69,7 +62,7 @@ function NotificationBell() {
     const handleNewNotification = (notification) => {
       console.log("📩 Received notification:", notification);
       if (notification?.message) {
-        toast.info(notification.message);
+        // toast.info(notification.message);
         dispatch(addNotification(notification));
       }
     };
@@ -123,7 +116,6 @@ function NotificationBell() {
 
         const notification = list.find((n) => n._id === notificationId);
         if (!notification || notification.recipient !== user._id) {
-          // toast.error("❌ You cannot delete this notification.");
           return;
         }
 
@@ -131,10 +123,8 @@ function NotificationBell() {
 
         await deleteNotificationAPI(notificationId);
         dispatch(deleteNotificationReducer(notificationId));
-        // toast.success("✅ Notification deleted successfully.");
       } catch (error) {
         console.error("❌ Error deleting notification:", error);
-        // toast.error("❌ Failed to delete notification.");
       }
     },
     [dispatch, list, user]
@@ -174,33 +164,45 @@ function NotificationBell() {
                   ไม่มีการแจ้งเตือน
                 </p>
               ) : (
-                list.map((n) => (
-                  <motion.div
-                    key={n._id}
-                    className="p-3 flex justify-between items-center border-b hover:bg-gray-100 transition"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <p
-                      onClick={() => handleRead([n._id], n.link)}
-                      className="cursor-pointer text-base hover:text-blue-500"
+                list.map((n) => {
+                  const created = dayjs(n.createdAt);
+                  const now = dayjs();
+                  const diffInDays = now.diff(created, "day");
+
+                  return (
+                    <motion.div
+                      key={n._id}
+                      className="p-3 flex justify-between items-start gap-2 border-b hover:bg-gray-100 transition"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                     >
-                      {n.message}
-                    </p>
-                    <FaTrash
-                      onClick={() => handleDelete(n._id)}
-                      className="text-red-500 cursor-pointer hover:text-red-700"
-                    />
-                  </motion.div>
-                ))
+                      <div className="flex-1 ">
+                        <p
+                          onClick={() => handleRead(n._id, n.link)}
+                          className="cursor-pointer text-sm hover:text-blue-500 break-words"
+                        >
+                          {n.message}
+                        </p>
+                        <span className="block text-xs text-gray-400 mt-2">
+                          {diffInDays >= 3
+                            ? created.format("DD/MM/YYYY HH:mm") // ถ้าเกิน 3 วัน → แสดงวันที่
+                            : created.fromNow()}{" "}
+                        </span>
+                      </div>
+
+                      <FaTrash
+                        onClick={() => handleDelete(n._id)}
+                        className="text-red-500 cursor-pointer hover:text-red-700 flex-shrink-0 mt-1"
+                      />
+                    </motion.div>
+                  );
+                })
               )}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-     
     </div>
   );
 }

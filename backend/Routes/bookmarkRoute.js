@@ -6,8 +6,8 @@ const { getBookmarks, updateBookmarks, removeBookmark } = require('../Controller
 router.get('/:userId', getBookmarks);
 
 // API สำหรับอัปเดตข้อมูล bookmarks ของผู้ใช้
-router.post('/:userId', updateBookmarks);
+router.post('/', updateBookmarks);
 
-router.delete('/remove-bookmark/:userId/:modelId', removeBookmark);
+router.delete("/remove-bookmark", removeBookmark);
 
 module.exports = router;

@@ -276,8 +276,6 @@ const updateQuiz = async (req, res) => {
     // บันทึกการอัปเดต quiz
     await quiz.save();
 
-    // ส่งการแจ้งเตือนการอัปเดต quiz
-    // await notificationController.notificationQuizUpdate(quiz.title, quiz._id, role, req.io);
 
     // ✅ ส่งการแจ้งเตือนให้กับทั้งนักเรียนและคุณครู
     const io = req.app.get("socketio");

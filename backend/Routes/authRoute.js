@@ -50,7 +50,7 @@ router.get(
       { expiresIn: "1h" }
     );
 
-    console.log("✅ Redirecting with Token:", token);
+    // console.log("✅ Redirecting with Token:", token);
     res.redirect(
       `${
         process.env.CLIENT_URL || "http://localhost:8080"

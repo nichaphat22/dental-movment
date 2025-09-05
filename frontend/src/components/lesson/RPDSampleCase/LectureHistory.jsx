@@ -3,14 +3,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import LectureModal from "./LectureModal";
 import { baseUrl } from "../../../utils/services";
-import { AuthContext } from "../../../context/AuthContext";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { RxCross2 } from "react-icons/rx";
-// import { Card, Button, Row, Col,Container } from 'react-bootstrap';
 import { toast, Flip, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { RiDeleteBin5Fill } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import {
   Card,
@@ -41,10 +36,26 @@ const LectureHistory = ({ limit = null, showViewAll = false }) => {
     try {
       if (!userLectureID) {
         console.error("No userLectureID provided"); // ตรวจสอบว่า ID ผู้ใช้ถูกส่งมา
+        setLoading(false);
         return;
       }
       const response = await axios.get(`${baseUrl}/lecture/${userLectureID}`); // ดึงข้อมูลบรรยาย
-      setLectures(response.data); // ตั้งค่าข้อมูลบรรยายใน state
+
+      if (Array.isArray(response.data)) {
+        const sortedLectures = [...response.data].sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+
+        const limitedLectures = limit
+        ? sortedLectures.slice(0, limit)
+        : sortedLectures;
+      
+        setLectures(limitedLectures);
+      } else {
+        setLectures([]);
+      }
+
+      // setLectures(response.data); // ตั้งค่าข้อมูลบรรยายใน state
       setLoading(false);
     } catch (error) {
       console.error("Error fetching lectures:", error); // จัดการข้อผิดพลาด

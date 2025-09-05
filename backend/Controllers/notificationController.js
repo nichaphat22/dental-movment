@@ -14,10 +14,40 @@ exports.sendNotification = async (type, title, itemId, role, io) => {
     if (!users?.length) return;
 
     const notificationTypes = {
-      quiz_add: { link: role === "student" ? `/Quiz/${itemId}` : `/quiz-teacher/${itemId}`, message: `📝 มีแบบทดสอบใหม่: ${title}` },
-      quiz_update: { link: role === "student" ? `/Quiz/${itemId}` : `/quiz-teacher/${itemId}`, message: `📢 มีการอัปเดตแบบทดสอบ: ${title}` },
-      lesson_add: { link: role === "student" ? `/getAnimation3DById/${itemId}` : `/getAnimation3DById/${itemId}`, message: `📚 มีบทเรียนใหม่: ${title}` },
-      lesson_update: { link: role === "student" ? `/Lesson/${itemId}` : `/lesson-teacher/${itemId}`, message: `📢 มีการอัปเดตบทเรียน: ${title}` },
+      quiz_add: {
+        link:
+          role === "student" ? `/Quiz/${itemId}` : `/quiz-teacher/${itemId}`,
+        message: `มีแบบทดสอบใหม่: ${title}`,
+      },
+      quiz_update: {
+        link:
+          role === "student" ? `/Quiz/${itemId}` : `/quiz-teacher/${itemId}`,
+        message: `มีการอัปเดตแบบทดสอบ: ${title}`,
+      },
+      animation2d_add: {
+        link: `/animation/view/${itemId}`,
+        message: `Biomechanical Consideration มีบทเรียนใหม่: ${title}`,
+      },
+      animation2d_update: {
+        link: `/animation/view/${itemId}`,
+        message: `Biomechanical Consideration มีการอัปเดตบทเรียน: ${title}`,
+      },
+      animation3d_add: {
+        link: `/animation3d/${itemId}/view`,
+        message: `การเคลื่อนที่ของฟันเทียม มีบทเรียนใหม่: ${title}`,
+      },
+      animation3d_update: {
+        link: `/animation3d/${itemId}/view`,
+        message: `การเคลื่อนที่ของฟันเทียม มีการอัปเดตบทเรียน: ${title}`,
+      },
+      model_add: {
+        link: `/Model/${itemId}/view`,
+        message: `RPD Sample Case มีบทเรียนใหม่: ${title}`,
+      },
+      model_update: {
+        link: `/Model/${itemId}/view`,
+        message: `RPD Sample Case มีการอัปเดตบทเรียน: ${title}`,
+      },
     };
 
     const { link, message } = notificationTypes[type] || {};
@@ -34,69 +64,45 @@ exports.sendNotification = async (type, title, itemId, role, io) => {
           message,
           type,
           link,
+
           isRead: false,
           recipient: user._id,
           userRole: role,
           createdAt: new Date(),
         },
         upsert: true,
-        setDefaultsOnInsert: true
-      }
+        setDefaultsOnInsert: true,
+      },
     }));
 
     await Notification.bulkWrite(notificationsToInsert);
 
-    // ส่งแจ้งเตือนแบบเรียลไทม์
-    users.forEach((user) => {
-      io.to(user?._id.toString()).emit("newNotification", { message, link });
-    });
+    // จำกัดไม่ให้เกิน 20 แจ้งเตือนต่อ user
+    for (const user of users) {
+      const count = await Notification.countDocuments({ recipient: user._id });
+      if (count > 20) {
+        const toDelete = count - 20; // ❗ แก้เป็น 20 จริงๆ (ไม่ใช่ -50)
+        await Notification.find({ recipient: user._id })
+          .sort({ createdAt: 1 })
+          .limit(toDelete)
+          .deleteMany();
+      }
+    }
 
+    // ส่งแจ้งเตือนแบบเรียลไทม์ (ต้องส่งทั้ง document ที่มี _id กลับไป)
+    for (const user of users) {
+      const newNoti = await Notification.findOne({ recipient: user._id })
+        .sort({ createdAt: -1 })
+        .lean();
+
+      if (newNoti) {
+        io.to(user._id.toString()).emit("newNotification", newNoti);
+      }
+    }
   } catch (error) {
     console.error("❌ Error sending notification:", error);
   }
 };
-
-// // 📌 แจ้งเตือนเมื่ออัปเดต Quiz
-// exports.notificationQuizUpdate = async (quizTitle, quizId, role, io) => {
-//   try {
-//     if (!quizId || !quizTitle) return;
-
-//     const type = "quiz_update";
-//     const link = role === "student" ? `/Quiz/${quizId}` : `/quiz-teacher/${quizId}`;
-//     const message = `📢 มีการอัปเดตแบบทดสอบ: ${quizTitle}`;
-
-//     const users = await User.find({ role, deleted_at: null }, "_id");
-
-//     if (!users?.length) return;
-
-//     const notifications = users.map((user) => ({
-//       updateOne: {
-//         filter: { recipient: user._id, type, message, link },
-//         update: {
-//           message,
-//           type,
-//           link,
-//           isRead: false,
-//           recipient: user._id,
-//           userRole: role,
-//           relatedQuiz: quizId,
-//           createdAt: new Date(),
-//         },
-//         upsert: true,
-//         setDefaultsOnInsert: true
-//       }
-//     }));
-
-//     await Notification.bulkWrite(notifications);
-
-//     users.forEach((user) => {
-//       io.to(user?._id.toString()).emit("newNotification", { message, link });
-//     });
-
-//   } catch (error) {
-//     console.error("❌ Error sending quiz notification:", error);
-//   }
-// };
 
 // 📌 ลบแจ้งเตือนที่เกี่ยวข้องกับ User
 exports.deleteUserNotifications = async (userId) => {
@@ -119,10 +125,14 @@ exports.deleteQuizNotifications = async (quizId) => {
 exports.getUserNotifications = async (req, res) => {
   try {
     if (!req.user?.id) {
-      return res.status(401).json({ message: "Unauthorized: User ID not found" });
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: User ID not found" });
     }
 
-    const notifications = await Notification.find({ recipient: req.user.id }).sort({ createdAt: -1 });
+    const notifications = await Notification.find({
+      recipient: req.user.id,
+    }).sort({ createdAt: -1 });
 
     res.json(notifications);
   } catch (error) {
@@ -131,11 +141,11 @@ exports.getUserNotifications = async (req, res) => {
   }
 };
 
-
 // 📌 อัปเดตการแจ้งเตือนเป็น "อ่านแล้ว"
 exports.markAsRead = async (req, res) => {
   try {
     const { notificationIds } = req.body;
+    console.log("📥 req.body:", req.body);
 
     if (!notificationIds?.length) {
       return res.status(400).json({ message: "ไม่พบ ID ของแจ้งเตือน" });
@@ -143,17 +153,21 @@ exports.markAsRead = async (req, res) => {
 
     const result = await Notification.updateMany(
       { _id: { $in: notificationIds } },
-      { $set: { isRead: true }  }
+      { $set: { isRead: true } }
     );
 
     if (result.matchedCount === 0) {
-      return res.status(400).json({ message: "ไม่มีการแจ้งเตือนที่สามารถอัปเดตได้" });
+      return res
+        .status(400)
+        .json({ message: "ไม่มีการแจ้งเตือนที่สามารถอัปเดตได้" });
     }
 
     res.json({ message: "อัปเดตสถานะการอ่านเรียบร้อย" });
   } catch (error) {
     console.error("❌ Error in markAsRead:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการอัปเดตสถานะแจ้งเตือน" });
+    res
+      .status(500)
+      .json({ message: "เกิดข้อผิดพลาดในการอัปเดตสถานะแจ้งเตือน" });
   }
 };
 
@@ -162,15 +176,13 @@ exports.deleteNotification = async (req, res) => {
   try {
     const { notificationId } = req.params;
 
-    // if (!mongoose.Types.ObjectId.isValid(notificationId)) {
-    //   return res.status(400).json({ message: "ID แจ้งเตือนไม่ถูกต้อง" });
-    // }
-
     if (!notificationId) {
       return res.status(400).json({ message: "ไม่พบ ID ของแจ้งเตือน" });
     }
 
-    const deletedNotification = await Notification.findByIdAndDelete(notificationId);
+    const deletedNotification = await Notification.findByIdAndDelete(
+      notificationId
+    );
 
     if (!deletedNotification) {
       return res.status(404).json({ message: "ไม่พบการแจ้งเตือนที่ต้องการลบ" });

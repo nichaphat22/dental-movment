@@ -9,7 +9,8 @@ import axios from "axios";
 import { baseUrl } from "../../utils/services";
 import { useCallback } from "react";
 import { HiOutlineArrowLongRight } from "react-icons/hi2";
-import imgHome from "../../../public/GroupHome.svg";
+// import imgHome from "../../../public/GroupHome.svg";
+import imgHome from "../../assets/GroupHome.svg";
 import { animate, motion } from "framer-motion";
 import { Link } from "react-router-dom";
 

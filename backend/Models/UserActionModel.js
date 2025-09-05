@@ -9,7 +9,7 @@ const UserActionSchema = new mongoose.Schema(
     },
     action: {
       type: String,
-      enum: ["ดูสื่อการสอน3D", "ทำแบบทดสอบ", "บทเรียน","การเคลื่อนที่ของฟันเทียม"],
+      enum: ["สื่อการสอน3D", "ทำแบบทดสอบ", "บทเรียน","การเคลื่อนที่ของฟันเทียม"],
       required: true,
     },
     animationId: {
@@ -20,6 +20,24 @@ const UserActionSchema = new mongoose.Schema(
     quizId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
+      default: null,
+    },
+    modelId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Model3D",
+      default: null,
+    },
+    animation3DId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Animation3D",
+      default: null,
+    },
+    animation3DTitle:{
+      type: String,
+      default: null,
+    },
+    modelTitle:{
+      type: String,
       default: null,
     },
     quizTitle: {

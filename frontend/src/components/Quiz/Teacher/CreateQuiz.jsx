@@ -5,7 +5,8 @@ import Swal from "sweetalert2";
 import { toast, Flip, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import defaultImage from "../../../../public/imgQuiz.svg";
+// import defaultImage from "../../../../public/imgQuiz.svg";
+import defaultImage from "../../../assets/imgQuiz.svg";
 import { HiPlusSm } from "react-icons/hi";
 import { HiOutlineX } from "react-icons/hi";
 

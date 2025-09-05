@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./MovementOfRPD.css";
-import { ref as dbRef, get, remove } from "firebase/database";
-import { ref as storageRef, getDownloadURL, deleteObject } from "firebase/storage"; 
-import { storage, database } from "../../../config/firebase";
 import Swal from "sweetalert2";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HiPlusSm } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import { animate } from "framer-motion";
+import { animate, filterProps } from "framer-motion";
+import { baseUrl } from "../../../utils/services";
+import { backendUrl } from "../../../utils/services";
 
 function View_MovementOfRPD() {
   const [animation3d, setAnimation3d] = useState([]);
@@ -16,16 +15,24 @@ function View_MovementOfRPD() {
   const user = useSelector((state) => state.auth.user);
   const navigate = useNavigate();
   const location = useLocation();
-    const [selectedFileName, setSelectedFileName] = useState("");
+  const [selectedFileName, setSelectedFileName] = useState("");
 
   useEffect(() => {
     const fetchAnimations = async () => {
-      const animationsRef = dbRef(database, "animations/");
-      const snapshot = await get(animationsRef);
-      if (snapshot.exists()) {
-        setAnimation3d(Object.values(snapshot.val()));
-      } else {
-        setAnimation3d([]);
+      try {
+        const res = await fetch(`${baseUrl}/animation3D/animations`);
+        if (!res.ok) throw new Error("โหลดข้อมูลล้มเหลว");
+        const data = await res.json();
+
+        // เรียง animation3d 
+        const sortedData = data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+        setAnimation3d(sortedData);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -33,16 +40,13 @@ function View_MovementOfRPD() {
   }, []);
 
   const handleAnimationClick = (animation) => {
-    navigate(`/animation3d-teacher/${animation.name}/view`, {
+    navigate(`/animation3d-teacher/${animation._id}/view`, {
       state: animation,
     });
-  }
-
-
-
+  };
 
   const goToEditPage = (animation) => {
-    navigate(`/Edit-MovementOfRPD/${animation.id}/edit`, {
+    navigate(`/Edit-MovementOfRPD/${animation._id}/edit`, {
       state: animation,
     });
   };
@@ -60,19 +64,14 @@ function View_MovementOfRPD() {
 
     if (confirmDelete.isConfirmed) {
       try {
-        const videoRef = storageRef(
-          storage,
-          `animation3d/${animation.name}/animation3d.mp4`
+        const res = await fetch(
+          `${baseUrl}/animation3D/delete/${animation._id}`,
+          {
+            method: "DELETE",
+          }
         );
-        const imageRef = storageRef(
-          storage,
-          `animation3d/${animation.name}/image.jpg`
-        );
-        await deleteObject(videoRef);
-        await deleteObject(imageRef);
-
-        const animationRef = dbRef(database, `animations/${animation.id}`);
-        await remove(animationRef);
+        if (!res.ok) throw new Error("ลบไม่สำเร็จ");
+        setAnimation3d((prev) => prev.filter((a) => a._id !== animation._id));
 
         Swal.fire("ลบแล้ว!", "แอนิเมชันของคุณถูกลบเรียบร้อยแล้ว", "success");
       } catch (error) {
@@ -102,29 +101,28 @@ function View_MovementOfRPD() {
           </span>
         </button>
       </div>
-
-      {/* {loading && <p className="text-center">กำลังโหลด...</p>} แสดงข้อความระหว่างการโหลด */}
-      {error && <p className="text-center text-red-500">{error}</p>} {/* แสดงข้อความ error */}
-
+      {loading && <p className="text-center">กำลังโหลด...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
+      {/* แสดงข้อความ error */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 justify-center md:mx-10 lg:mx-4">
         {animation3d.length > 0 ? (
           animation3d.map((animation) => (
             <div
               className="cursor-pointer bg-white shadow-sm rounded-lg p-4 lg:transform lg:transition lg:duration-300 lg:hover:scale-105 lg:hover:shadow-md"
-              key={animation.id}
-              
+              key={animation._id}
             >
-              
               <img
                 loading="lazy"
                 onClick={() => handleAnimationClick(animation)}
-                src={animation.imageUrl} // ใช้ URL ที่ดึงมาจาก Database
-                alt={animation.name}
+                src={`${backendUrl}/${animation.imageFile.path}`} // ใช้ URL ที่ดึงมาจาก Database
+                alt={animation._id}
                 className="cursor-pointer mb-4 w-full rounded hover:transform-none shadow-none"
               />
-              <h3 className="md:text-base lg:text-lg font-normal mb-2 text-center break-words">
+              <h3 className="md:text-base lg:text-lg font-normal mb-2 text-center break-words text-wrap">
                 {animation.name}
               </h3>
+
+              {/* <p className="text-sm text-gray-600 text-center mb-3 break-words">{animation.description}</p> */}
               <div className="flex items-center justify-center w-full text-xs md:text-sm lg:text-base pt-2">
                 <button
                   aria-label="Edit animation"

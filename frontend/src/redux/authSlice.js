@@ -14,7 +14,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess: (state, action) => {
-      console.log("🔹 Redux setUser:", action.payload);
+      // console.log("🔹 Redux setUser:", action.payload);
 
       if (!action.payload) {
         console.error("❌ No token provided!");
@@ -23,7 +23,7 @@ const authSlice = createSlice({
 
       try {
         const decodedToken = jwtDecode(action.payload);
-        console.log("🔹 Decoded token:", decodedToken); // ตรวจสอบข้อมูลใน Token
+        // console.log("🔹 Decoded token:", decodedToken); // ตรวจสอบข้อมูลใน Token
 
         // ✅ ตรวจสอบ Token หมดอายุ
         if (decodedToken.exp * 1000 < Date.now()) {

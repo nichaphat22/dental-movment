@@ -38,6 +38,7 @@ function Edit_Biomechanical_consideration() {
   const nameRef = useRef(null);
   const descriptionRef = useRef(null);
   const [loading, setLoading] = useState(true); // Loading state
+  const [inputKey, setInputKey] = useState(Date.now());
 
   useEffect(() => {
     if (id) {
@@ -77,8 +78,11 @@ function Edit_Biomechanical_consideration() {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file); // ไม่ต้องแปลงเป็น base64
+    if (file) {
+      setSelectedFile(file); // อัปเดต preview และชื่อไฟล์
+    }
   };
+
   useEffect(() => {
     if (existingAnimation) {
       setSelectedFile(existingAnimation); // ถ้ามีไฟล์เก่าให้ตั้งค่าให้กับ selectedFile
@@ -87,7 +91,9 @@ function Edit_Biomechanical_consideration() {
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-    setSelectedImage(file); // ไม่ต้องแปลงเป็น base64
+    if (file) {
+      setSelectedImage(file); // ไม่ต้องแปลงเป็น base64
+    }
   };
 
   useEffect(() => {
@@ -96,7 +102,7 @@ function Edit_Biomechanical_consideration() {
     }
   }, [existingImage]);
 
-  const handleUpdateAnimation = () => {
+  const handleUpdateAnimation = async () => {
     try {
       if (!id) {
         console.error("ID is null or undefined");
@@ -109,11 +115,6 @@ function Edit_Biomechanical_consideration() {
         newAnimationDescription !== originalAnimationDescription ||
         selectedFile ||
         selectedImage;
-
-      // if (!isDataChanged) {
-      //   alert("You haven't made any changes to the data.");
-      //   return;
-      // }
 
       const formData = new FormData();
       // ถ้าไม่มีการเปลี่ยนแปลงใดๆ ก็ไม่ต้องทำอะไร
@@ -158,9 +159,37 @@ function Edit_Biomechanical_consideration() {
         return; // หยุดการทำงานหากไม่มีอะไรเปลี่ยน
       }
 
-      axios.put(`${baseUrl}/animation/updateAnimation/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      //Swal progress
+      Swal.fire({
+        title: "กำลังอัปเดตแอนิเมชัน...",
+        html: `
+        <p> โปรดรอสักครู่ <b id="progress-text">0%</b></p>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
       });
+
+      await axios.put(`${baseUrl}/animation/updateAnimation/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            const progressBar =
+              Swal.getHtmlContainer().querySelector("#progress-bar");
+            const progressText =
+              Swal.getHtmlContainer().querySelector("#progress-text");
+
+            if (progressBar) progressBar.style.width = percent + "%";
+            if (progressText) progressText.textContent = percent + "%";
+          }
+        },
+      });
+      Swal.close();
 
       //  / แจ้งเตือนเมื่อเพิ่มโมเดลสำเร็จ
       Swal.fire({
@@ -176,13 +205,7 @@ function Edit_Biomechanical_consideration() {
       });
     } catch (error) {
       console.error("ไม่สามารถอัปเดตอนิเมชันได้", error);
-      setUploading(false);
-      toast.error("เกิดข้อผิดพลาดในการอัปโหลดไฟล์", {
-        position: "top-right",
-        autoClose: 2000,
-        theme: "light",
-        transition: Flip,
-      });
+      Swal.close();
       Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตอนิเมชันได้", "error");
     }
   };
@@ -209,12 +232,15 @@ function Edit_Biomechanical_consideration() {
   // ฟังก์ชันในการลบไฟล์
   const handleDeleteFile = (fileType) => {
     if (fileType === "Ani_animation") {
+      setSelectedFile(null);
       setExistingAnimation(null);
       setOriginalAnimation(null);
     } else if (fileType === "Ani_image") {
+      setSelectedImage(null);
       setExistingImage(null);
       setOriginalImage(null);
     }
+    setInputKey(Date.now());
   };
   console.log(selectedImage);
 
@@ -391,6 +417,7 @@ function Edit_Biomechanical_consideration() {
               <br />
 
               <Input
+                key={selectedFile?.name || existingAnimation?.name || "empty"}
                 type="file"
                 name="Ani_animation"
                 className="choose-file"
@@ -502,6 +529,7 @@ function Edit_Biomechanical_consideration() {
               </label>
               <br />
               <Input
+                key={selectedImage?.name || existingImage?.name || "empty"}
                 type="file"
                 name="Ani_image"
                 className="choose-file"

@@ -1,108 +1,52 @@
 import React, { useState, useContext, useEffect } from "react";
-import { ref, get } from "firebase/database";
-import { database } from "../../../config/firebase"; // ใช้การตั้งค่าของ Firebase Realtime Database
 import { useNavigate } from "react-router-dom";
 import "./RPD_sample_case.css";
 import axios from "axios"; // นำเข้า axios
-import { baseUrl } from "../../../utils/services";
-import { AuthContext } from "../../../context/AuthContext";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import bk from "../../../../public/bookmark.png";
+import { backendUrl, baseUrl } from "../../../utils/services";
+import bk from "../../../assets/bookmark.png";
 import { useSelector } from "react-redux";
-import {
-  Card,
-  Button,
-  Row,
-  Col,
-  Container,
-  Spinner,
-  Dropdown,
-  ButtonGroup,
-} from "react-bootstrap";
-
+import { Row, Col, Container, Spinner } from "react-bootstrap";
 
 function BookMark({ limit = null, showViewAllButton = false }) {
   const [bookmarkedModels, setBookmarkedModels] = useState([]);
   const navigate = useNavigate();
-  const [clickedBookmark, setClickedBookmark] = useState({});
-  // const { user } = useContext(AuthContext);
+  const [clickedBookmark, setClickedBookmark] = useState([]);
   const user = useSelector((state) => state.auth.user);
   const [loading, setLoading] = useState(true); // Loading state
 
   console.log(bookmarkedModels);
 
   // ฟังก์ชันสำหรับดึงข้อมูลโมเดลที่ถูกบุ๊คมาร์ค
+  // สำหรับ BookMark.jsx
   const fetchBookmarkedModels = async () => {
-    if (!user?._id) {
-      console.error("User ID is not available");
-      return;
-    }
-
+    if (!user?._id) return;
+    setLoading(true); 
     try {
+      // ดึง bookmarks จาก backend
       const response = await axios.get(`${baseUrl}/bookmark/${user._id}`);
-      // ตรวจสอบว่า response มีข้อมูลบุ๊คมาร์คหรือไม่
-      if (!response.data) {
-        console.error("Error: No bookmarks data found", response.data);
+      const bookmarkIds = response.data?.bookmarks || [];
+      console.log("Bookmark IDs:", bookmarkIds);
+
+
+      setClickedBookmark(bookmarkIds); // อัปเดต state ของ bookmarks
+
+      if (bookmarkIds.length === 0) {
+        setBookmarkedModels([]);
         return;
       }
 
-      const bookmarksData = response.data;
+      // ดึงข้อมูล models ตาม bookmarkIds
+      const modelsResponse = await axios.post(`${baseUrl}/model/getByIds`, {
+        ids: bookmarkIds, // ส่ง array ของ string ตรง ๆ
+      });
 
-      // คัดกรองเฉพาะโมเดลที่บุ๊คมาร์ค (ค่าที่เป็น true)
-      const filteredBookmarks = Object.entries(bookmarksData)
-        .filter(([_, isBookmarked]) => isBookmarked) // คัดกรองเฉพาะที่เป็น true
-        .map(([name]) => name);
-
-      // ถ้าไม่มีข้อมูลบุ๊คมาร์คก็ออกจากฟังก์ชัน
-      if (filteredBookmarks.length === 0) {
-        console.warn("No valid bookmarked models found.");
-        setBookmarkedModels([]); // ตั้งค่ารายการโมเดลเป็นค่าว่าง
-        setLoading(false);
-        return;
-      }
-
-      // ดึงข้อมูลจาก Firebase Realtime Database
-      const modelsRef = ref(database, "models"); // เส้นทางที่เก็บข้อมูลโมเดลใน Realtime Database
-      const modelsSnapshot = await get(modelsRef);
-
-      if (!modelsSnapshot.exists()) {
-        console.error("Error: No models data found in database");
-        return;
-      }
-
-      const modelsData = modelsSnapshot.val();
-
-      // คัดกรองเฉพาะโมเดลที่ถูกบุ๊คมาร์คจากฐานข้อมูล
-      const modelsWithUrls = filteredBookmarks
-        .map((modelId) => {
-          const model = modelsData[modelId];
-          if (model) {
-            return {
-              id: model.id,
-              name: model.name,
-              url: model.url || "",
-              patternUrl: model.patternUrl || "",
-              imageUrl: model.imageUrl || "",
-            };
-          }
-          return null;
-        })
-        .filter((model) => model !== null); // ลบข้อมูลที่เป็น null ออก
-
-      // ตั้งค่ารายการโมเดลที่ถูกบุ๊คมาร์ค
-      // ตั้งค่ารายการโมเดลที่ถูกบุ๊คมาร์ค โดยเรียงลำดับใหม่ (ล่าสุดอยู่หน้า)
-      const sortedModels = [...modelsWithUrls].reverse();
-
-      // ถ้ามี limit ให้ตัดเฉพาะจำนวนล่าสุด
-      const limitedModels = limit ? sortedModels.slice(0, limit) : sortedModels;
-
-      setBookmarkedModels(limitedModels);
-
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching bookmarked models:", error);
-      setLoading(false);
-    }
+      console.log("Models fetched:", modelsResponse.data?.data);
+      setBookmarkedModels(modelsResponse.data?.data || []);
+    } catch (err) {
+      console.error("Error fetching bookmarked models:", err);
+    }finally {
+    setLoading(false); // ต้อง setLoading(false) หลัง fetch
+  }
   };
 
   // useEffect สำหรับดึงข้อมูลเมื่อมีการเปลี่ยนแปลง user
@@ -113,23 +57,21 @@ function BookMark({ limit = null, showViewAllButton = false }) {
   }, [user]); // useEffect นี้จะทำงานเมื่อ user เปลี่ยนแปลง
 
   // ฟังก์ชันสำหรับจัดการการคลิกที่โมเดล
-  const handleModelClick = (name, url, patternUrl) => {
-    navigate(`/Model/${name}/view`, {
-      state: { selectedModel: { name, url, patternUrl } },
+  const handleModelClick = (model) => {
+    navigate(`/Model/${model._id}/view`, {
+      state: { selectedModel: { ...model } },
     });
   };
 
-  const handleRemoveBookmark = async (modelId, modelName) => {
+  const handleRemoveBookmark = async (modelId) => {
     try {
-      // Send a DELETE request with the correct modelId
-      await axios.delete(
-        `${baseUrl}/bookmark/remove-bookmark/${user._id}/${modelId}`
-      );
+      await axios.delete(`${baseUrl}/bookmark/remove-bookmark`, {
+        data: { userId: user._id, modelId },
+      });
 
-      // Update UI to remove the model using modelId
-      setBookmarkedModels((prevModels) =>
-        prevModels.filter((model) => model.id !== modelId)
-      ); // ใช้ model.id แทน model.name
+      // อัปเดต state ทั้ง bookmarkedModels และ clickedBookmark
+      setBookmarkedModels((prev) => prev.filter((m) => m._id !== modelId));
+      setClickedBookmark((prev) => prev.filter((id) => id !== modelId));
     } catch (error) {
       console.error("Error removing bookmark:", error);
     }
@@ -143,7 +85,7 @@ function BookMark({ limit = null, showViewAllButton = false }) {
     } else {
       navigate("/"); // fallback เผื่อไม่มี role
     }
-  }
+  };
 
   return (
     <div className="Content" style={{ backgroundColor: "#fff" }}>
@@ -186,14 +128,15 @@ function BookMark({ limit = null, showViewAllButton = false }) {
                 </button>
               </div>
             )}
-            {bookmarkedModels.map((model) => (
+            {bookmarkedModels.map((model, index) => (
               <Col
                 xs={12}
                 sm={6}
                 md={6}
                 lg={3}
+                xl={3}
                 className="mb-4 py-2"
-                key={model.name}
+                key={model._id || index}
                 style={{}}
               >
                 <div className="modelrow-bookmark  h-100" style={{}}>
@@ -201,7 +144,7 @@ function BookMark({ limit = null, showViewAllButton = false }) {
                     <button
                       title="บันทึกเป็นรายการโปรด"
                       className="bookmark"
-                      onClick={() => handleRemoveBookmark(model.id, model.name)}
+                      onClick={() => handleRemoveBookmark(model._id)}
                     >
                       <img
                         className="img-bookmark"
@@ -217,27 +160,21 @@ function BookMark({ limit = null, showViewAllButton = false }) {
                     </button>
                     <img
                       className="img-bookmark"
-                      src={model.imageUrl}
+                      src={`${backendUrl}${model.imageUrl}`}
                       alt={model.name}
                       style={{
                         cursor: "pointer",
                         width: "100%",
-                        height: "20vh",
+                        height: "25vh",
                       }}
-                      onClick={() =>
-                        handleModelClick(
-                          model.name,
-                          model.url,
-                          model.patternUrl
-                        )
-                      }
+                      onClick={() => handleModelClick(model)}
                     />
                     <div
                       className="model-container h-100"
                       style={{ height: "70px", display: "flex" }}
                     >
                       <span
-                        className="modelName-span"
+                        className="modelName-span h-100"
                         style={{
                           margin: "10px 0 10px 0",
                           fontSize: "0.85rem",

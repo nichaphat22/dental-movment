@@ -71,21 +71,31 @@ const QuizList = () => {
     }
   }, [user, studentId]);
 
-  const handleAction = async (
+  const handleAction = async ({
     actionType,
     animationId = null,
+    animationTitle = null,
     quizId = null,
-    quizTitle = null
-  ) => {
-    if (!user) return; // เช็คว่า user มีค่าก่อน
+    quizTitle = null,
+    modelId = null,
+    modelTitle = null,
+    animation3DId = null,
+    animation3DTitle = null,
+  }) => {
+    if (!user) return;
 
     try {
       await axios.post(`${baseUrl}/recent`, {
-        userId: user._id, // ใช้ userId ที่ได้จาก useSelector
+        userId: user._id,
         action: actionType,
         animationId,
+        animationTitle,
         quizId,
         quizTitle,
+        modelId,
+        modelTitle,
+        animation3DId,
+        animation3DTitle,
       });
     } catch (error) {
       console.error("Error saving action:", error);
@@ -94,7 +104,12 @@ const QuizList = () => {
 
   // การคลิกเพื่อดูรายละเอียดแบบทดสอบ
   const handleQuizClick = (id, title) => {
-    handleAction("ทำแบบทดสอบ", null, id, title);
+    handleAction({
+      actionType: "ทำแบบทดสอบ",
+      quizId: id,
+      quizTitle: title,
+    });
+
     navigate(`/Quiz/${id}`);
   };
 
@@ -130,7 +145,7 @@ const QuizList = () => {
           return (
             <div
               key={quiz._id}
-              onClick={() => handleQuizClick(quiz._id)}
+              onClick={() => handleQuizClick(quiz._id, quiz.title)}
               className="relative p-2 md:p-4 bg-white lg:hover:border-b-4 lg:hover:border-purple-500 inset-shadow-xs rounded-md drop-shadow-xl transition hover:-translate cursor-pointer duration-300 ease-in-out transform hover:scale-x-105"
             >
               <div className="flex items-center">

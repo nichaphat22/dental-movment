@@ -43,6 +43,9 @@ const uploadedFile = async (req, res) => {
 
     if (fileType === "xlsx") {
       console.log("📄 ข้อมูลจากไฟล์ Excel:", data.slice(1, 4));
+      fs.unlink(filePath, (error) => {
+        if (error) console.error("❌ ลบไฟล์ไม่สำเร็จ:", error);
+      });
       return res.json(data);
     }
 
@@ -113,7 +116,10 @@ const uploadedFile = async (req, res) => {
     }
 
     await processStudents(studentLists);
-
+    // ✅ ลบไฟล์หลังจากประมวลผลเสร็จ
+    fs.unlink(filePath, (error)=> {
+      if (error) console.error("❌ ลบไฟล์ไม่สำเร็จ:", err);
+    })
     
 
     res.json({ message: "อัปโหลดและบันทึกข้อมูลสำเร็จ!" });

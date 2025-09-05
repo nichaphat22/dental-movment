@@ -1,26 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const notificationController = require("../Controllers/notificationController");
-const { verifyToken } = require("../middleware/authMiddleware")
+const { verifyToken } = require("../middleware/authMiddleware");
 // Middleware สำหรับแนบ `socket.io` ไปที่ `req.io`
 router.use((req, res, next) => {
   const io = req.app.get("socketio");
   console.log("✅ WebSocket Instance:", io);
   if (!io) {
     console.error("⚠️ WebSocket connection not initialized");
-    return res.status(500).json({ error: "WebSocket connection not initialized" });
+    return res
+      .status(500)
+      .json({ error: "WebSocket connection not initialized" });
   }
   req.io = io;
   next();
 });
 
-
-
 // 📌 API ดึงแจ้งเตือนของผู้ใช้ที่ล็อกอิน
-router.get("/user",verifyToken, notificationController.getUserNotifications);
+router.get("/user", verifyToken, notificationController.getUserNotifications);
 
 // 📌 API อัปเดตสถานะแจ้งเตือนเป็น "อ่านแล้ว"
-router.put("/mark-read", notificationController.markAsRead);
+router.put("/mark-read", verifyToken,notificationController.markAsRead);
 
 // 📌 API ลบแจ้งเตือน;
 router.delete("/:notificationId", notificationController.deleteNotification);
@@ -45,7 +45,9 @@ router.delete("/quiz/:quizId", async (req, res) => {
     res.json({ message: "ลบแจ้งเตือนที่เกี่ยวข้องกับ Quiz เรียบร้อย" });
   } catch (error) {
     console.error("❌ Error deleting quiz notifications:", error);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบแจ้งเตือนที่เกี่ยวข้องกับ Quiz" });
+    res
+      .status(500)
+      .json({ message: "เกิดข้อผิดพลาดในการลบแจ้งเตือนที่เกี่ยวข้องกับ Quiz" });
   }
 });
 

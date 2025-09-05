@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import quizService from "../../../utils/quizService";
 import { useNavigate, useLocation } from "react-router-dom";
-import defaultImage from "../../../../public/imgQuiz.svg";
+// import defaultImage from "../../../../public/imgQuiz.svg";
 import { CiEdit, CiTrash } from "react-icons/ci";
 import Swal from "sweetalert2";
 import { toast, Flip, ToastContainer } from "react-toastify";

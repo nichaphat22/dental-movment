@@ -1,7 +1,10 @@
 // import Carousel from "./Carousel";
 import React from "react";
 import { HiOutlineArrowLongRight } from "react-icons/hi2";
-import imgHome from '../../public/GroupHome.svg'
+// import imgHome from '../../public/GroupHome.svg'
+
+import imgHome from "../assets/GroupHome.svg";
+
 import {animate, motion} from "framer-motion";
 import { Link } from "react-router-dom";
 // import '../tailwind.css'

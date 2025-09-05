@@ -1,120 +1,223 @@
-const Animation3D = require('../Models/animation3DModel.js');
-const notificationController = require('../Controllers/notificationController.js');
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
+const Animation3D = require("../Models/animation3DModel");
+const notificationController = require("../Controllers/notificationController");
 
-// GET all Animations3D
-const getAnimation3D = async (req, res) => {
-    try {
-      const animation3D = await Animation3D.find().lean();
-      res.json(animation3D);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ err: error, msg: "Something went wrong!" });
+const videoDir = path.join(__dirname, "../uploads/video3d/videos");
+const imageDir = path.join(__dirname, "../uploads/video3d/images");
+
+//สร้างโฟลเดอร์อัตโนมัติ
+[videoDir, imageDir].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    if (file.fieldname === "animationFile") {
+      cb(null, videoDir);
+    } else if (file.fieldname === "imageFile") {
+      cb(null, imageDir);
     }
-  }
-  
-  // GET Animation by ID
-  const getAnimation3DById = async (req, res) => {
-    try {
-      const id = req.params._id; // ใช้ _id แทน id
-      const animation3D = await Animation3D.findById(id).lean();
-  
-      if (!animation3D) {
-        return res.status(404).json({ error: 'Animation3D not found' });
-      }
-  
-      res.json(animation3D);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Server error' });
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + file.originalname;
+    cb(null, uniqueSuffix);
+  },
+});
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (
+      file.fieldname === "animationFile" &&
+      !file.mimetype.startsWith("video/")
+    ) {
+      return cb(new Error("ต้องเป็นไฟล์วิดีโอเท่านั้น"));
     }
-  }
-  
-  // Update an existing Animation3D
-  const updateAnimation3D = async (req, res) => {
-    const id = req.params._id; // ใช้ id แทน _id
-    const { Ani3D_name, Ani3D_description } = req.body;
-    const { Ani3D_animation, Ani3D_image } = req.files;
-  
-    try {
-      let updateData = {
-        Ani3D_name, Ani3D_description,
-        Ani3D_animation: { data: Ani3D_animation[0].buffer, contentType: Ani3D_animation[0].mimetype, size: Ani3D_animation[0].size },
-        Ani3D_image: { data: Ani3D_image[0].buffer, contentType: Ani3D_image[0].mimetype, size: Ani3D_image[0].size }
-      };
-  
-  
-      await Animation3D.findByIdAndUpdate(id, updateData); // ใช้ id แทน _id
-      res.json("Updated Successfully");
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ err: err, msg: "Something went wrong!" });
+    if (file.fieldname === "imageFile" && !file.mimetype.startsWith("image/")) {
+      return cb(new Error("ต้องเป็นไฟล์รูปภาพเท่านั้น"));
     }
-  }
-  
-  
-  
-  
-  // Create a new Animation`
-// Create a new Animation
-const saveAnimation3D = async (req, res) => {
-  const { Ani3D_name, Ani3D_description } = req.body;
-  const { Ani3D_animation, Ani3D_image} = req.files;
-  const Ani3D_animationFile = req.files['Ani3D_animation'] ? req.files['Ani3D_animation'][0] : null;
-  const Ani3D_imageFile = req.files['Ani3D_image'] ? req.files['Ani3D_image'][0] : null;
+    cb(null, true);
+  },
+});
 
-  if (!Ani3D_name || !Ani3D_description || !Ani3D_animationFile || !Ani3D_imageFile) {
-      return res.status(400).json({ err: "Ani3D_name, Ani3D_description, Ani3D_animation, and Ani3D_image details are required." });
-  }
+//----------------------- API ------------------------------//
+//upload
+exports.uploadAnimation = [
+  upload.fields([
+    { name: "animationFile", maxCount: 1 },
+    { name: "imageFile", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    const { name, description } = req.body;
+    const animationFile = req.files?.animationFile?.[0];
+    const imageFile = req.files?.imageFile?.[0];
+    if (
+      !name ||
+      !description ||
+      !req.files.animationFile ||
+      !req.files.imageFile
+    ) {
+      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+    }
 
-  // // Debugging output
-  // console.log("Ani3D_animation size:", Ani3D_animationFile.size);
-  // console.log("Ani3D_image size:", Ani3D_imageFile.size);
+    const animation = await Animation3D.create({
+      name,
+      description,
+      animationFile: {
+        name: animationFile.originalname,
+        path: `uploads/video3d/videos/${animationFile.filename}`,
+        mimetype: animationFile.mimetype,
+        size: animationFile.size,
+      },
+      imageFile: {
+        name: imageFile.originalname,
+        path: `uploads/video3d/images/${imageFile.filename}`,
+        mimetype: imageFile.mimetype,
+        size: imageFile.size,
+      },
+    });
 
+    const io = req.app.get("socketio");
+
+    await notificationController.sendNotification(
+      "animation3d_add", name, animation._id, "student", io
+    );
+    await notificationController.sendNotification(
+      "animation3d_add", name, animation._id, "teacher", io
+    );
+
+    res.status(201).json({ message: "อัปโหลดสำเร็จ", data: animation });
+  },
+];
+
+// get all
+exports.getAnimations = async (req, res) => {
   try {
-      const newAnimation3D = await Animation3D.create({
-          Ani3D_name,
-          Ani3D_description,
-          Ani3D_animation: {
-              data: Ani3D_animation[0].buffer,
-              contentType: Ani3D_animation[0].mimetype,
-              size: Ani3D_animation[0].size
-          },
-          Ani3D_image: {
-              data: Ani3D_image[0].buffer,
-              contentType: Ani3D_image[0].mimetype,
-              size: Ani3D_image[0].size
-          }
-      });
-      console.log("Saved Successfully...");
-
-      await notificationController.sendNotification("lesson_add", Ani3D_name, newAnimation3D._id, "student", req.io);
-      await notificationController.sendNotification("lesson_add", Ani3D_name, newAnimation3D._id, "teacher", req.io);
-
-      
-      res.status(201).json(newAnimation3D);
-  } catch (error) {
-      console.error("Error saving animation:", error);
-      res.status(500).json({ err: error.message, msg: "Something went wrong!" });
+    const animations = await Animation3D.find();
+    res.json(animations);
+  } catch (err) {
+    res.status(500).json({ message: "โหลดข้อมูลล้มเหลว", error: String(err) });
   }
 };
 
-
-
-  
-  
-  
-  
-  // Delete an Animation
-  const deleteAnimation3D = async (req, res) => {
-    const id = req.params._id;
-  
-    try {
-      await Animation3D.findByIdAndDelete(id);
-      res.json("Delete Successfully");
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ err: err, msg: "Something went wrong!" });
-    }
+//get by ID
+exports.getAnimationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const animation = await Animation3D.findById(id);
+    if (!animation) return res.status(404).json({ message: "ไม่พบข้อมูล" });
+    res.json(animation);
+  } catch (err) {
+    res.status(500).json({ message: "โหลดข้อมูลล้มเหลว", error: String(err) });
   }
+};
 
-  module.exports = {getAnimation3D, getAnimation3DById, updateAnimation3D, saveAnimation3D, deleteAnimation3D};
+// update
+exports.updateAnimation = [
+  upload.fields([
+    { name: "animationFile", maxCount: 1 },
+    { name: "imageFile", maxCount: 1 },
+  ]),
+  async (req, res) => {
+    try {
+      const { name, description } = req.body;
+      const { id } = req.params;
+
+      const animation = await Animation3D.findById(id);
+      if (!animation) return res.status(404).json({ message: "ไม่พบข้อมูล"})
+
+      const updateData = {};
+
+      if (name) updateData.name = name;
+      if (description) updateData.description = description;
+
+      // อัปเดตไฟล์วิดีโอ
+      if (req.files.animationFile) {
+        const file = req.files.animationFile[0];
+        // ลบไฟล์เก่า
+        if (animation.animationFile?.path) {
+          const oldVideoPath = path.join(__dirname, "..", animation.animationFile.path);
+          if (fs.existsSync(oldVideoPath)) fs.unlinkSync(oldVideoPath);
+        }
+        // อัปเดตไฟล์ใหม่
+        updateData.animationFile = {
+          name: file.originalname,
+          path: `uploads/video3d/videos/${file.filename}`,
+          mimetype: file.mimetype,
+          size: file.size,
+        };
+      }
+
+      // อัปเดตไฟล์รูปภาพ
+      if (req.files.imageFile) {
+        const file = req.files.imageFile[0];
+        // ลบไฟล์เก่า
+        if (animation.imageFile?.path) {
+          const oldImagePath = path.join(__dirname, "..", animation.imageFile.path);
+          if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
+        }
+
+        // อัปเดตไฟล์ใหม่
+        updateData.imageFile = {
+          name: file.originalname,
+          path: `uploads/video3d/images/${file.filename}`,
+          mimetype: file.mimetype,
+          size: file.size,
+        };
+      }
+
+      const updateAnimation = await Animation3D.findByIdAndUpdate(
+        id,
+        updateData,
+        { new: true }
+      );
+
+      if (!updateAnimation) {
+        return res.status(404).json({ message: "ไม่พบข้อมุล" });
+      }
+
+      const io = req.app.get("socketio");
+
+    await notificationController.sendNotification(
+      "animation3d_update", name, updateAnimation._id, "student", io
+    );
+    await notificationController.sendNotification(
+      "animation3d_update", name, updateAnimation._id, "teacher", io
+    );
+
+      res.json({ message: "อัปเดตสำเร็จ", data: updateAnimation });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+    }
+  },
+];
+
+//delete
+exports.deleteAnimation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const animation = await Animation3D.findById(id);
+
+    if (!animation) {
+      return res.status(404).json({ message: "ไม่พบข้อมูล" });
+    }
+
+    // ใช้ path ที่เก็บใน object
+    const videoPath = path.join(__dirname, "..", animation.animationFile.path);
+    if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
+
+    const imagePath = path.join(__dirname, "..", animation.imageFile.path);
+    if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+
+    await Animation3D.findByIdAndDelete(id);
+
+    res.json({ message: "ลบสำเร็จ" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+  }
+};

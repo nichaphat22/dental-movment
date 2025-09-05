@@ -11,47 +11,71 @@ import { baseUrl } from "../../utils/services";
 
 // Card สำหรับแสดงข้อมูลของการกระทำ
 const RecentActionCard = ({ action, handleAction }) => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    
   // ฟังก์ชันจัดการการคลิกปุ่ม
   const handleClick = () => {
     if (action.animationId) {
-      navigate(`/animation/view/${action.animationId._id}`); // ไปที่หน้า Animation
+      navigate(`/animation/view/${action.animationId._id}`);
     } else if (action.quizId) {
-      navigate(`/Quiz/${action.quizId._id}`); // ไปที่หน้า Quiz
-    } else {
-      navigate("/3d-media"); // ไปที่หน้า 3D Media ถ้าไม่มี animationId หรือ quizId
+      navigate(`/Quiz/${action.quizId._id}`);
+    } else if (action.modelId) {
+      navigate(`/Model/${action.modelId._id}/view`,{
+        state: { selectedModel: action.modelId }
+      });
+    } else if (action.animation3DId) {
+      navigate(`/animation3d/${action.animation3DId._id}/view`,{
+        state: action.animation3DId,
+      });
     }
+    console.log(action.modelId._id);
+    
 
     // เรียกใช้ handleAction หากต้องการส่งข้อมูลไปยัง backend
-    handleAction(action.action, action.animationId?._id, action.quizId?._id);
+    handleAction({
+      actionType: action.action,
+      animationId: action.animationId?._id,
+      quizId: action.quizId?._id,
+      modelId: action.modelId?._id,
+      animation3DId: action.animation3DId?._id,
+    });
   };
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-      <h3 className="text-2xl text-start font-semibold mb-1">{action.action}</h3>
-      <p className="text-base  text-gray-600">
+      <h3 className="text-2xl text-start font-semibold mb-1">
+        {action.action}
+      </h3>
+      <p className="text-base text-gray-600">
         {action.animationId
-          ? `📖 บทเรียน: ${action.animationId.Ani_name}`
+          ? `📖 บทเรียน: ${action.animationId?.Ani_name || ""}`
           : action.quizId
-          ? `📝 แบบทดสอบ: ${action.quizId.title}`
-          : "📌 สื่อ 3D"}
+            ? `📝 แบบทดสอบ: ${action.quizId?.title || ""}`
+            : action.modelId
+              ? `📌 สื่อ 3D: ${action.modelId?.name || ""}`
+              : action.animation3DId
+                ? `📖 บทเรียน: ${action.animation3DId?.name || ""}`
+                : ""}
       </p>
-      <p className="text-xs text-gray-500 ">🕒 {moment(action.createdAt).fromNow()}</p>
+
+      <p className="text-xs text-gray-500 ">
+        🕒 {moment(action.createdAt).fromNow()}
+      </p>
       <div className="flex justify-end m-2">
-      <button
-        onClick={handleClick} // เรียกใช้ handleAction เมื่อคลิก
-        className=" mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-      >
-        {action.animationId
-          ? "ดูสื่อการสอน"
-          : action.quizId
-          ? "ทำแบบทดสอบ"
-          : "ดูสื่อ 3D"}
-      </button>
-        
+        <button
+          onClick={handleClick} // เรียกใช้ handleAction เมื่อคลิก
+          className=" mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          {action.animationId
+            ? "Biomechanical consideration"
+            : action.quizId
+              ? "แบบทดสอบ"
+              : action.modelId
+                ? "RPD sample case"
+                : action.animation3DId
+                  ? "การเคลื่อนที่ของฟันเทียม"
+                  : ""}
+        </button>
       </div>
-      
     </div>
   );
 };
@@ -75,13 +99,23 @@ const Recents = ({ userId }) => {
   }, [userId]);
 
   // ฟังก์ชันบันทึกการกระทำ
-  const handleAction = async (actionType, animationId = null, quizId = null) => {
+  const handleAction = async ({
+    actionType,
+    animationId = null,
+    quizId = null,
+    modelId = null,
+    animation3DId = null,
+  }) => {
+    if (!userId) return; // ป้องกัน undefined
+
     try {
       await axios.post(`${baseUrl}/recent`, {
         userId,
-        action: actionType,  // เช่น "ดูสื่อการสอน" หรือ "ทำแบบทดสอบ"
-        animationId,  // หากมี
-        quizId,  // หากมี
+        action: actionType,
+        animationId,
+        quizId,
+        modelId,
+        animation3DId,
       });
     } catch (error) {
       console.error("Error saving action:", error);

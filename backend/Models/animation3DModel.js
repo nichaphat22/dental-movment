@@ -1,25 +1,33 @@
 const mongoose = require("mongoose");
 
-const Animation3DSchema = new mongoose.Schema({
-    Ani3D_name: {
-        type: String,
-        required: true,
+const Animation3DSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
-    Ani3D_animation: {
-        data: Buffer,
-        contentType: String,
-        size: Number
+    description: {
+      type: String,
+      required: true,
     },
-    Ani3D_image: {
-        data: Buffer,
-        contentType: String,
-        size: Number
+    animationFile: {
+      name: String ,  
+      path: { type: String, required: true },   
+      mimetype: { type: String },
+      size: { type: Number }, // ไบต์
+      duration: { type: Number },
     },
-    Ani3D_description: {
-        type: String
-    },
-});
+    imageFile: {
+      name: String ,  
+      path: { type: String, required: true },   
+      mimetype: { type: String },
+      size: { type: Number }, // ไบต์
 
-const animation3DModel = mongoose.model("Animation3D", Animation3DSchema);
+    },
+  },
+  { timestamps: true }
+);
 
-module.exports = animation3DModel;
+module.exports = mongoose.model("Animation3D", Animation3DSchema);

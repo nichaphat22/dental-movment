@@ -135,13 +135,13 @@ function App () {
           <Route path="/AR-RPD" element={user ? <ARModel /> : <Login />} />
 
           <Route element={<ProtectedRoute allowedRoles={['teacher', 'student']}/>}>
-              <Route path="/Model-teacher/:name/view" element={ <ModelT /> } />
-              <Route path="/animation-teacher/view/:id" element={ <BioemchanT /> } />
+              <Route path="/Model-teacher/:id/view" element={ <ModelT /> } />
+              <Route path="/animation/view/:_id" element={ <BioemchanT /> } />
               <Route path="/animation3d-teacher/:name/view" element={ <MomentT /> } />
 
-               <Route path="/Model/:name/view" element={ <Model /> } />
+               <Route path="/Model/:id/view" element={ <Model /> } />
               <Route path="/animation/view/:id" element={ <ViewBiomechanicalConsideration /> } />
-              <Route path="/animation3d/:name/view" element={ <ViewMovementOfRPD /> } />
+              <Route path="/animation3d/:id/view" element={ <ViewMovementOfRPD /> } />
 
               <Route path="/Biomechanical-consideration" element={ <BiomechanicalConsiderationStudent /> } />
               <Route path="/Possible-Movement-Of-RPD" element={ <PossibleMovementOfRPDStudent/> }/>
@@ -188,7 +188,7 @@ function App () {
               <Route path="/Add-Biomechanical-consideration" element={ <AddBiomechanicalConsideration /> } />
               <Route path="/Edit-Biomechanical-consideration/:id" element={ <EditBiomechanicalConsideration /> } />
               <Route path="/Add-MovementOfRPD" element={ <AddMovementOfRPD /> } />
-              <Route path="/Edit-MovementOfRPD/:name/edit" element={ <Edit_MovementOfRPD /> } />
+              <Route path="/Edit-MovementOfRPD/:id/edit" element={ <Edit_MovementOfRPD /> } />
 
               <Route path="/ListQuiz-teacher" element={ <QuizList/>}/>
               <Route path='/Add-Quiz' element={ <CreateQuizT/>}/>           

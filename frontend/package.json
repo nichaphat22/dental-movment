@@ -41,6 +41,7 @@
     "core-js": "^3.37.1",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.18",
     "dotenv": "^16.4.5",
     "emoji-picker-react": "^4.12.2",
     "express": "^4.21.1",

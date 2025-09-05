@@ -1,46 +1,29 @@
-const Animation = require('../Models/animationModel.js');
-const multer = require('multer');
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 20 * 1024 * 1024, // 20 MB
-  },
-});
+const Animation = require("../Models/animationModel.js");
+const fs = require("fs").promises;
+// const path = (require = require("path"));
+const path = require("path");
+const notificationController = require("../Controllers/notificationController.js");
 
 // GET all Animations with pagination
 const getAnimation = async (req, res) => {
   try {
     const { lastCreatedAt, limit = 10 } = req.query;
     const query = {};
-
-    // Ensure limit is a valid number and doesn't exceed a max limit
-    const maxLimit = 50; // Set a max limit for pagination
+    const maxLimit = 50;
     const paginationLimit = Math.min(Number(limit), maxLimit);
 
-    // Handle lastCreatedAt pagination
     if (lastCreatedAt) {
       const lastCreatedDate = new Date(lastCreatedAt);
-      if (!isNaN(lastCreatedDate)) {
-        query.createdAt = { $lt: lastCreatedDate };
-      } else {
-        return res.status(400).json({ msg: 'Invalid lastCreatedAt format' });
-      }
+      if (!isNaN(lastCreatedDate)) query.createdAt = { $lt: lastCreatedDate };
+      else return res.status(400).json({ msg: "Invalid lastCreatedAt format" });
     }
 
-    console.time("APIRequest");
-
-    // Fetch animations from the database
     const animations = await Animation.find(query)
-      .select('Ani_name Ani_image createdAt')
+      .select("Ani_name Ani_image createdAt")
       .sort({ createdAt: -1 })
       .limit(paginationLimit)
       .lean();
 
-    console.timeEnd("APIRequest");
-
-    // Return the animations as JSON
-    res.setHeader('Content-Type', 'application/json');
     res.json(animations);
   } catch (error) {
     console.error(error);
@@ -51,17 +34,16 @@ const getAnimation = async (req, res) => {
 // GET Animation by ID
 const getAnimationById = async (req, res) => {
   try {
-    const id = req.params._id; // ใช้ _id แทน id
-    const animation = await Animation.findById(id).lean(); // ใช้ .lean()
+    const id = req.params._id;
+    const animation = await Animation.findById(id).lean();
 
-    if (!animation) {
-      return res.status(404).json({ error: 'Animation not found' });
-    }
+    if (!animation)
+      return res.status(404).json({ error: "Animation not found" });
 
     res.json(animation);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: error.message || 'Server error' });
+    res.status(500).json({ error: error.message || "Server error" });
   }
 };
 
@@ -71,7 +53,7 @@ const updateAnimation = async (req, res) => {
   const { Ani_name, Ani_description } = req.body;
 
   try {
-    const animation = await Animation.findById(id).lean();
+    const animation = await Animation.findById(id);
 
     if (!animation) {
       return res.status(404).json({ msg: "Animation not found" });
@@ -84,37 +66,37 @@ const updateAnimation = async (req, res) => {
 
     if (req.files) {
       const { Ani_animation, Ani_image } = req.files;
-      
-      const filePromises = [];
+
+      // const filePromises = [];
 
       if (Ani_animation) {
-        filePromises.push(
-          (async () => {
-            updateData.Ani_animation = {
-              name: encodeURIComponent(Ani_animation[0].originalname),
-              data: Ani_animation[0].buffer,
-              contentType: Ani_animation[0].mimetype,
-              size: Ani_animation[0].size,
-            };
-          })()
-        );
+        // ลบไฟล์เก่า
+        if (animation.Ani_animation?.path) {
+          await fs
+            .unlink(path.resolve(animation.Ani_animation.path))
+            .catch(() => {});
+        }
+        updateData.Ani_animation = {
+          name: Ani_animation[0].originalname,
+          path: `uploads/animation2d/animations/${Ani_animation[0].filename}`,
+          contentType: Ani_animation[0].mimetype,
+          size: Ani_animation[0].size,
+        };
       }
 
       if (Ani_image) {
-        filePromises.push(
-          (async () => {
-            updateData.Ani_image = {
-              name: encodeURIComponent(Ani_image[0].originalname),
-              data: Ani_image[0].buffer,
-              contentType: Ani_image[0].mimetype,
-              size: Ani_image[0].size,
-            };
-          })()
-        );
+        if (animation.Ani_image?.path) {
+          await fs
+            .unlink(path.resolve(animation.Ani_image.path))
+            .catch(() => {});
+        }
+        updateData.Ani_image = {
+          name: Ani_image[0].originalname,
+          path: `uploads/animation2d/images/${Ani_image[0].filename}`,
+          contentType: Ani_image[0].mimetype,
+          size: Ani_image[0].size,
+        };
       }
-
-      // รอให้ไฟล์ทั้งหลายเสร็จ
-      await Promise.all(filePromises);
     }
 
     if (Object.keys(updateData).length === 0) {
@@ -128,6 +110,23 @@ const updateAnimation = async (req, res) => {
     if (!updatedAnimation) {
       return res.status(500).json({ msg: "Failed to update animation." });
     }
+    const io = req.app.get("socketio");
+
+    // 🔔 ส่งแจ้งเตือนให้ student & teacher
+    await notificationController.sendNotification(
+      "animation2d_update",
+      updatedAnimation.Ani_name,
+      updatedAnimation._id,
+      "student",
+      io
+    );
+    await notificationController.sendNotification(
+      "animation2d_update",
+      updatedAnimation.Ani_name,
+      updatedAnimation._id,
+      "teacher",
+      io
+    );
 
     res.json({ msg: "Animation updated successfully", updatedAnimation });
   } catch (err) {
@@ -136,72 +135,55 @@ const updateAnimation = async (req, res) => {
   }
 };
 
-
 // Create a new Animation
 const saveAnimation = async (req, res) => {
   const { Ani_name, Ani_description } = req.body;
-  const { Ani_animation, Ani_image } = req.files;
-
-  let imageNameUTF8 = Buffer.from(Ani_image[0].originalname, "latin1").toString("utf8").trim();
-  let animationNameUTF8 = Buffer.from(Ani_animation[0].originalname, "latin1").toString("utf8").trim();
-
-  imageNameUTF8 = imageNameUTF8.replace(/(\d{4})-0 (\d{2}-\d{2})/, "$1-$2");
-  animationNameUTF8 = animationNameUTF8.replace(/(\d{4})-0 (\d{2}-\d{2})/, "$1-$2");
-
-  console.log("Fixed Image Name:", imageNameUTF8);
-  console.log("Fixed Animation Name:", animationNameUTF8);
+  const Ani_image = req.files?.Ani_image?.[0];
+  const Ani_animation = req.files?.Ani_animation?.[0];
 
   if (!Ani_name || !Ani_description || !Ani_animation || !Ani_image) {
     return res.status(400).json({ err: "All fields are required." });
   }
 
   try {
-    const filePromises = [];
-
-    if (Ani_animation) {
-      filePromises.push(
-        (async () => {
-          return {
-            Ani_animation: {
-              name: animationNameUTF8,  
-              data: Ani_animation[0].buffer, 
-              contentType: Ani_animation[0].mimetype, 
-              size: Ani_animation[0].size
-            }
-          };
-        })()
-      );
-    }
-
-    if (Ani_image) {
-      filePromises.push(
-        (async () => {
-          return {
-            Ani_image: {
-              name: imageNameUTF8,  
-              data: Ani_image[0].buffer, 
-              contentType: Ani_image[0].mimetype, 
-              size: Ani_image[0].size
-            }
-          };
-        })()
-      );
-    }
-
-    // รอให้ไฟล์ทั้งหลายเสร็จ
-    const fileData = await Promise.all(filePromises);
-
-    // Combine file data with the rest of the body
-    const newAnimationData = {
+    const newAnimation = await Animation.create({
       Ani_name,
       Ani_description,
-      ...fileData[0],
-      ...fileData[1]
-    };
+      Ani_image: {
+        name: Ani_image.originalname,
+        path: `uploads/animation2d/images/${Ani_image.filename}`,
+        contentType: Ani_image.mimetype,
+        size: Ani_image.size,
+      },
+      Ani_animation: {
+        name: Ani_animation.originalname,
+        path: `uploads/animation2d/animations/${Ani_animation.filename}`,
+        contentType: Ani_animation.mimetype,
+        size: Ani_animation.size,
+      },
+    });
 
-    const newAnimation = await Animation.create(newAnimationData);
+    const io = req.app.get("socketio");
 
-    res.status(201).json({ message: "Animation saved successfully!", newAnimation });
+    // 🔔 ส่งแจ้งเตือนให้ student & teacher
+    await notificationController.sendNotification(
+      "animation2d_add",
+      Ani_name,
+      newAnimation._id,
+      "student",
+      io
+    );
+    await notificationController.sendNotification(
+      "animation2d_add",
+      Ani_name,
+      newAnimation._id,
+      "teacher",
+      io
+    );
+
+    res
+      .status(201)
+      .json({ message: "Animation saved successfully!", newAnimation });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to save animation" });
@@ -213,7 +195,18 @@ const deleteAnimation = async (req, res) => {
   const id = req.params._id;
 
   try {
+    const animation = await Animation.findById(id);
+    if (!animation) {
+      return res.status(404).json({ msg: "Animation not found" });
+    }
+    if (animation.Ani_image?.path) {
+      await fs.unlink(animation.Ani_image.path).catch(() => {});
+    }
+    if (animation.Ani_animation?.path) {
+      await fs.unlink(animation.Ani_animation?.path).catch(() => {});
+    }
     await Animation.findByIdAndDelete(id);
+
     res.json("Delete Successfully");
   } catch (err) {
     console.error(err);
@@ -221,4 +214,10 @@ const deleteAnimation = async (req, res) => {
   }
 };
 
-module.exports = { getAnimation, getAnimationById, updateAnimation, saveAnimation, deleteAnimation };
+module.exports = {
+  getAnimation,
+  getAnimationById,
+  updateAnimation,
+  saveAnimation,
+  deleteAnimation,
+};
