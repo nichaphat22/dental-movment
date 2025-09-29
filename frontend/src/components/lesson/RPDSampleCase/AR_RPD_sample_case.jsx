@@ -1,47 +1,57 @@
-import React, { useEffect, useState, useRef } from 'react'; 
+import React, { useEffect, useState, useRef } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import * as THREE from 'three';
-import { useFrame } from '@react-three/fiber'; // Import useFrame from @react-three/fiber
+import { useFrame } from '@react-three/fiber';
+
+// ทำเป็น global loader ใช้ร่วมกัน
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
+
+const gltfLoader = new GLTFLoader();
+gltfLoader.setDRACOLoader(dracoLoader);
 
 function AR_RPD_sample_case({ modelUrl, scale, position = [0, 0, 0], rotation = [0, 0, 0] }) {
   const [model, setModel] = useState(null);
-  const modelRef = useRef(null); // ใช้ useRef สำหรับเก็บโมเดล
-  const loader = new GLTFLoader();
+  const modelRef = useRef(null);
 
   useEffect(() => {
-    if (modelUrl) {
-      const loadModel = async () => {
-        try {
-          const gltf = await loader.loadAsync(modelUrl);
-          const loadedModel = gltf.scene;
+    if (!modelUrl) return;
 
-          // กำหนด scale ของโมเดล
-          loadedModel.scale.set(scale, scale, scale);
+    let isMounted = true;
 
-          // กำหนดตำแหน่ง
-          loadedModel.position.set(...position);
+    gltfLoader.load(
+      modelUrl,
+      (gltf) => {
+        if (!isMounted) return;
+        const loadedModel = gltf.scene;
 
-          // กำหนดการหมุน
-          loadedModel.rotation.set(...rotation);
+        loadedModel.scale.set(scale, scale, scale);
+        loadedModel.position.set(...position);
+        loadedModel.rotation.set(...rotation);
 
-          modelRef.current = loadedModel; // ใช้ useRef แทนการใช้ state
-          setModel(loadedModel);
-          console.log("Model loaded at:", position);
-        } catch (error) {
-          console.error("Error loading model:", error);
-        }
-      };
+        modelRef.current = loadedModel;
+        setModel(loadedModel);
 
-      loadModel();
-    }
+        console.log("Model loaded at:", position);
+      },
+      undefined,
+      (error) => {
+        console.error("Error loading model:", error);
+      }
+    );
 
-    // Cleanup function to dispose of the model when it's no longer needed
     return () => {
+      isMounted = false;
       if (modelRef.current) {
         modelRef.current.traverse((child) => {
           if (child.isMesh) {
-            child.geometry.dispose();  // Dispose geometry
-            child.material.dispose();   // Dispose material
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((mat) => mat.dispose());
+            } else {
+              child.material.dispose();
+            }
           }
         });
         modelRef.current = null;
@@ -49,18 +59,14 @@ function AR_RPD_sample_case({ modelUrl, scale, position = [0, 0, 0], rotation = 
     };
   }, [modelUrl, scale, position, rotation]);
 
-   // ใช้ useFrame เพื่อหมุนโมเดลอัตโนมัติ
-   useFrame(() => {
+  useFrame(() => {
     if (modelRef.current) {
-      modelRef.current.rotation.y += 0.005; // หมุน 0.01 radian ทุกๆ เฟรม
+      modelRef.current.rotation.y += 0.005;
     }
   });
 
-  return (
-    <>
-      {model && <primitive object={model} />}
-    </>
-  );
+  return <>{model && <primitive object={model} />}</>;
 }
+
 
 export default AR_RPD_sample_case;
