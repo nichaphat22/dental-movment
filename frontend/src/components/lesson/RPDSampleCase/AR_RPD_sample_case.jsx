@@ -59,11 +59,7 @@ function AR_RPD_sample_case({ modelUrl, scale, position = [0, 0, 0], rotation = 
     };
   }, [modelUrl, scale, position, rotation]);
 
-  useFrame(() => {
-    if (modelRef.current) {
-      modelRef.current.rotation.y += 0.005;
-    }
-  });
+  
 
   return <>{model && <primitive object={model} />}</>;
 }

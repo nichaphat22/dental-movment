@@ -12,7 +12,7 @@ function ARScene() {
   const [isARActive, setIsARActive] = useState(true);
   const navigate = useNavigate();
   const [scale, setScale] = useState(1);
-  const [modelVisible, setModelVisible] = useState(false);
+  // const [modelVisible, setModelVisible] = useState(false);
   const [visibleMarkers, setVisibleMarkers] = useState({});
 
   // Fetch model data from backend
@@ -144,6 +144,7 @@ function ARScene() {
           {memoizedPatterns.map((pattern, index) => (
             <ARMarker
               key={index}
+              type="pattern"
               patternUrl={pattern.patternUrl}
               onMarkerFound={() => onMarkerFound(pattern)}
               onMarkerLost={() => onMarkerLost(pattern)}
