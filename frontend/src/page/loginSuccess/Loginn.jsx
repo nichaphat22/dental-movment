@@ -41,8 +41,7 @@ const Loginn = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const {  } = useAuth();  // ใช้ฟังก์ชัน setUserData จาก context
-  // const { user,setUser } = useContext(AuthContext);
+
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -110,73 +109,6 @@ const Loginn = () => {
     }
   }, []);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-
-  //   try {
-  //     const res = await API.post(
-  //       `${import.meta.env.VITE_APP_API_URL}/api/auth/login`,
-  //       { email, password },
-  //       { headers: { "Content-Type": "application/json" } }
-  //     );
-
-  //     const { token } = res.data;
-  //     if (!token || typeof token !== "string") {
-  //       throw new Error("Invalid token received");
-  //     }
-
-  //     const decoded = jwtDecode(token);
-
-  //     if (decoded.exp * 1000 < Date.now()) {
-  //       console.error("❌ Token expired");
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     localStorage.setItem("token", token);
-  //     dispatch(loginSuccess({ token, user: decoded }));
-  //     setUser(decoded);  // ส่งข้อมูลผู้ใช้ไปยัง context
-
-  //     if (decoded.role === "teacher") {
-  //       localStorage.setItem("teacherId", decoded._id);
-  //       navigate("/dashboard-teacher");
-  //     } else if (decoded.role === "student") {
-  //       navigate("/dashboard-student");
-  //     } else {
-  //       navigate("/");
-  //     }
-
-  //   } catch (error) {
-  //     console.error("Login Failed:", error.response?.data || error.message);
-  //     setLoading(false);
-  //   }
-  // };
-  // <div className="mt-16">
-  //   <h2>Login</h2>
-  //   {/* onSubmit={handleSubmit} */}
-  //   <form >
-  //     <input
-  //       type="email"
-  //       placeholder="Email"
-  //       value={email}
-  //       onChange={(e) => setEmail(e.target.value)}
-  //       required
-  //     />
-  //     <input
-  //       type="password"
-  //       placeholder="Password"
-  //       value={password}
-  //       onChange={(e) => setPassword(e.target.value)}
-  //       required
-  //     />
-  //     <button type="submit" disabled={loading}>
-  //       {loading ? "Logging in..." : "Login"}
-  //     </button>
-  //   </form>
-
-  // </div>
-
   return (
     <section className="border-none bg-white overflow-hidden relative">
       <div className="container grid grid-cols-1 md:grid-cols-2 min-h-[650px]">
@@ -203,7 +135,7 @@ const Loginn = () => {
               className="flex justify-center md:justify-start
                             "
             >
-              <a href="/api/auth/google">
+              <a href={`${import.meta.env.VITE_API_URL}/api/auth/google`} className="group flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition duration-300">
                 <button>Login with Google</button>
               </a>
 
