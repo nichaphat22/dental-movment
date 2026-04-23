@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const API_URL =
-  import.meta.env.VITE_APP_NOTIFICATION_API_URL ||
-  "http://localhost:8080/api/notifications";
+  import.meta.env.VITE_APP_NOTIFICATION_API_URL
 
 export default API_URL;
 

@@ -1,13 +1,6 @@
-// https://project-it-410215.uc.r.appspot.com/api
-// <<<<<<< HEAD
-// export const baseUrl = "https://backend-dental-production.up.railway.app/api";
-// export const baseUrl = "https://project-it-410215.uc.r.appspot.com/api";
-// =======
-export const baseUrl = "https://dental-movment.onrender.com/api";
-export const backendUrl = "https://dental-movment.onrender.com"
-// export const baseUrl = "https://dental-movmentofrpd.up.railway.app/api";
-// export const baseUrl = "https://backend-dental-production.up.railway.app/api";
-// >>>>>>> 17e3e66933ba71d74a2e3eb14960d1a5350d1d3a
+
+export const baseUrl = `${import.meta.env.VITE_API_URL}/api`;
+export const backendUrl = import.meta.env.VITE_API_URL;
 
 export const postRequest = async (url, body,token) => {
     const response = await fetch(url, {
