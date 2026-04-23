@@ -48,10 +48,8 @@ app.use(
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "https://itweb0867.cpkkuhost.com",
-    "http://localhost:8080",
-    "https://dental-movmentofrpd.up.railway.app",
-    "https://dentalonlinelearning-production.up.railway.app",
+    "https://dental-movment.vercel.app",
+   
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: [
