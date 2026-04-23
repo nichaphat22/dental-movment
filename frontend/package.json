@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node ./node_modules/vite/bin/vite.js build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "nodemon index.js"
@@ -34,9 +34,11 @@
     "@reduxjs/toolkit": "^2.2.7",
     "add": "^2.0.6",
     "axios": "^1.7.8",
+    "baseline-browser-mapping": "^2.10.0",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "bootstrap": "^5.3.3",
+    "caniuse-lite": "^1.0.30001774",
     "cookie-session": "^2.1.0",
     "core-js": "^3.37.1",
     "cors": "^2.8.5",

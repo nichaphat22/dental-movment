@@ -11,11 +11,12 @@ function ARScene() {
   const [patterns, setPatterns] = useState([]);
   const [isARActive, setIsARActive] = useState(true);
   const navigate = useNavigate();
-  const [scale, setScale] = useState(1);
-  // const [modelVisible, setModelVisible] = useState(false);
   const [visibleMarkers, setVisibleMarkers] = useState({});
 
-  // Fetch model data from backend
+  const targetSize = 100;   // normalize ขนาดโมเดล
+  const baseScale = 0.05;  // ปรับรวม scale สำหรับ AR
+
+  // Fetch model data
   useEffect(() => {
     const fetchModelData = async () => {
       try {
@@ -40,55 +41,25 @@ function ARScene() {
 
   const memoizedPatterns = useMemo(() => patterns, [patterns]);
 
-  // Handle AR close button
+  // Close AR
   const handleClose = () => {
     setIsARActive(false);
-
     setTimeout(() => {
-      if (window.history.length > 1) {
-        navigate(-1);
-      } else {
-        window.close();
-      }
+      if (window.history.length > 1) navigate(-1);
+      else window.close();
     }, 300);
 
-    const videoElement = document.querySelector("video");
-    if (videoElement?.srcObject) {
-      videoElement.srcObject.getTracks().forEach((track) => track.stop());
-    }
+    const video = document.querySelector("video");
+    if (video?.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
 
     const arVideo = document.getElementById("arjs-video");
-    if (arVideo) {
-      arVideo.srcObject = null;
-      arVideo.remove();
-    }
+    if (arVideo) { arVideo.srcObject = null; arVideo.remove(); }
 
     const arCanvas = document.querySelector("canvas");
     if (arCanvas) arCanvas.remove();
   };
 
-  // Responsive scale
-  useEffect(() => {
-    const updateScale = () => {
-      const windowWidth = window.innerWidth;
-      setScale(windowWidth < 1024 ? 0.025 : 0.01);
-    };
-    updateScale();
-    window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
-
-  // Initialize camera stream
-  useEffect(() => {
-    navigator.mediaDevices
-      .getUserMedia({ video: { width: { max: 1280 }, height: { max: 720 } } })
-      .then((stream) => {
-        const videoElement = document.querySelector("video");
-        if (videoElement) videoElement.srcObject = stream;
-      })
-      .catch((err) => console.error("Error accessing camera:", err));
-  }, []);
-
+  // Camera settings
   const [cameraSettings, setCameraSettings] = useState({
     fov: 50,
     aspect: window.innerWidth / window.innerHeight,
@@ -96,10 +67,9 @@ function ARScene() {
     far: 10,
   });
 
-  // Update camera aspect on resize
   useEffect(() => {
     const handleResize = () => {
-      setCameraSettings((prev) => ({
+      setCameraSettings(prev => ({
         ...prev,
         aspect: window.innerWidth / window.innerHeight,
       }));
@@ -110,11 +80,10 @@ function ARScene() {
 
   // Marker handlers
   const onMarkerFound = (pattern) => {
-    setVisibleMarkers((prev) => ({ ...prev, [pattern.patternUrl]: true }));
+    setVisibleMarkers(prev => ({ ...prev, [pattern.patternUrl]: true }));
   };
-
   const onMarkerLost = (pattern) => {
-    setVisibleMarkers((prev) => ({ ...prev, [pattern.patternUrl]: false }));
+    setVisibleMarkers(prev => ({ ...prev, [pattern.patternUrl]: false }));
   };
 
   return (
@@ -152,7 +121,8 @@ function ARScene() {
               {visibleMarkers[pattern.patternUrl] && (
                 <AR_RPD_sample_case
                   modelUrl={pattern.modelUrl}
-                  scale={scale}
+                  targetSize={targetSize}
+                  baseScale={baseScale}
                   position={[0, 1, 0]}
                 />
               )}

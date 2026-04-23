@@ -111,6 +111,9 @@ app.use("/api/bookmark", bookmarkRoute);
 
 app.set("socketio", io);
 
+console.log("DBURI:", process.env.DBURI);
+console.log("DB state before connect:", mongoose.connection.readyState);
+
 // MongoDB Connection
 mongoose
   .connect(process.env.DBURI)
@@ -119,6 +122,7 @@ mongoose
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "./dist/index.html"));
 });
+console.log("DBURI:", process.env.DBURI);
 
 io.on("connection", (socket) => {
   console.log("New connection", socket.id);
