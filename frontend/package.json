@@ -91,6 +91,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.60.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
