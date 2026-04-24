@@ -135,7 +135,7 @@ const Loginn = () => {
               className="flex justify-center md:justify-start
                             "
             >
-              <a href={`${import.meta.env.VITE_API_URL}/api/auth/google`} className="group flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 transition duration-300">
+              <a href={`${import.meta.env.VITE_API_URL}/api/auth/google`}>
                 <button>Login with Google</button>
               </a>
 

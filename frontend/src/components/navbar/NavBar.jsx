@@ -87,7 +87,7 @@ const NavBar = () => {
                 }
               >
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                  src="/DENTISTRY_KKU.svg.png"
                   alt="Logo"
                   width="50"
                   height="50"
@@ -127,7 +127,7 @@ const NavBar = () => {
               }
             >
               <img
-                src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                src="/DENTISTRY_KKU.svg.png"
                 alt="Logo"
                 width="50"
                 height="50"
@@ -166,13 +166,7 @@ const NavBar = () => {
           <div className="ml-auto flex items-center">
             {user ? (
               <div className="relative flex items-center space-x-1">
-                <a
-                  href="/redirect-to-dental-online"
-                  className="text-purple-600 group flex items-center"
-                >
-                  Online Learning
-                  <HiOutlineArrowLongRight className="ml-1.5 text-xl transition-transform duration-300 group-hover:translate-x-2 group-hover:-rotate-45 mr-6" />
-                </a>
+                
                 <Notifications />
                 <NotificationBell />
                 <MenuProfile />
@@ -206,7 +200,7 @@ const NavBar = () => {
                   onClick={closeMenu}
                 >
                   <img
-                    src="https://upload.wikimedia.org/wikipedia/th/thumb/1/19/DENTISTRY_KKU.svg/800px-DENTISTRY_KKU.svg.png"
+                    src="/DENTISTRY_KKU.svg.png"
                     alt="Logo"
                     width="50"
                     height="50"
@@ -297,13 +291,7 @@ const NavBar = () => {
                   >
                     แบบทดสอบ
                   </Link>
-                  <a
-                    href="/redirect-to-dental-online"
-                    className="text-purple-800 group flex items-center font-semibold"
-                  >
-                    Online Learning
-                    <HiOutlineArrowLongRight className="ml-1.5 text-xl transition-transform duration-300 group-hover:translate-x-2 group-hover:-rotate-45" />
-                  </a>
+                 
                 </>
               )}
 
@@ -379,14 +367,6 @@ const NavBar = () => {
                       </div>
                     )}
                   </div>
-
-                  <a
-                    href="/redirect-to-dental-online"
-                    className="text-purple-800 group flex items-center font-semibold"
-                  >
-                    Online Learning
-                    <HiOutlineArrowLongRight className="ml-1.5 text-xl transition-transform duration-300 group-hover:translate-x-2 group-hover:-rotate-45" />
-                  </a>
                 </>
               )}
             </nav>
