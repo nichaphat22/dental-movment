@@ -36,16 +36,26 @@ const MenuProfile = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const handleLogout = async () => {
-    try {
-      await API.get("/api/auth/logout");
-      dispatch(logout());
-      navigate("/login"); // Redirect after logout
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+ const handleLogout = async () => {
+  try {
+    const isDemoMode = localStorage.getItem("isDemoMode") === "true";
 
+    if (!isDemoMode) {
+      // ถ้าไม่ใช่ demo ถึงจะเรียก API logout จริง
+      await API.get("/api/auth/logout");
+    }
+
+    // ล้างทุกอย่างทั้ง token จริงและ demo
+    localStorage.removeItem("token");
+    localStorage.removeItem("isDemoMode");
+    localStorage.removeItem("demoUser");
+
+    dispatch(logout());
+    navigate("/");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -68,7 +78,7 @@ const MenuProfile = () => {
               <div className="flex">
                 <div className="w-12 h-12 mr-3 flex-shrink-0  flex items-center justify-center">
                   <img
-                    src={img}
+                    src={img || user?.img || "https://ui-avatars.com/api/?name=User&background=random"}
                     alt="Profile"
                     className="w-10 h-10 rounded-full hover:transform-none shadow-none"
                   />

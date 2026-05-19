@@ -21,6 +21,15 @@ const authSlice = createSlice({
         return;
       }
 
+      // ✅ กรณี Demo Mode — ส่งมาเป็น { token, user } object
+      if (typeof action.payload === "object" && action.payload.user) {
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.roleData = null;
+        state.img = action.payload.user.img || null;
+        return;
+      }
+
       try {
         const decodedToken = jwtDecode(action.payload);
         // console.log("🔹 Decoded token:", decodedToken); // ตรวจสอบข้อมูลใน Token
@@ -50,21 +59,19 @@ const authSlice = createSlice({
         console.error("❌ Error decoding token:", error);
       }
     },
-   
-       
+
     logout: (state) => {
-      
       state.user = null;
       state.token = null;
       state.roleData = null;
       state.img = null; // ✅ เคลียร์รูปโปรไฟล์เมื่อ logout
       localStorage.removeItem("token");
       localStorage.removeItem("teacherId");
-      // return { ...initialState };
+      localStorage.removeItem("isDemoMode"); // ✅ เพิ่ม
+      localStorage.removeItem("demoUser"); // ✅ เพิ่ม
     },
-  
   },
 });
 
-export const { loginSuccess,updateUserProfile, logout } = authSlice.actions;
+export const { loginSuccess, updateUserProfile, logout } = authSlice.actions;
 export default authSlice.reducer;

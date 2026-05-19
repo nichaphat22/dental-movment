@@ -13,6 +13,10 @@ import { HiOutlineArrowLongRight } from "react-icons/hi2";
 import imgHome from "../../assets/GroupHome.svg";
 import { animate, motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { _ } from "core-js";
+import { name } from "dayjs/locale/th";
+import { FaGoogle } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 
 export const FadeUp = (delay) => {
   return {
@@ -41,7 +45,6 @@ const Loginn = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -109,13 +112,47 @@ const Loginn = () => {
     }
   }, []);
 
+  // function Demo Login
+  const handleDemoLogin = (role) => {
+    const demoUsers = {
+      student: {
+        _id: "6871f8e5aaee6f8071211211",
+        role: "student",
+        name: "Demo Student",
+        email: "demo.student@example.com",
+        img: "https://ui-avatars.com/api/?name=student%40gmail.com&background=random",
+        isDemo: true,
+      },
+      teacher: {
+        _id: "6871f8b8aaee6f807121116f",
+        role: "teacher",
+        name: "Demo Teacher",
+        email: "demo.teacher@example.com",
+        img: "https://ui-avatars.com/api/?name=demo.teacher@example.com&background=random",
+        isDemo: true,
+      },
+    };
+
+    const demoUser = demoUsers[role];
+    localStorage.setItem("isDemoMode", "true");
+    localStorage.setItem("demoUser", JSON.stringify(demoUser));
+
+    dispatch(loginSuccess({ token: "demo_token", user: demoUser }));
+
+    if (role === "teacher") {
+      navigate("/dashboard-teacher");
+    } else {
+      navigate("/dashboard-student");
+    }
+  };
+
   return (
     <section className="border-none bg-white overflow-hidden relative">
       <div className="container grid grid-cols-1 md:grid-cols-2 min-h-[650px]">
         {/* Brand Info */}
         <div
           className="flex flex-col justify-center
-                    py-14 md:py-0 relative z-20"
+                    py-14 md:py-0 lg:px-20 relative z-20"
         >
           <div className="pl-2 w-70% text-center md:text-left space-y-10 lg:text-left lg:max-w-[600px]">
             <motion.h1
@@ -128,7 +165,7 @@ const Loginn = () => {
               BIOMECHANICS & POSSIBLE MOVEMENT
             </motion.h1>
 
-            <motion.div
+            {/* <motion.div
               variants={FadeUp(0.8)}
               initial="initial"
               animate="animate"
@@ -136,13 +173,64 @@ const Loginn = () => {
                             "
             >
               <a href={`${import.meta.env.VITE_API_URL}/api/auth/google`}>
-                <button>Login with Google</button>
-              </a>
-
-              <HiOutlineArrowLongRight
-                className="text-xl group-hover:translate-x-2
+                <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 transition">
+                  <FcGoogle className="text-lg" /> Login with Google
+                  <HiOutlineArrowLongRight
+                    className="text-xl group-hover:translate-x-2
                             group-hover:-rotate-45 duration-300"
-              />
+                  />
+                </button>
+              </a>
+            </motion.div> */}
+
+            {/* Demo Login Buttons  */}
+            <motion.div
+              variants={FadeUp(0.7)}
+              initial="initial"
+              animate="animate"
+              className="bg-white border border-purple-300 rounded-xl p-4  "
+            >
+              
+              <div className="flex gap-2 flex-wrap justify-center ">
+                <button
+                  onClick={() => handleDemoLogin("student")}
+                  className="flex items-center gap-1 px-4 py-2  border border-purple-300 text-gray-600 text-sm rounded-lg hover:bg-purple-200 transition"
+                >
+                  🎓 เข้าในฐานะนักศึกษา
+                </button>
+                <button
+                  onClick={() => handleDemoLogin("teacher")}
+                  className="flex items-center gap-1 px-4 py-2  border border-purple-300 text-gray-600 text-sm rounded-lg hover:bg-purple-200 transition"
+                >
+                  👨‍🏫 เข้าในฐานะอาจารย์
+                </button>
+                <div className="flex justify-center items-center gap-2  text-xs">
+                <span className="bg-purple-400 text-purple-900 text-xs px-2 py-0.5 rounded-full">
+                  DEMO
+                </span>
+                <p className="text-purple-800 text-xs ">
+                  - ทดทองการใช้งานโดยไม่ต้องล็อกอิน
+                </p>
+              </div>
+              </div>
+
+              <hr className="mt-4" />
+              <div className=" mt-4">
+                <p className="text-center text-gray-600 text-sm mb-1">
+                  หรือเข้าสู่ระบบด้วยบัญชี Google
+                </p>
+                <div className="flex justify-center ">
+                  <a href={`${import.meta.env.VITE_API_URL}/api/auth/google`}>
+                    <button className="flex items-center text-base gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50 transition">
+                      <FcGoogle className="text-base" /> Login with Google
+                      <HiOutlineArrowLongRight
+                        className="text-base group-hover:translate-x-2
+                            group-hover:-rotate-45 duration-300"
+                      />
+                    </button>
+                  </a>
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>

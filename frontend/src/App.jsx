@@ -97,8 +97,12 @@ function App () {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      dispatch(loginSuccess(token)); // ✅ โหลด Token จาก LocalStorage
+    const isDemoMode = localStorage.getItem("isDemoMode") === "true";
+    const demoUser = localStorage.getItem("demoUser");
+    if (isDemoMode && demoUser) {
+      dispatch(loginSuccess({ token:"demo_token", user: JSON.parse(demoUser) }));
+    } else if (token) {
+      dispatch(loginSuccess(token));
     }
   }, [dispatch]);
 

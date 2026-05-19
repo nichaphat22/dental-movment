@@ -87,7 +87,7 @@ const NavBar = () => {
                 }
               >
                 <img
-                  src="/DENTISTRY_KKU.svg.png"
+                  src="../DENTISTRY_KKU.svg.png"
                   alt="Logo"
                   width="50"
                   height="50"
@@ -127,7 +127,7 @@ const NavBar = () => {
               }
             >
               <img
-                src="/DENTISTRY_KKU.svg.png"
+                src="../DENTISTRY_KKU.svg.png"
                 alt="Logo"
                 width="50"
                 height="50"
@@ -200,7 +200,7 @@ const NavBar = () => {
                   onClick={closeMenu}
                 >
                   <img
-                    src="/DENTISTRY_KKU.svg.png"
+                    src="../DENTISTRY_KKU.svg.png"
                     alt="Logo"
                     width="50"
                     height="50"
